@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-duster/","title":"pallet-duster","tags":["dust","ed","treasury","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-duster","repo":"hydration-node","paths":["pallets/duster/src/lib.rs"],"symbols":["Pallet","Config","dust_account","whitelist_account","remove_from_whitelist","AccountWhitelist","DusterWhitelist"],"traits_impl":["OnDust","Contains","DustRemovalAccountWhitelist"],"depends_on":["pallet-asset-registry","pallet-currencies"],"runtime_index":61,"tags":["dust","ed","treasury","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-duster/","title":"pallet-duster","tags":["dust","ed","treasury","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-duster","repo":"hydration-node","paths":["pallets/duster/src/lib.rs"],"symbols":["Pallet","Config","dust_account","whitelist_account","remove_from_whitelist","AccountWhitelist","DusterWhitelist"],"traits_impl":["OnDust","Contains","DustRemovalAccountWhitelist"],"depends_on":["pallet-asset-registry","pallet-currencies"],"runtime_index":61,"tags":["dust","ed","treasury","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

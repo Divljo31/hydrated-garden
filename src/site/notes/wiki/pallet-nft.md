@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-nft/","title":"pallet-nft","tags":["nft","uniques","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-nft","repo":"hydration-node","paths":["pallets/nft/src/lib.rs","pallets/nft/src/types.rs"],"symbols":["Pallet","Config","create_collection","mint","transfer","burn","destroy_collection","Collections","Items","CollectionInfo","ItemInfo","NftPermission","NftCollectionId","NftItemId"],"traits_impl":[],"depends_on":[],"runtime_index":null,"tags":["nft","uniques","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-nft/","title":"pallet-nft","tags":["nft","uniques","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-nft","repo":"hydration-node","paths":["pallets/nft/src/lib.rs","pallets/nft/src/types.rs"],"symbols":["Pallet","Config","create_collection","mint","transfer","burn","destroy_collection","Collections","Items","CollectionInfo","ItemInfo","NftPermission","NftCollectionId","NftItemId"],"traits_impl":[],"depends_on":[],"runtime_index":null,"tags":["nft","uniques","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/routing/","title":"Task Routing","dg-note-properties":{"type":"routing","title":"Task Routing","last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/routing/","title":"Task Routing","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"routing","title":"Task Routing","last_updated":"2026-04-20"}}
 ---
 
 

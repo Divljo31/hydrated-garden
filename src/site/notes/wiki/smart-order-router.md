@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/smart-order-router/","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"dg-note-properties":{"type":"concept","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/smart-order-router/","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

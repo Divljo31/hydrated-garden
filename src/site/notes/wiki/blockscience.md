@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/blockscience/","title":"BlockScience","tags":["auditor","security","economics"],"dg-note-properties":{"type":"entity","entity_kind":"company","title":"BlockScience","tags":["auditor","security","economics"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/blockscience/","title":"BlockScience","tags":["auditor","security","economics"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"company","title":"BlockScience","tags":["auditor","security","economics"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

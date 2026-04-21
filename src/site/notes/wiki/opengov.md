@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/opengov/","title":"OpenGov","tags":["governance","polkadot","hdx"],"dg-note-properties":{"type":"concept","title":"OpenGov","tags":["governance","polkadot","hdx"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/opengov/","title":"OpenGov","tags":["governance","polkadot","hdx"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"OpenGov","tags":["governance","polkadot","hdx"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

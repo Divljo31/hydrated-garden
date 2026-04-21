@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xc-core/","title":"xc-core","tags":["sdk","cross-chain","types","definitions"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-core","tags":["sdk","cross-chain","types","definitions"],"source_count":1,"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/xc-core/","title":"xc-core","tags":["sdk","cross-chain","types","definitions"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-core","tags":["sdk","cross-chain","types","definitions"],"source_count":1,"last_updated":"2026-04-20"}}
 ---
 
 

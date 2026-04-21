@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/wormhole/","title":"Wormhole","tags":["bridge","cross-chain"],"dg-note-properties":{"type":"concept","title":"Wormhole","tags":["bridge","cross-chain"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/wormhole/","title":"Wormhole","tags":["bridge","cross-chain"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Wormhole","tags":["bridge","cross-chain"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

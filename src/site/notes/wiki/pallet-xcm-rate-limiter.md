@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-xcm-rate-limiter/","title":"pallet-xcm-rate-limiter","tags":["xcm","risk","rate-limit","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-xcm-rate-limiter","repo":"hydration-node","paths":["pallets/xcm-rate-limiter/src/lib.rs","pallets/xcm-rate-limiter/src/types.rs"],"symbols":["Pallet","Config","AccumulatedAmounts","DeferredMessages","TryDeferXcm","OnDeposit"],"traits_impl":["OnDeposit","TryDeferXcm"],"depends_on":[],"runtime_index":null,"tags":["xcm","risk","rate-limit","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-xcm-rate-limiter/","title":"pallet-xcm-rate-limiter","tags":["xcm","risk","rate-limit","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-xcm-rate-limiter","repo":"hydration-node","paths":["pallets/xcm-rate-limiter/src/lib.rs","pallets/xcm-rate-limiter/src/types.rs"],"symbols":["Pallet","Config","AccumulatedAmounts","DeferredMessages","TryDeferXcm","OnDeposit"],"traits_impl":["OnDeposit","TryDeferXcm"],"depends_on":[],"runtime_index":null,"tags":["xcm","risk","rate-limit","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

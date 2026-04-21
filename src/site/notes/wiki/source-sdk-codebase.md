@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/source-sdk-codebase/","title":"Galactic SDK — Codebase","tags":["sdk","codebase","typescript","wasm","cross-chain","trading"],"dg-note-properties":{"type":"source","title":"Galactic SDK — Codebase","author":"Galactic Council (galacticcouncil/sdk)","date_ingested":"2026-04-13","source_date":"2026-04-20","last_refreshed":"2026-04-20","last_commit":"4f5ad1b xc: add Basejump bridge support (2026-04-17)","cloned_at":"2026-04-20","tags":["sdk","codebase","typescript","wasm","cross-chain","trading"]}}
+{"dg-publish":true,"permalink":"/wiki/source-sdk-codebase/","title":"Galactic SDK — Codebase","tags":["sdk","codebase","typescript","wasm","cross-chain","trading"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"source","title":"Galactic SDK — Codebase","author":"Galactic Council (galacticcouncil/sdk)","date_ingested":"2026-04-13","source_date":"2026-04-20","last_refreshed":"2026-04-20","last_commit":"4f5ad1b xc: add Basejump bridge support (2026-04-17)","cloned_at":"2026-04-20","tags":["sdk","codebase","typescript","wasm","cross-chain","trading"]}}
 ---
 
 

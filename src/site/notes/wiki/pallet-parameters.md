@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-parameters/","title":"pallet-parameters","tags":["parameters","governance","dynamic-config","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-parameters","repo":"hydration-node","paths":["pallets/parameters/src/lib.rs"],"symbols":["Pallet","Config","set_parameter","Parameters","RuntimeParameters","AggregatedKeyValue"],"traits_impl":["Get"],"depends_on":[],"runtime_index":83,"tags":["parameters","governance","dynamic-config","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-parameters/","title":"pallet-parameters","tags":["parameters","governance","dynamic-config","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-parameters","repo":"hydration-node","paths":["pallets/parameters/src/lib.rs"],"symbols":["Pallet","Config","set_parameter","Parameters","RuntimeParameters","AggregatedKeyValue"],"traits_impl":["Get"],"depends_on":[],"runtime_index":83,"tags":["parameters","governance","dynamic-config","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

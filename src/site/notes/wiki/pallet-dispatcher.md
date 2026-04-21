@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_with_extra_gas","note_ismp_responses","CLEANUP_LIMIT"],"traits_impl":[],"depends_on":[],"runtime_index":40,"tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_with_extra_gas","note_ismp_responses","CLEANUP_LIMIT"],"traits_impl":[],"depends_on":[],"runtime_index":40,"tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

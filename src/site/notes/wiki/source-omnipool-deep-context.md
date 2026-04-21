@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/source-omnipool-deep-context/","title":"Omnipool — Deep Context","tags":["omnipool","amm","liquidity","defi","math","security"],"dg-note-properties":{"type":"source","title":"Omnipool — Deep Context","author":"Hydration team (internal AI context document)","date_ingested":"2026-04-13","source_date":"2025-09-22","tags":["omnipool","amm","liquidity","defi","math","security"]}}
+{"dg-publish":true,"permalink":"/wiki/source-omnipool-deep-context/","title":"Omnipool — Deep Context","tags":["omnipool","amm","liquidity","defi","math","security"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"source","title":"Omnipool — Deep Context","author":"Hydration team (internal AI context document)","date_ingested":"2026-04-13","source_date":"2025-09-22","tags":["omnipool","amm","liquidity","defi","math","security"]}}
 ---
 
 

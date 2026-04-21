@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/runtime-verification/","title":"Runtime Verification","tags":["auditor","security"],"dg-note-properties":{"type":"entity","entity_kind":"company","title":"Runtime Verification","tags":["auditor","security"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/runtime-verification/","title":"Runtime Verification","tags":["auditor","security"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"company","title":"Runtime Verification","tags":["auditor","security"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

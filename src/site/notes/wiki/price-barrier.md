@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/price-barrier/","title":"Price Barrier","tags":["security","risk","omnipool","oracle"],"dg-note-properties":{"type":"concept","title":"Price Barrier","tags":["security","risk","omnipool","oracle"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/price-barrier/","title":"Price Barrier","tags":["security","risk","omnipool","oracle"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Price Barrier","tags":["security","risk","omnipool","oracle"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

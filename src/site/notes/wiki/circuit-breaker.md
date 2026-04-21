@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/circuit-breaker/","title":"Circuit Breaker","tags":["security","risk","omnipool"],"dg-note-properties":{"type":"concept","title":"Circuit Breaker","tags":["security","risk","omnipool"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/circuit-breaker/","title":"Circuit Breaker","tags":["security","risk","omnipool"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Circuit Breaker","tags":["security","risk","omnipool"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

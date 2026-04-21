@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration-borrow/","title":"Hydration Borrow","tags":["lending","borrowing","aave","defi","core-product"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Hydration Borrow","tags":["lending","borrowing","aave","defi","core-product"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/hydration-borrow/","title":"Hydration Borrow","tags":["lending","borrowing","aave","defi","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Hydration Borrow","tags":["lending","borrowing","aave","defi","core-product"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

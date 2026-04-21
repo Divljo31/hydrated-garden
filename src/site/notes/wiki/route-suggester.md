@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/route-suggester/","title":"route-suggester","tags":["rust","routing","algorithm","performance"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"route-suggester","tags":["rust","routing","algorithm","performance"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/route-suggester/","title":"route-suggester","tags":["rust","routing","algorithm","performance"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"route-suggester","tags":["rust","routing","algorithm","performance"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

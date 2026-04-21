@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/asset-hub/","title":"Asset Hub","tags":["polkadot","system-chain","assets"],"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Asset Hub","tags":["polkadot","system-chain","assets"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/asset-hub/","title":"Asset Hub","tags":["polkadot","system-chain","assets"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Asset Hub","tags":["polkadot","system-chain","assets"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 # Asset Hub

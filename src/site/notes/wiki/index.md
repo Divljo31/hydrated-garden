@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/index/","title":"Wiki Index","dg-note-properties":{"type":"index","title":"Wiki Index","last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/index/","title":"Wiki Index","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"index","title":"Wiki Index","last_updated":"2026-04-20"}}
 ---
 
 

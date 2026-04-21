@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/lrna/","title":"LRNA (H2O)","tags":["token","hub-token","omnipool","amm"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"LRNA (H2O)","tags":["token","hub-token","omnipool","amm"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/lrna/","title":"LRNA (H2O)","tags":["token","hub-token","omnipool","amm"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"LRNA (H2O)","tags":["token","hub-token","omnipool","amm"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

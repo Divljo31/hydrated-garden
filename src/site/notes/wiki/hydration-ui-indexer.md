@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration-ui-indexer/","title":"hydration-ui indexer","tags":["indexer","graphql","data-layer","hydration"],"dg-note-properties":{"type":"package","title":"hydration-ui indexer","repo":"hydration-ui","paths":["packages/indexer/src/indexer","packages/indexer/src/squid","packages/indexer/src/snowbridge"],"symbols":["useIndexerClient","useSquidClient","useSnowbridgeClient"],"key_deps":["graphql-request","graphql-codegen","graphql"],"tags":["indexer","graphql","data-layer","hydration"],"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/hydration-ui-indexer/","title":"hydration-ui indexer","tags":["indexer","graphql","data-layer","hydration"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"package","title":"hydration-ui indexer","repo":"hydration-ui","paths":["packages/indexer/src/indexer","packages/indexer/src/squid","packages/indexer/src/snowbridge"],"symbols":["useIndexerClient","useSquidClient","useSnowbridgeClient"],"key_deps":["graphql-request","graphql-codegen","graphql"],"tags":["indexer","graphql","data-layer","hydration"],"last_updated":"2026-04-20"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/dynamic-fees/","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"dg-note-properties":{"type":"concept","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/dynamic-fees/","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/referrals/","title":"Referrals","tags":["growth","incentives","fees"],"dg-note-properties":{"type":"concept","title":"Referrals","tags":["growth","incentives","fees"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/referrals/","title":"Referrals","tags":["growth","incentives","fees"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Referrals","tags":["growth","incentives","fees"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

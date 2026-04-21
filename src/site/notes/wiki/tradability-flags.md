@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/tradability-flags/","title":"Tradability Flags","tags":["security","omnipool","governance"],"dg-note-properties":{"type":"concept","title":"Tradability Flags","tags":["security","omnipool","governance"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/tradability-flags/","title":"Tradability Flags","tags":["security","omnipool","governance"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Tradability Flags","tags":["security","omnipool","governance"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

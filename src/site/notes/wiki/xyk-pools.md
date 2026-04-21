@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xyk-pools/","title":"XYK (Isolated) Pools","tags":["amm","trading","permissionless"],"dg-note-properties":{"type":"concept","title":"XYK (Isolated) Pools","tags":["amm","trading","permissionless"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/xyk-pools/","title":"XYK (Isolated) Pools","tags":["amm","trading","permissionless"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"XYK (Isolated) Pools","tags":["amm","trading","permissionless"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

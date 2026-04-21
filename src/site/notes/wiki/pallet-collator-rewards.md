@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-collator-rewards/","title":"pallet-collator-rewards","tags":["collator","rewards","session","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-collator-rewards","repo":"hydration-node","paths":["pallets/collator-rewards/src/lib.rs"],"symbols":["Pallet","Config","Collators","RewardPerCollator","RewardCurrencyId","RewardsBag","ExcludedCollators"],"traits_impl":["SessionManager"],"depends_on":[],"runtime_index":57,"tags":["collator","rewards","session","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-collator-rewards/","title":"pallet-collator-rewards","tags":["collator","rewards","session","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-collator-rewards","repo":"hydration-node","paths":["pallets/collator-rewards/src/lib.rs"],"symbols":["Pallet","Config","Collators","RewardPerCollator","RewardCurrencyId","RewardsBag","ExcludedCollators"],"traits_impl":["SessionManager"],"depends_on":[],"runtime_index":57,"tags":["collator","rewards","session","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

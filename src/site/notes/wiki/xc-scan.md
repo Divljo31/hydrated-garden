@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xc-scan/","title":"xc-scan","tags":["sdk","cross-chain","monitoring","scanning"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-scan","tags":["sdk","cross-chain","monitoring","scanning"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/xc-scan/","title":"xc-scan","tags":["sdk","cross-chain","monitoring","scanning"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-scan","tags":["sdk","cross-chain","monitoring","scanning"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

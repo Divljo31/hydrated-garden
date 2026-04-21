@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-transaction-pause/","title":"pallet-transaction-pause","tags":["governance","pause","risk","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-transaction-pause","repo":"hydration-node","paths":["pallets/transaction-pause/src/lib.rs"],"symbols":["Pallet","Config","PausedTransactions","pause_transaction","unpause_transaction","PausedTransactionFilter"],"traits_impl":["Contains"],"depends_on":[],"runtime_index":60,"tags":["governance","pause","risk","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-transaction-pause/","title":"pallet-transaction-pause","tags":["governance","pause","risk","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-transaction-pause","repo":"hydration-node","paths":["pallets/transaction-pause/src/lib.rs"],"symbols":["Pallet","Config","PausedTransactions","pause_transaction","unpause_transaction","PausedTransactionFilter"],"traits_impl":["Contains"],"depends_on":[],"runtime_index":60,"tags":["governance","pause","risk","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

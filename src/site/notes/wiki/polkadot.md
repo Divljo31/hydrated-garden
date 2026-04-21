@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/polkadot/","title":"Polkadot","tags":["blockchain","ecosystem","relay-chain","security"],"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Polkadot","tags":["blockchain","ecosystem","relay-chain","security"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/polkadot/","title":"Polkadot","tags":["blockchain","ecosystem","relay-chain","security"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Polkadot","tags":["blockchain","ecosystem","relay-chain","security"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

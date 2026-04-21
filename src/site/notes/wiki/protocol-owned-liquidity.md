@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/protocol-owned-liquidity/","title":"Protocol-Owned Liquidity (POL)","tags":["economics","treasury","liquidity","omnipool"],"dg-note-properties":{"type":"concept","title":"Protocol-Owned Liquidity (POL)","tags":["economics","treasury","liquidity","omnipool"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/protocol-owned-liquidity/","title":"Protocol-Owned Liquidity (POL)","tags":["economics","treasury","liquidity","omnipool"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Protocol-Owned Liquidity (POL)","tags":["economics","treasury","liquidity","omnipool"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

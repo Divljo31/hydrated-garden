@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/source-hydration-general-context/","title":"Hydration — General Protocol Context","tags":["hydration","protocol","overview","polkadot","defi"],"dg-note-properties":{"type":"source","title":"Hydration — General Protocol Context","author":"Hydration team (internal AI context document)","date_ingested":"2026-04-13","source_date":"2025-09-22","tags":["hydration","protocol","overview","polkadot","defi"]}}
+{"dg-publish":true,"permalink":"/wiki/source-hydration-general-context/","title":"Hydration — General Protocol Context","tags":["hydration","protocol","overview","polkadot","defi"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"source","title":"Hydration — General Protocol Context","author":"Hydration team (internal AI context document)","date_ingested":"2026-04-13","source_date":"2025-09-22","tags":["hydration","protocol","overview","polkadot","defi"]}}
 ---
 
 

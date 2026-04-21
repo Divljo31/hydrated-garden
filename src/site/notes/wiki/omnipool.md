@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/omnipool/","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/omnipool/","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

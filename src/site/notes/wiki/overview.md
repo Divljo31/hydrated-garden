@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/overview/","title":"Wiki Overview","tags":["gardenEntry"],"dg-note-properties":{"type":"overview","title":"Wiki Overview","last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/overview/","title":"Wiki Overview","tags":["gardenEntry"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"overview","title":"Wiki Overview","last_updated":"2026-04-20"}}
 ---
 
 

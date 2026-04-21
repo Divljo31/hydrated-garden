@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/sdk-common/","title":"common (SDK)","tags":["sdk","utilities","shared"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"common (SDK)","tags":["sdk","utilities","shared"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/sdk-common/","title":"common (SDK)","tags":["sdk","utilities","shared"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"common (SDK)","tags":["sdk","utilities","shared"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

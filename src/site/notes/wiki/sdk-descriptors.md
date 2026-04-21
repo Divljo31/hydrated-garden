@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/sdk-descriptors/","title":"descriptors (SDK)","tags":["sdk","metadata","papi","types"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"descriptors (SDK)","tags":["sdk","metadata","papi","types"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/sdk-descriptors/","title":"descriptors (SDK)","tags":["sdk","metadata","papi","types"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"descriptors (SDK)","tags":["sdk","metadata","papi","types"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

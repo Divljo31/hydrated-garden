@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/bonding-curve/","title":"Bonding Curve (Staking)","tags":["staking","tokenomics","hdx"],"dg-note-properties":{"type":"concept","title":"Bonding Curve (Staking)","tags":["staking","tokenomics","hdx"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/bonding-curve/","title":"Bonding Curve (Staking)","tags":["staking","tokenomics","hdx"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Bonding Curve (Staking)","tags":["staking","tokenomics","hdx"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

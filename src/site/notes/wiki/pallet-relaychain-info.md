@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-relaychain-info/","title":"pallet-relaychain-info","tags":["relaychain","parachain","cumulus","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-relaychain-info","repo":"hydration-node","paths":["pallets/relaychain-info/src/lib.rs"],"symbols":["Pallet","Config","OnValidationData","CurrentBlockNumbers"],"traits_impl":[],"depends_on":[],"runtime_index":201,"tags":["relaychain","parachain","cumulus","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-relaychain-info/","title":"pallet-relaychain-info","tags":["relaychain","parachain","cumulus","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-relaychain-info","repo":"hydration-node","paths":["pallets/relaychain-info/src/lib.rs"],"symbols":["Pallet","Config","OnValidationData","CurrentBlockNumbers"],"traits_impl":[],"depends_on":[],"runtime_index":201,"tags":["relaychain","parachain","cumulus","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

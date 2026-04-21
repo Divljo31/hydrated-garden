@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-bonds/","title":"pallet-bonds","tags":["bonds","fixed-term","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-bonds","repo":"hydration-node","paths":["pallets/bonds/src/lib.rs","pallets/bonds/src/types.rs"],"symbols":["Pallet","Config","Bond","issue","redeem","Bonds","BondIds"],"traits_impl":[],"depends_on":["pallet-asset-registry"],"runtime_index":71,"tags":["bonds","fixed-term","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-bonds/","title":"pallet-bonds","tags":["bonds","fixed-term","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-bonds","repo":"hydration-node","paths":["pallets/bonds/src/lib.rs","pallets/bonds/src/types.rs"],"symbols":["Pallet","Config","Bond","issue","redeem","Bonds","BondIds"],"traits_impl":[],"depends_on":["pallet-asset-registry"],"runtime_index":71,"tags":["bonds","fixed-term","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

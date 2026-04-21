@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/dca/","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"dg-note-properties":{"type":"concept","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/dca/","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

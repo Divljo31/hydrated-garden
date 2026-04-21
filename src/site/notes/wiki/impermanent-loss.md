@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/impermanent-loss/","title":"Impermanent Loss","tags":["amm","risk","liquidity","economics"],"dg-note-properties":{"type":"concept","title":"Impermanent Loss","tags":["amm","risk","liquidity","economics"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/impermanent-loss/","title":"Impermanent Loss","tags":["amm","risk","liquidity","economics"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Impermanent Loss","tags":["amm","risk","liquidity","economics"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

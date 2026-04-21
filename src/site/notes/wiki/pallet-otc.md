@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-otc/","title":"pallet-otc","tags":["otc","orderbook","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-otc","repo":"hydration-node","paths":["pallets/otc/src/lib.rs","pallets/otc/src/types.rs"],"symbols":["Pallet","Config","Order","NextOrderId","Orders","place_order","fill_order","partial_fill_order","cancel_order"],"traits_impl":["NamedMultiReservableCurrency"],"depends_on":[],"runtime_index":64,"tags":["otc","orderbook","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-otc/","title":"pallet-otc","tags":["otc","orderbook","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-otc","repo":"hydration-node","paths":["pallets/otc/src/lib.rs","pallets/otc/src/types.rs"],"symbols":["Pallet","Config","Order","NextOrderId","Orders","place_order","fill_order","partial_fill_order","cancel_order"],"traits_impl":["NamedMultiReservableCurrency"],"depends_on":[],"runtime_index":64,"tags":["otc","orderbook","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

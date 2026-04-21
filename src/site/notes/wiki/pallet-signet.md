@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-signet/","title":"pallet-signet","tags":["signet","mpc","signing","bridge","evm","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-signet","repo":"hydration-node","paths":["pallets/signet/src/lib.rs","pallets/signet/src/types.rs"],"symbols":["Pallet","Config","sign_bidirectional","SignRequest","SigNetKeys","KeyId","WithdrawalRequest","RequestId"],"traits_impl":[],"depends_on":[],"runtime_index":84,"tags":["signet","mpc","signing","bridge","evm","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-signet/","title":"pallet-signet","tags":["signet","mpc","signing","bridge","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-signet","repo":"hydration-node","paths":["pallets/signet/src/lib.rs","pallets/signet/src/types.rs"],"symbols":["Pallet","Config","sign_bidirectional","SignRequest","SigNetKeys","KeyId","WithdrawalRequest","RequestId"],"traits_impl":[],"depends_on":[],"runtime_index":84,"tags":["signet","mpc","signing","bridge","evm","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/gsol/","title":"GSOL","tags":["strategy-token","yield","sol"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"GSOL","tags":["strategy-token","yield","sol"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/gsol/","title":"GSOL","tags":["strategy-token","yield","sol"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"GSOL","tags":["strategy-token","yield","sol"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

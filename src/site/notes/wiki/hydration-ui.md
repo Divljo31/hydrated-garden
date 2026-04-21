@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration-ui/","title":"hydration-ui","tags":["ui","frontend","hydration","react","typescript"],"dg-note-properties":{"type":"package","title":"hydration-ui","repo":"hydration-ui","paths":["apps/main/src/App.tsx","packages/ui/src","packages/web3-connect/src","packages/money-market/src","packages/indexer/src","packages/utils/src"],"key_exports":["App","ThemeProvider","Web3ConnectModal","useAccount","useSquidClient"],"tags":["ui","frontend","hydration","react","typescript"],"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/hydration-ui/","title":"hydration-ui","tags":["ui","frontend","hydration","react","typescript"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"package","title":"hydration-ui","repo":"hydration-ui","paths":["apps/main/src/App.tsx","packages/ui/src","packages/web3-connect/src","packages/money-market/src","packages/indexer/src","packages/utils/src"],"key_exports":["App","ThemeProvider","Web3ConnectModal","useAccount","useSquidClient"],"tags":["ui","frontend","hydration","react","typescript"],"last_updated":"2026-04-20"}}
 ---
 
 

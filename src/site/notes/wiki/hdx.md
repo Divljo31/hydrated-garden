@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hdx/","title":"HDX","tags":["token","governance","staking","tokenomics"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"HDX","tags":["token","governance","staking","tokenomics"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/hdx/","title":"HDX","tags":["token","governance","staking","tokenomics"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"HDX","tags":["token","governance","staking","tokenomics"],"source_count":2,"last_updated":"2026-04-13"}}
 ---
 
 

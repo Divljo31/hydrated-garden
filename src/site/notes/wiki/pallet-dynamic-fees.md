@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dynamic-fees/","title":"pallet-dynamic-fees","tags":["fees","dynamic","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-dynamic-fees","repo":"hydration-node","paths":["pallets/dynamic-fees/src/lib.rs","pallets/dynamic-fees/src/types.rs","pallets/dynamic-fees/src/traits.rs"],"symbols":["Pallet","Config","FeeEntry","AssetFee","GetDynamicFee","UpdateAndRetrieveFees"],"traits_impl":["GetDynamicFee"],"depends_on":["pallet-ema-oracle"],"runtime_index":68,"tags":["fees","dynamic","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dynamic-fees/","title":"pallet-dynamic-fees","tags":["fees","dynamic","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dynamic-fees","repo":"hydration-node","paths":["pallets/dynamic-fees/src/lib.rs","pallets/dynamic-fees/src/types.rs","pallets/dynamic-fees/src/traits.rs"],"symbols":["Pallet","Config","FeeEntry","AssetFee","GetDynamicFee","UpdateAndRetrieveFees"],"traits_impl":["GetDynamicFee"],"depends_on":["pallet-ema-oracle"],"runtime_index":68,"tags":["fees","dynamic","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-genesis-history/","title":"pallet-genesis-history","tags":["genesis","provenance","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-genesis-history","repo":"hydration-node","paths":["pallets/genesis-history/src/lib.rs"],"symbols":["Pallet","Config","PreviousChain","Chain"],"traits_impl":[],"depends_on":[],"runtime_index":55,"tags":["genesis","provenance","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-genesis-history/","title":"pallet-genesis-history","tags":["genesis","provenance","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-genesis-history","repo":"hydration-node","paths":["pallets/genesis-history/src/lib.rs"],"symbols":["Pallet","Config","PreviousChain","Chain"],"traits_impl":[],"depends_on":[],"runtime_index":55,"tags":["genesis","provenance","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration/","title":"Hydration","tags":["protocol","polkadot","defi","parachain"],"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Hydration","tags":["protocol","polkadot","defi","parachain"],"source_count":3,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/hydration/","title":"Hydration","tags":["protocol","polkadot","defi","parachain"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"project","title":"Hydration","tags":["protocol","polkadot","defi","parachain"],"source_count":3,"last_updated":"2026-04-13"}}
 ---
 
 

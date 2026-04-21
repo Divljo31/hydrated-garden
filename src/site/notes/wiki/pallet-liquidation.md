@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-liquidation/","title":"pallet-liquidation","tags":["lending","liquidation","money-market","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-liquidation","repo":"hydration-node","paths":["pallets/liquidation/src/lib.rs","pallets/liquidation/src/types.rs"],"symbols":["Pallet","Config","liquidate","BorrowingContract"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-evm","pallet-currencies"],"runtime_index":76,"tags":["lending","liquidation","money-market","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-liquidation/","title":"pallet-liquidation","tags":["lending","liquidation","money-market","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-liquidation","repo":"hydration-node","paths":["pallets/liquidation/src/lib.rs","pallets/liquidation/src/types.rs"],"symbols":["Pallet","Config","liquidate","BorrowingContract"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-evm","pallet-currencies"],"runtime_index":76,"tags":["lending","liquidation","money-market","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

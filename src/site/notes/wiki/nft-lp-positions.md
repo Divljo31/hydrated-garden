@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/nft-lp-positions/","title":"NFT LP Positions","tags":["liquidity","omnipool","nft"],"dg-note-properties":{"type":"concept","title":"NFT LP Positions","tags":["liquidity","omnipool","nft"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/nft-lp-positions/","title":"NFT LP Positions","tags":["liquidity","omnipool","nft"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"NFT LP Positions","tags":["liquidity","omnipool","nft"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

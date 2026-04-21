@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/gdot/","title":"GDOT","tags":["strategy-token","yield","dot","staking"],"dg-note-properties":{"type":"entity","entity_kind":"product","title":"GDOT","tags":["strategy-token","yield","dot","staking"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/gdot/","title":"GDOT","tags":["strategy-token","yield","dot","staking"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"GDOT","tags":["strategy-token","yield","dot","staking"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 

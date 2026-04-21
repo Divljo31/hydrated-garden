@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dispenser/","title":"pallet-dispenser","tags":["faucet","evm","dispenser","signet","runtime","rust","substrate"],"dg-note-properties":{"type":"pallet","title":"pallet-dispenser","repo":"hydration-node","paths":["pallets/dispenser/src/lib.rs","pallets/dispenser/src/types.rs"],"symbols":["Pallet","Config","request_fund","DispenserConfig","FaucetBalanceWei","UsedRequestIds","EvmTransactionParams"],"traits_impl":[],"depends_on":["pallet-signet"],"runtime_index":85,"tags":["faucet","evm","dispenser","signet","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dispenser/","title":"pallet-dispenser","tags":["faucet","evm","dispenser","signet","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispenser","repo":"hydration-node","paths":["pallets/dispenser/src/lib.rs","pallets/dispenser/src/types.rs"],"symbols":["Pallet","Config","request_fund","DispenserConfig","FaucetBalanceWei","UsedRequestIds","EvmTransactionParams"],"traits_impl":[],"depends_on":["pallet-signet"],"runtime_index":85,"tags":["faucet","evm","dispenser","signet","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
 ---
 
 

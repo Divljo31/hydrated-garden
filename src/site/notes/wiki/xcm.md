@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xcm/","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"dg-note-properties":{"type":"concept","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/xcm/","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"source_count":1,"last_updated":"2026-04-13"}}
 ---
 
 
