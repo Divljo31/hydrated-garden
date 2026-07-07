@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRL Asset Dependency Graph — Moonbeam Sunset</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b26; --panel2:#1c2333; --line:#2a3350;
+    --txt:#dfe6f3; --dim:#8a94ad; --accent:#5bc8af; --warn:#e8b339; --bad:#e06c75; --ok:#7fbf7f;
+    --edge:#3a4568; --edge-hi:#5bc8af;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  header{padding:18px 24px 6px}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:12.5px}
+  .sub b{color:var(--warn)}
+  #wrap{display:flex;gap:0;align-items:flex-start}
+  #graphbox{flex:1 1 auto;overflow:auto;padding:6px 0 0 8px}
+  svg{display:block}
+  #side{flex:0 0 380px;max-width:380px;padding:12px 16px 24px 4px;position:sticky;top:0;max-height:100vh;overflow:auto}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .card h3{margin:0 0 6px;font-size:15px}
+  .card h3 .id{color:var(--dim);font-weight:400;font-size:12px}
+  .tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;margin:1px 3px 1px 0;border:1px solid var(--line);color:var(--dim)}
+  .tag.crit{border-color:var(--bad);color:var(--bad)}
+  .tag.warn{border-color:var(--warn);color:var(--warn)}
+  .tag.ok{border-color:var(--ok);color:var(--ok)}
+  ul{margin:6px 0 2px;padding-left:18px}
+  li{margin:3px 0;font-size:13px}
+  li b{color:var(--accent);font-weight:600}
+  .muted{color:var(--dim)}
+  .node{cursor:pointer}
+  .node rect{transition:all .15s}
+  .node text{pointer-events:none}
+  .edge{fill:none;stroke:var(--edge);stroke-width:1.3;opacity:.5;transition:all .15s}
+  .edge.hi{stroke:var(--edge-hi);stroke-width:2.4;opacity:1}
+  .edge.dimmed{opacity:.08}
+  .node.dimmed{opacity:.18}
+  .node.hi rect{stroke:var(--accent);stroke-width:2}
+  .collabel{fill:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  footer{color:var(--dim);font-size:11.5px;padding:8px 24px 20px}
+  #legend{padding:2px 24px 4px;font-size:12px;color:var(--dim)}
+  #legend span{margin-right:14px}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>MRL (Moonbeam-Wormhole) asset dependency graph — Hydration</h1>
+  <div class="sub">Live on-chain snapshot: block <b>#13,037,544</b> (2026-07-07, runtime 428) · <b style="color:var(--bad)">Moonbeam sunset: 31 July 2026 — 24-day window</b> · All 12 assets registered at XCM location <b>parachain 2004 (Moonbeam)</b> · Click any node to trace its dependencies; click background to reset.</div>
+</header>
+<div id="legend">
+  <span><span class="sw" style="background:#31405f"></span>bridge layer</span>
+  <span><span class="sw" style="background:#274a44"></span>MRL asset</span>
+  <span><span class="sw" style="background:#3d3455"></span>pool / venue</span>
+  <span><span class="sw" style="background:#54432a"></span>money market / HSM</span>
+  <span><span class="sw" style="background:#4f2f39"></span>system-critical</span>
+</div>
+<div id="wrap">
+  <div id="graphbox"><svg id="g" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div id="side">
+    <div class="card" id="detail">
+      <h3>Select an asset</h3>
+      <div class="muted">Click an asset node to see everything it touches and the unwind checklist (GLMR-runbook template).</div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:10px 24px 8px">
+<h2 style="font-size:16px;margin:8px 0">Full asset matrix — chain state @ block 13,037,544</h2>
+<table id="mtx" style="border-collapse:collapse;width:100%;font-size:12.5px">
+<thead><tr style="text-align:left;color:var(--dim);border-bottom:1px solid var(--line)">
+<th style="padding:6px 8px">Asset</th><th>Bridged supply (≈USD)</th><th>Treasury holds</th><th>Omnipool</th><th>Stablepools</th><th>Money market</th><th>HSM</th><th>Fee accts</th><th>DCA/OTC</th><th>Farms</th><th>Key blocker</th>
+</tr></thead><tbody>
+<tr><td><b>PRIME</b> 43</td><td>9,879,279 (≈$10.34M)</td><td>686</td><td>—</td><td>143 vs HOLLAR (Propeller)</td><td>LTV 85 · <b>aPRIME 9.38M = 95% of supply</b> · 21.9 borrowed</td><td>—</td><td>4</td><td>2 DCA</td><td>—</td><td class="crit">Propeller product + 95% locked in MM</td></tr>
+<tr><td><b>WBTC</b> 19</td><td>13.3462 (≈$827k)</td><td><b>5.57 (42%)</b></td><td>—</td><td>101 vs iBTC</td><td><b>FROZEN, LTV 0</b> · aWBTC 6.85 = 51% of supply · 0.13 borrowed</td><td>—</td><td>23</td><td>—</td><td>—</td><td>residual MM positions + treasury swap</td></tr>
+<tr><td><b>SOL</b> 1000752</td><td>6,909.3 (≈$562k)</td><td>1.3</td><td>bits 15 · 104 pos</td><td>90001 leg via aSOL</td><td>LTV 70 · aSOL 6,169 = 89% of supply · 1,897 borrowed</td><td>—</td><td>77</td><td>—</td><td>2 stopped</td><td>sequence with jitoSOL/GSOL chain</td></tr>
+<tr><td><b>sUSDS</b> 1000745</td><td>481,031 (≈$531k)</td><td>—</td><td>—</td><td>112 (HUSDS) vs HOLLAR</td><td>HUSDS shares 134k · LTV 70</td><td class="crit"><b>LIVE collateral</b> (inv 0, cap 2M)</td><td>2</td><td>—</td><td>—</td><td>HOLLAR peg-defense capacity</td></tr>
+<tr><td><b>EURC</b> 44</td><td>350,693 (≈$402k)</td><td>955</td><td>—</td><td>HEURC 10044 via aEURC</td><td>LTV 75 · aEURC 436.5k · <b>99.5k borrowed (28%)</b></td><td>—</td><td>10</td><td>3 DCA</td><td>—</td><td>deleverage before HEURC drain</td></tr>
+<tr><td><b>jitoSOL</b> 40</td><td>2,623.65 (≈$274k)</td><td>5.0</td><td>via GSOL · 148 pos</td><td>90001 vs aSOL</td><td>GSOL 9,230 · LTV 60</td><td>—</td><td>1</td><td>—</td><td class="crit"><b>131 ACTIVE</b></td><td>longest chain: farm→GSOL→90001</td></tr>
+<tr><td><b>USDC</b> 21</td><td>228,922 (≈$229k)</td><td>2.6</td><td>—</td><td>100 + 105 (HOLLAR)</td><td>—</td><td>—</td><td>228</td><td>2 OTC</td><td>—</td><td>HSM-X migration decision</td></tr>
+<tr><td><b>USDT</b> 23</td><td>200,892 (≈$201k)</td><td>12</td><td>—</td><td>100 + 105 (HOLLAR)</td><td>—</td><td>—</td><td>343</td><td>1 OTC</td><td>—</td><td>HSM-X migration decision</td></tr>
+<tr><td><b>GLMR</b> 16</td><td>22,263,487 (≈$194k)</td><td>4,718</td><td>bits 11 · 295 pos</td><td>—</td><td>—</td><td>—</td><td>821</td><td>1 DCA</td><td>3 stopped (475 entries)</td><td class="ok"><b>REF #360 LIVE</b> — delist in flight</td></tr>
+<tr><td><b>SUI</b> 1000753</td><td>201,099 (≈$150k)</td><td>1.2</td><td>bits 15 · 43 pos</td><td>—</td><td>—</td><td>—</td><td>23</td><td>1 OTC</td><td>1 stopped</td><td>none — easiest template run</td></tr>
+<tr><td><b>WETH</b> 20</td><td>68.392 (≈$119k)</td><td>0.2</td><td>—</td><td>104 vs aETH</td><td>—</td><td>—</td><td><b>909</b></td><td>—</td><td>—</td><td class="crit"><b>EVM GAS CURRENCY</b> — runtime change</td></tr>
+<tr><td><b>DAI</b> 18</td><td>3,665.6 (≈$3.5k)</td><td>294</td><td>—</td><td>100 (4-Pool)</td><td>—</td><td>—</td><td>18</td><td>—</td><td>—</td><td>none — trivial</td></tr>
+</tbody></table>
+<div style="color:var(--dim);font-size:11.5px;margin-top:6px">All 12 = accepted tx-fee currencies (2,459 accounts total) · 23 live EMA-oracle pairs · no stored router routes reference MRL assets · XYK exposure is dust · no bonds.</div>
+</div>
+<style>#mtx td{padding:5px 8px;border-bottom:1px solid #1c2333;vertical-align:top}#mtx td.crit{color:var(--bad)}#mtx td.ok{color:var(--ok)}#mtx tr:hover td{background:#161b26}</style>
+
+<footer>
+  Sources: on-chain (assetRegistry / omnipool / stableswap / hsm / dca / otc / xyk / omnipoolWarehouseLM / multiTransactionPayment; Aave Pool 0x1b02…7b38 via eth_call) · garden wiki (glmr-omnipool-delist-calldata, pallet-hsm, tradability-flags, note-hollar-only-bridged-stables, chopsticks-testing-hydration) · Ben&#8217;s matrix (snapshot 3 Jul).
+</footer>
+<script>
+// ---------- data (from chain snapshot block 13037544) ----------
+const nodes = {
+  // col 0: origins
+  eth:{c:0,l:"Ethereum",cls:"bridge"}, sol:{c:0,l:"Solana",cls:"bridge"}, sui:{c:0,l:"Sui",cls:"bridge"}, glmrN:{c:0,l:"Moonbeam (native)",cls:"bridge"},
+  // col 1: bridge
+  mrl:{c:1,l:"Wormhole ⇢ Moonbeam MRL",sub:"BasejumpProxy · mrelayer · DIES 31 JUL 2026",cls:"bridge",crit:true},
+  // col 2: assets
+  A16:{c:2,l:"GLMR (16)",sub:"22.26M GLMR · ≈$194k",cls:"asset"}, A18:{c:2,l:"DAI (18)",sub:"3,666 DAI · ≈$3.5k",cls:"asset"}, A19:{c:2,l:"WBTC (19)",sub:"13.346 WBTC · ≈$827k",cls:"asset"},
+  A20:{c:2,l:"WETH (20)",sub:"68.39 WETH · ≈$119k",cls:"asset",crit:true}, A21:{c:2,l:"USDC (21)",sub:"228.9k USDC · ≈$229k",cls:"asset"}, A23:{c:2,l:"USDT (23)",sub:"200.9k USDT · ≈$201k",cls:"asset"},
+  A40:{c:2,l:"jitoSOL (40)",sub:"2,624 jitoSOL · ≈$274k",cls:"asset"}, A43:{c:2,l:"PRIME (43)",sub:"9.88M PRIME · ≈$10.3M",cls:"asset"}, A44:{c:2,l:"EURC (44)",sub:"350.7k EURC · ≈$402k",cls:"asset"},
+  A745:{c:2,l:"sUSDS (1000745)",sub:"481k sUSDS · ≈$531k",cls:"asset"}, A752:{c:2,l:"SOL (1000752)",sub:"6,909 SOL · ≈$562k",cls:"asset"}, A753:{c:2,l:"SUI (1000753)",sub:"201.1k SUI · ≈$150k",cls:"asset"},
+  // col 3: venues
+  omni:{c:3,l:"Omnipool",sub:"GLMR·SOL·SUI·GSOL·GETH",cls:"pool"},
+  sp100:{c:3,l:"Stablepool 100 · 4-Pool",sub:"USDT₁₀ᴬᴴ + DAI + USDC + USDT",cls:"pool"},
+  sp101:{c:3,l:"Stablepool 101",sub:"iBTC + WBTC",cls:"pool"},
+  sp104:{c:3,l:"Stablepool 104",sub:"WETH + aETH",cls:"pool"},
+  sp105:{c:3,l:"Stablepool 105 · 3-Pool-MRL",sub:"USDC + USDT + HOLLAR",cls:"pool"},
+  sp112:{c:3,l:"Stablepool 112 · HUSDS",sub:"HOLLAR + sUSDS",cls:"pool"},
+  sp143:{c:3,l:"Stablepool 143",sub:"PRIME + HOLLAR (Propeller)",cls:"pool"},
+  sp90001:{c:3,l:"Stablepool 90001 · 2-Pool-GSOL",sub:"jitoSOL + aSOL",cls:"pool"},
+  xyk:{c:3,l:"XYK pools ×3",sub:"USDC/DOT · GLMR/ext · SUI/ext",cls:"pool"},
+  gsol:{c:3,l:"GSOL (9001)",sub:"aToken of pool-90001 shares → Omnipool",cls:"pool"},
+  // col 4: MM / HSM / HOLLAR
+  mm:{c:4,l:"Money Market (Aave)",sub:"Pool 0x1b02…7b38",cls:"mm"},
+  hsm:{c:4,l:"HSM",sub:"sUSDS = live collateral (pool 112)",cls:"mm"},
+  hollar:{c:4,l:"HOLLAR (222)",sub:"pools 105 · 112 · 143 · HEURC",cls:"mm"},
+  aeurc:{c:4,l:"aEURC (1044) → HEURC pool",cls:"mm"},
+  aprime:{c:4,l:"aPRIME (1043) · LTV 85",sub:"PRIMEoracleMRL oracle",cls:"mm"},
+  // col 5: system
+  fees:{c:5,l:"Tx-fee currencies",sub:"ALL 12 accepted · 2,459 accounts set",cls:"sys",crit:true},
+  evmgas:{c:5,l:"EVM gas = WETH(20)",sub:"pallet_evm Currency · MetaMask default · faucet",cls:"sys",crit:true},
+  dca:{c:5,l:"DCA schedules",sub:"GLMR 1 · PRIME 2 · EURC 3",cls:"sys"},
+  otc:{c:5,l:"OTC orders",sub:"USDC 2 · USDT 1 · SUI 1",cls:"sys"},
+  farms:{c:5,l:"LM farms",sub:"GSOL farm 131 still ACTIVE",cls:"sys"},
+  prop:{c:5,l:"Propeller product",sub:"routes via pool 143 + aPRIME",cls:"sys"},
+};
+const E = [
+  ["eth","mrl"],["sol","mrl"],["sui","mrl"],["glmrN","mrl"],
+  ...["A16","A18","A19","A20","A21","A23","A40","A43","A44","A745","A752","A753"].map(a=>["mrl",a]),
+  ["A16","omni"],["A16","xyk"],["A16","dca"],["A16","farms"],
+  ["A18","sp100"],
+  ["A19","sp101"],["A19","mm"],
+  ["A20","sp104"],["A20","evmgas"],
+  ["A21","sp100"],["A21","sp105"],["A21","xyk"],["A21","otc"],
+  ["A23","sp100"],["A23","sp105"],["A23","otc"],
+  ["A40","sp90001"],["sp90001","gsol"],["gsol","omni"],["gsol","mm"],["A40","farms"],
+  ["A43","sp143"],["A43","mm"],["mm","aprime"],["aprime","prop"],["sp143","prop"],["A43","dca"],
+  ["A44","mm"],["mm","aeurc"],["aeurc","hollar"],["A44","dca"],
+  ["A745","sp112"],["A745","hsm"],["sp112","mm"],["sp112","hollar"],
+  ["A752","omni"],["A752","mm"],["A752","sp90001"],["A752","farms"],
+  ["A753","omni"],["A753","xyk"],["A753","otc"],["A753","farms"],
+  ["sp105","hollar"],["sp143","hollar"],["hsm","hollar"],
+  ...["A16","A18","A19","A20","A21","A23","A40","A43","A44","A745","A752","A753"].map(a=>[a,"fees"]),
+];
+// per-asset detail panel content
+const D = {
+A16:{t:"GLMR (16) · Glimmer",sup:"22,263,487 GLMR (≈$194k)",tags:[["REF #360 LIVE","warn"],["omnipool","warn"]],rows:[
+ "<b>Omnipool</b>: tradability bits 11 (ADD already disabled) · <b>295 LP positions</b> · 3 farms (all Stopped, 475 entries)",
+ "<b>XYK</b> pool vs external asset 1000512",
+ "1 live <b>DCA</b> schedule · <b>fee currency — 821 accounts</b> · <b>Referendum #360 LIVE</b> (delist, preimage 0xec9ce0b4…)",
+ "<span class='muted'>Unwind: glmr-omnipool-delist-calldata.md is ready & chopsticks-verified (REMOVE_ONLY → 475 exit_farms → 297 remove_all_liquidity → FROZEN → remove_token → sweep to multisig). Add: remove_currency, cancel DCA.</span>"]},
+A18:{t:"DAI (18) · Moonbeam Wormhole",sup:"3,665.6 DAI (≈$3.5k)",tags:[["low value $3.5k","ok"]],rows:[
+ "<b>Stablepool 100 (4-Pool)</b> — live, tradability 15",
+ "<b>Fee currency</b> — 18 accounts",
+ "<span class='muted'>Unwind: drain from 4-Pool (remove_liquidity of DAI leg / pool migration), remove_currency. Smallest exposure of the 12.</span>"]},
+A19:{t:"WBTC (19) · Moonbeam Wormhole",sup:"13.3462 WBTC (≈$827k)",tags:[["MM frozen","warn"]],rows:[
+ "<b>Money market</b>: reserve <b>frozen, LTV 0, still active</b> — residual aWBTC positions need swap/migration",
+ "<b>Stablepool 101</b> vs iBTC — live, tradability 15",
+ "<b>Fee currency</b> — 23 accounts",
+ "<span class='muted'>Unwind: migrate aWBTC suppliers → withdraw reserve; drain pool 101; remove_currency.</span>"]},
+A20:{t:"WETH (20) · Moonbeam Wormhole",sup:"68.392 WETH (≈$119k)",tags:[["SYSTEM-CRITICAL","crit"]],rows:[
+ "<b>EVM gas currency</b>: pallet_evm Config::Currency = WethCurrency (asset 20). Every EVM tx (Aave, HOLLAR, HSM arbitrage) pays gas in this asset",
+ "<b>MetaMask / unbound-account default</b> (palo: &#8216;default EVM asset in case acc is unbound&#8217;) · dispenser faucet asset",
+ "<b>Stablepool 104</b> vs aETH (snowbridge ETH route)",
+ "<b>Fee currency — 909 accounts</b> (most of any asset)",
+ "<span class='muted'>Unwind: CANNOT simply delist. Needs runtime change (WethAssetId → snowbridge ETH 34/aETH) or balance migration via pool 104, then faucet + UI defaults. Do this one first — everything EVM depends on it.</span>"]},
+A21:{t:"USDC (21) · Moonbeam Wormhole",sup:"228,922 USDC (≈$229k)",tags:[["2 pools","warn"]],rows:[
+ "<b>Stablepool 100 (4-Pool)</b> + <b>Stablepool 105 (3-Pool-MRL, holds HOLLAR)</b>",
+ "XYK vs DOT (dust ≈$7) · <b>2 OTC orders</b> · <b>fee currency — 228 accounts</b>",
+ "<span class='muted'>Unwind: candidate for HSM-X 1:1 migration path (note-hollar-only-bridged-stables). Pool 105 unwind touches 289k HOLLAR.</span>"]},
+A23:{t:"USDT (23) · Moonbeam Wormhole",sup:"200,892 USDT (≈$201k)",tags:[["2 pools","warn"]],rows:[
+ "<b>Stablepool 100 (4-Pool)</b> + <b>Stablepool 105 (3-Pool-MRL)</b>",
+ "<b>1 OTC order</b> · <b>fee currency — 343 accounts</b>",
+ "<span class='muted'>Unwind: same as USDC; migrate to AH-native USDT(10) which shares pool 100.</span>"]},
+A40:{t:"jitoSOL (40)",sup:"2,623.65 jitoSOL (≈$274k)",tags:[["deep chain","warn"],["farm ACTIVE","crit"]],rows:[
+ "<b>Chain: jitoSOL → pool 90001 (w/ aSOL) → shares wrapped as GSOL(9001) aToken → GSOL in Omnipool (148 positions, tradable 15) + GSOL collateral LTV 60</b>",
+ "<b>Farm 131 on GSOL is still ACTIVE</b> (must stop before unwind); farm 127 stopped",
+ "<b>Fee currency</b> — 1 account",
+ "<span class='muted'>Unwind (longest chain): stop farm 131 → GLMR-template omnipool removal of GSOL → unwrap 4626 → withdraw pool 90001 → jitoSOL+aSOL out. MM collateral (LTV 60) must be deleveraged first.</span>"]},
+A43:{t:"PRIME (43)",sup:"9,879,279 PRIME (≈$10.34M)",tags:[["Propeller","crit"],["LTV 85","warn"]],rows:[
+ "<b>Stablepool 143</b> vs HOLLAR (703k H / 345k PRIME, 66% HOLLAR-heavy) — the Propeller loop pool",
+ "<b>Money market</b>: live reserve LTV 85, borrow enabled → aPRIME(1043); priced by bespoke <b>PRIMEoracleMRL</b>-mirroring ManagedOracle",
+ "<b>2 DCA schedules</b> · <b>fee currency — 4 accounts</b>",
+ "<span class='muted'>Unwind: product decision (Propeller) before technical unwind. Deleverage aPRIME borrowers → freeze reserve → drain pool 143 (HOLLAR side) → oracle retirement.</span>"]},
+A44:{t:"EURC (44) · Moonbeam Wormhole",sup:"350,693 EURC (≈$402k)",tags:[["via aEURC","warn"]],rows:[
+ "<b>Money market</b>: live reserve LTV 75 → aEURC(1044); aEURC pairs HOLLAR in <b>HEURC pool (10044)</b> — stablepool exposure is indirect (sheet &#8216;Yes&#8217; = via aToken)",
+ "<b>3 DCA schedules</b> (most of any asset) · <b>fee currency — 10 accounts</b>",
+ "<span class='muted'>Unwind: deleverage → freeze reserve → drain HEURC pool (517k aEURC vs 707k HOLLAR) → remove_currency, cancel DCAs.</span>"]},
+A745:{t:"sUSDS (1000745) · Moonbeam Wormhole",sup:"481,031 sUSDS (≈$531k)",tags:[["HSM collateral","crit"]],rows:[
+ "<b>HSM</b>: one of 4 live collaterals (→ pool 112); peg-defense capacity 2M",
+ "<b>Stablepool 112 (HUSDS)</b> vs HOLLAR; pool-112 shares are themselves an MM collateral (HUSDS 1112, LTV 70)",
+ "<b>Fee currency</b> — 2 accounts · <b>HSM inventory currently 0</b> (cap 2M) — removal is cheap now",
+ "<span class='muted'>Unwind: hsm.remove_collateral_asset(1000745) (drain holdings first) → deleverage HUSDS collateral users → drain pool 112 → remove_currency. Reduces HSM peg-defense capacity — check Hollar peg posture first.</span>"]},
+A752:{t:"SOL (1000752) · Moonbeam Wormhole",sup:"6,909.3 SOL (≈$562k)",tags:[["3 venues","warn"]],rows:[
+ "<b>Omnipool</b>: fully tradable (15), <b>104 LP positions</b>, 2 farms stopped",
+ "<b>Money market</b>: live reserve LTV 70 → aSOL(1009); aSOL sits in pool 90001 (GSOL chain)",
+ "<b>Fee currency</b> — 77 accounts",
+ "<span class='muted'>Unwind: GLMR-template omnipool removal + MM deleverage/freeze + it&#8217;s a leg of the GSOL chain — sequence with jitoSOL.</span>"]},
+A753:{t:"SUI (1000753) · Moonbeam Wormhole",sup:"201,099 SUI (≈$150k)",tags:[["simplest omnipool","ok"]],rows:[
+ "<b>Omnipool</b>: fully tradable (15), <b>43 LP positions</b>, 1 farm stopped",
+ "XYK vs 1000408 (dust) · <b>1 OTC order</b> · <b>fee currency — 23 accounts</b>",
+ "<span class='muted'>Unwind: smallest GLMR-template job. Good second candidate after GLMR to exercise the pipeline.</span>"]},
+mrl:{t:"Wormhole ⇢ Moonbeam MRL bridge",tags:[["SHUTDOWN POINT","crit"]],rows:[
+ "All 12 asset locations = <b>parachain 2004</b> (pallet 110 + Wormhole contract key)",
+ "Inbound/outbound path: origin chain → Wormhole VAA → <b>BasejumpProxy on Moonbeam</b> → XCM → Hydration; relayed by <b>mrelayer + guardian spy on play server</b>",
+ "<span class='muted'>When Moonbeam sunsets: representations become unbridgeable & unpriceable at origin. Everything downstream must be unwound or migrated (snowbridge / AH-native / direct-Wormhole landing) BEFORE the last exit window.</span>"]},
+};
+// ---------- layout ----------
+const colX=[20,190,425,660,945,1205], colW=[150,215,175,265,240,250];
+const colTitle=["Origin","Bridge (dies w/ Moonbeam)","MRL assets","AMM venues","MM · HSM · HOLLAR","System / secondary"];
+const byCol={}; Object.entries(nodes).forEach(([id,n])=>{(byCol[n.c]=byCol[n.c]||[]).push(id)});
+const H=980, topPad=46;
+Object.entries(byCol).forEach(([c,idsArr])=>{
+  const gap=(H-topPad)/(idsArr.length+0.2);
+  idsArr.forEach((id,i)=>{const n=nodes[id]; n.x=colX[c]; n.w=colW[c]; n.h=n.sub?40:28; n.y=topPad+gap*(i+0.55)-n.h/2;});
+});
+const svg=document.getElementById('g');
+svg.setAttribute('viewBox',`0 0 1470 ${H}`); svg.setAttribute('width',1470); svg.setAttribute('height',H);
+const NS='http://www.w3.org/2000/svg';
+const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+colTitle.forEach((t,c)=>{const e=mk('text',{x:colX[c],y:22,class:'collabel'});e.textContent=t;svg.appendChild(e);});
+// edges
+const adj={};
+E.forEach(([a,b])=>{(adj[a]=adj[a]||[]).push(b);(adj[b]=adj[b]||[]).push(a);});
+const edgeEls=[];
+E.forEach(([a,b])=>{
+  const A=nodes[a],B=nodes[b];
+  const x1=A.x+A.w, y1=A.y+A.h/2, x2=B.x, y2=B.y+B.h/2, mx=(x1+x2)/2;
+  const p=mk('path',{d:`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`,class:'edge'});
+  p.dataset.a=a;p.dataset.b=b; svg.appendChild(p); edgeEls.push(p);
+});
+// nodes
+const fill={bridge:'#31405f',asset:'#274a44',pool:'#3d3455',mm:'#54432a',sys:'#4f2f39'};
+const nodeEls={};
+Object.entries(nodes).forEach(([id,n])=>{
+  const gEl=mk('g',{class:'node','data-id':id});
+  const r=mk('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:7,fill:fill[n.cls],stroke:n.crit?'#e06c75':'#2a3350','stroke-width':n.crit?1.6:1});
+  gEl.appendChild(r);
+  const t=mk('text',{x:n.x+9,y:n.y+(n.sub?16:18),fill:'#dfe6f3','font-size':'12.5','font-weight':'600'});
+  t.textContent=n.l; gEl.appendChild(t);
+  if(n.sub){const s=mk('text',{x:n.x+9,y:n.y+31,fill:'#8a94ad','font-size':'10.5'});s.textContent=n.sub;gEl.appendChild(s);}
+  svg.appendChild(gEl); nodeEls[id]=gEl;
+  gEl.addEventListener('click',ev=>{ev.stopPropagation();focus(id);});
+});
+function neighborhood(id){
+  // full reach for assets & bridge: everything connected transitively downstream/upstream, else 1-hop
+  const keep=new Set([id]);
+  if(id.startsWith('A')||id==='mrl'){
+    const stack=[id];
+    while(stack.length){const cur=stack.pop();(adj[cur]||[]).forEach(nx=>{
+      // don't traverse THROUGH other assets or the bridge hub (except from origin id)
+      if(keep.has(nx))return;
+      if(nx!==id && (nx.startsWith('A')||nx==='mrl') && cur!==id){return;}
+      if(nx.startsWith('A')&&cur==='mrl'&&id!=='mrl')return;
+      keep.add(nx); if(!(nx.startsWith('A')&&nx!==id)) stack.push(nx);
+    });}
+  } else { (adj[id]||[]).forEach(n=>keep.add(n)); }
+  return keep;
+}
+function focus(id){
+  const keep=neighborhood(id);
+  Object.entries(nodeEls).forEach(([nid,el])=>{el.classList.toggle('dimmed',!keep.has(nid));el.classList.toggle('hi',nid===id);});
+  edgeEls.forEach(p=>{const on=keep.has(p.dataset.a)&&keep.has(p.dataset.b);p.classList.toggle('hi',on);p.classList.toggle('dimmed',!on);});
+  const d=D[id];const det=document.getElementById('detail');
+  if(d){det.innerHTML=`<h3>${d.t}</h3>${d.sup?`<div class='muted' style='margin:-2px 0 4px'>Bridged supply: <b style='color:var(--txt)'>${d.sup}</b></div>`:''}<div>${d.tags.map(([t,c])=>`<span class="tag ${c}">${t}</span>`).join('')}</div><ul>${d.rows.map(r=>`<li>${r}</li>`).join('')}</ul>`;}
+  else{det.innerHTML=`<h3>${nodes[id].l}</h3><div class="muted">${nodes[id].sub||''}</div><div class="muted" style="margin-top:6px">Connected: ${[...keep].filter(k=>k!==id).map(k=>nodes[k].l).join(' · ')}</div>`;}
+}
+document.body.addEventListener('click',()=>{
+  Object.values(nodeEls).forEach(el=>el.classList.remove('dimmed','hi'));
+  edgeEls.forEach(p=>p.classList.remove('hi','dimmed'));
+});
+</script>
+</body>
+</html>
