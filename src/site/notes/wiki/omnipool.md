@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/omnipool/","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/omnipool/","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"Omnipool","tags":["amm","trading","liquidity","defi","core-product"],"source_count":2,"last_updated":"2026-08-15"}}
 ---
 
 
@@ -25,8 +25,8 @@ Each TKN/LRNA virtual sub-pool uses a constant product invariant (`Q_i * T_i = k
 ## Swap Mechanics
 
 Two fees per trade:
-- **Asset fee (`fA`)** — charged in the output asset, stays in the pool as LP rewards
-- **Protocol fee (`fP`)** — charged in LRNA, flows to the protocol for [[wiki/hdx\|hdx]] buybacks
+- **Asset fee (`fA`)** — charged in the output asset. Roughly half stays in the pool as LP rewards; the rest is taken out by the `on_trade_fee` hook and split by [[wiki/pallet-fee-processor\|pallet-fee-processor]] (gigahdx pot 15%, gigahdx-rewards pot 25%, [[wiki/pallet-staking\|pallet-staking]] pot 5%, [[wiki/pallet-referrals\|pallet-referrals]] pot 5%). Non-HDX slices are converted to [[wiki/hdx\|hdx]] in `on_idle` via an Omnipool sell.
+- **Protocol fee (`fP`)** — charged in LRNA, flows to the protocol for [[wiki/hdx\|hdx]] buybacks (a `BurnProtocolFee` fraction is burned)
 
 **Sell formula:**
 ```

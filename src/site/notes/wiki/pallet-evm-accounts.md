@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-evm-accounts/","title":"pallet-evm-accounts","tags":["evm","accounts","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-evm-accounts","repo":"hydration-node","paths":["pallets/evm-accounts/src/lib.rs"],"symbols":["Pallet","Config","bind_evm_address","add_contract_deployer","approve_contract","claim_account","AccountExtension","ContractDeployer","ApprovedContract","MarkedEvmAccounts","Allowances","MESSAGE_PREFIX"],"traits_impl":["InspectEvmAccounts","ValidateUnsigned"],"depends_on":["pallet-asset-registry","pallet-transaction-multi-payment"],"runtime_index":93,"tags":["evm","accounts","runtime","rust","substrate"],"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-evm-accounts/","title":"pallet-evm-accounts","tags":["evm","accounts","ntt","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-evm-accounts","repo":"hydration-node","paths":["pallets/evm-accounts/src/lib.rs"],"symbols":["Pallet","Config","bind_evm_address","add_contract_deployer","approve_contract","claim_account","set_ntt_minter","clear_ntt_minter","AccountExtension","ContractDeployer","ApprovedContract","MarkedEvmAccounts","Allowances","NttMinters","MESSAGE_PREFIX"],"traits_impl":["InspectEvmAccounts","ValidateUnsigned"],"depends_on":["pallet-asset-registry","pallet-transaction-multi-payment"],"runtime_index":93,"tags":["evm","accounts","ntt","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -22,6 +22,9 @@ pub trait Config: frame_system::Config {
     type EvmNonceProvider: EvmNonceProvider;
     #[pallet::constant] type FeeMultiplier: Get<u32>;
     type ControllerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+    /// Origin that can clear an NTT minter. Meant to be faster than
+    /// `ControllerOrigin` so it can act as an emergency stop for NTT mint/burn.
+    type NttEmergencyOrigin: EnsureOrigin<Self::RuntimeOrigin>;
     type AssetId: Parameter + Member + Copy + ... + AtLeast32BitUnsigned;
     type Currency: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = Balance>;
     type ExistentialDeposits: GetByKey<Self::AssetId, Balance>;
@@ -39,14 +42,15 @@ pub trait Config: frame_system::Config {
 | `ApprovedContract` | StorageMap | `EvmAddress → ()` (balance-managing contracts) |
 | `MarkedEvmAccounts` | StorageMap | `AccountId → ()` (permanent sufficient counter) |
 | `Allowances` | StorageNMap | `(AssetId, owner, spender) → Balance` (ERC-20 style) |
+| `NttMinters` | StorageMap | `AssetId → EvmAddress` — the **only** EVM address allowed to mint/burn that asset via the MultiCurrency precompile (NTT spoke manager) |
 
 ## Events
 
-`Bound`, `DeployerAdded`, `DeployerRemoved`, `ContractApproved`, `ContractDisapproved`, `AccountClaimed`.
+`Bound`, `DeployerAdded`, `DeployerRemoved`, `ContractApproved`, `ContractDisapproved`, `AccountClaimed`, `NttMinterSet { asset_id, minter }`, `NttMinterCleared { asset_id }`.
 
 ## Errors
 
-`TruncatedAccountAlreadyUsed`, `AddressAlreadyBound`, `BoundAddressCannotBeUsed`, `AddressNotWhitelisted`, `InvalidSignature`, `AccountAlreadyExists`, `InsufficientAssetBalance`.
+`TruncatedAccountAlreadyUsed`, `AddressAlreadyBound`, `BoundAddressCannotBeUsed`, `AddressNotWhitelisted`, `InvalidSignature`, `AccountAlreadyExists`, `InsufficientAssetBalance`, `InvalidMinterAddress` (zero address rejected).
 
 ## Extrinsics
 
@@ -59,6 +63,8 @@ pub trait Config: frame_system::Config {
 | `approve_contract` | Approve contract for protocol balance management |
 | `disapprove_contract` | Revoke contract approval |
 | `claim_account` | Unsigned — prove ownership of truncated account via Ethereum signature |
+| `set_ntt_minter` | Call index 7. `ControllerOrigin`. Set the NTT spoke-manager address permitted to mint/burn `asset_id` via the MultiCurrency precompile. Rejects the zero address. |
+| `clear_ntt_minter` | Call index 8. `NttEmergencyOrigin` (deliberately *faster* than `ControllerOrigin`). Emergency stop: removes the entry, halting all NTT mint/burn for that asset. |
 
 ## Hooks
 
@@ -78,6 +84,8 @@ pub trait Config: frame_system::Config {
 - Contract deployment goes through `ControllerOrigin` permission check in the frontier call path — bypassable only by whitelisted deployers.
 - `Allowances` storage is used by the multi-currency precompile to implement ERC-20 `approve`/`transferFrom`.
 - `FeeMultiplier` scales the weight for binding — prevents griefing.
+- **NTT minter is per-asset and single-valued.** `set_ntt_minter` overwrites without a prior-value check; an unset asset simply cannot be minted/burned through the precompile. The asymmetric origins are intentional: setting is slow (`ControllerOrigin`), clearing is fast (`NttEmergencyOrigin`) so the mint path can be halted in one governance action.
+- `set_ntt_minter` / `clear_ntt_minter` weights are hand-copied from `approve_contract` / `disapprove_contract` (same shape: one map write) rather than benchmarked.
 
 ## Runtime wiring
 

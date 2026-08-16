@@ -1,95 +1,125 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_with_extra_gas","note_ismp_responses","CLEANUP_LIMIT"],"traits_impl":[],"depends_on":[],"runtime_index":40,"tags":["dispatcher","batching","governance","ismp","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs","pallets/dispatcher/src/weights.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_as_emergency_admin","dispatch_with_extra_gas","dispatch_evm_call","dispatch_with_fee_payer","note_aave_manager","AaveManagerAccount","ExtraGas","LastEvmCallExitReason","EvmCallChecker","MaybeEvmCall","EvmFeePayerSupport","ExtraGasSupport"],"traits_impl":["ExtraGasSupport"],"depends_on":["pallet-evm"],"runtime_index":40,"tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"last_updated":"2026-05-14"}}
 ---
 
 
 # pallet-dispatcher
 
-**TL;DR:** Authorized-origin call dispatcher — lets specific origins (Treasury, AaveManager, EmergencyAdmin) execute calls as a pallet-controlled account, plus a gas-augmented dispatch path for heavy EVM calls, plus an ISMP response cleanup hook via `on_idle`. Runtime index = 40.
+**TL;DR:** Authorised-origin call dispatcher. Lets specific governance origins (Treasurer, AaveManager, EmergencyAdmin = TC majority) execute calls as a pallet-controlled signed account, plus EVM-specific dispatch paths: gas-augmented dispatch, single EVM call dispatch (with exit-reason validation), and fee-payer override. Runtime index = 40. (ISMP cleanup hook removed in spec 419 along with Hyperbridge.)
 
 ## Role
 
 Three jobs rolled into one pallet:
-1. **Dispatch-as**: Governance (or specific privileged origins) can dispatch inner calls as if signed by a designated managed account (Treasury account, Aave manager account).
-2. **Extra gas**: Wrap an inner call with a declared extra gas allowance, used for EVM-heavy dispatches where standard weight estimation is too conservative.
-3. **ISMP housekeeping**: `on_idle` cleans up stale ISMP responses (up to `CLEANUP_LIMIT` per block).
+1. **Dispatch-as**: A governance origin dispatches an inner call as if signed by a designated managed account (Treasury account, Aave manager account, Emergency Admin account).
+2. **Extra gas / EVM call**: Wrap an inner call with declared extra EVM gas allowance (`dispatch_with_extra_gas`), or run a single EVM call and validate the exit reason (`dispatch_evm_call`).
+3. **Fee payer override**: Temporarily override which account pays for an EVM call (`dispatch_with_fee_payer`) via `EvmFeePayerSupport`.
 
 ## Config trait (excerpt)
 
 ```rust
 // pallets/dispatcher/src/lib.rs
 pub trait Config: frame_system::Config {
-    type RuntimeEvent: ...;
-    type RuntimeCall: Parameter + Dispatchable<...> + GetDispatchInfo + From<Call<Self>>;
+    type RuntimeCall: IsType<<Self as frame_system::Config>::RuntimeCall>
+        + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin, PostInfo = PostDispatchInfo>
+        + GetDispatchInfo + FullCodec + TypeInfo
+        + From<frame_system::Call<Self>> + Parameter;
+
+    // Identifies whether a RuntimeCall is `pallet_evm::Call::call`.
+    type EvmCallIdentifier: MaybeEvmCall<<Self as Config>::RuntimeCall>;
+
     type TreasuryManagerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
     type AaveManagerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
-    type DefaultAaveManagerAccount: Get<Self::AccountId>;
+    type EmergencyAdminOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
     type TreasuryAccount: Get<Self::AccountId>;
+    type DefaultAaveManagerAccount: Get<Self::AccountId>;
+    type EmergencyAdminAccount: Get<Self::AccountId>;
+
     type GasWeightMapping: GasWeightMapping;
+    type EvmFeePayer: EvmFeePayerSupport<AccountId = Self::AccountId>;
     type WeightInfo: WeightInfo;
 }
+```
 
-pub const CLEANUP_LIMIT: u32 = 100;
+Runtime wiring (`runtime/hydradx/src/governance/mod.rs`):
+
+```rust
+type TreasuryManagerOrigin = EitherOf<EnsureRoot<AccountId>, Treasurer>;
+type AaveManagerOrigin     = EitherOf<EnsureRoot<AccountId>, EconomicParameters>;
+type EmergencyAdminOrigin  = EitherOf<EnsureRoot<AccountId>, TechCommitteeMajority>;
 ```
 
 ## Storage
 
 | Name | Kind | Key → Value |
 |------|------|-------------|
-| `AaveManagerAccount` | StorageValue | `AccountId` (OptionQuery → falls back to DefaultAaveManagerAccount) |
+| `AaveManagerAccount` | StorageValue | `AccountId` (ValueQuery, default = `DefaultAaveManagerAccount`) |
+| `ExtraGas` | StorageValue | `u64` (ValueQuery, whitelist) — extra gas for the currently-running outer call |
+| `LastEvmCallExitReason` | StorageValue | `Option<ExitReason>` (whitelist, unbounded) — captured during EVM execution, reset in `on_finalize` |
 
 ## Events
 
-`TreasuryManagerCallDispatched { result }`, `AaveManagerCallDispatched { result }`.
+`TreasuryManagerCallDispatched { call_hash, result }`, `AaveManagerCallDispatched { call_hash, result }`, `EmergencyAdminCallDispatched { call_hash, result }`.
 
 ## Errors
 
-None unique — inner call errors propagate.
+`EvmCallFailed`, `NotEvmCall`, `EvmOutOfGas`, `EvmArithmeticOverflowOrUnderflow`, `AaveSupplyCapExceeded`, `AaveBorrowCapExceeded`, `AaveHealthFactorNotBelowThreshold`, `AaveHealthFactorLowerThanLiquidationThreshold`, `CollateralCannotCoverNewBorrow`, `AaveReservePaused`.
 
 ## Extrinsics
 
-| Name | Description |
-|------|-------------|
-| `dispatch_as_treasury` | `TreasuryManagerOrigin` dispatches call as `TreasuryAccount` signed origin |
-| `dispatch_as_aave_manager` | `AaveManagerOrigin` dispatches call as Aave manager account signed origin |
-| `note_aave_manager` | Root sets the Aave manager account in `AaveManagerAccount` |
-| `dispatch_with_extra_gas` | Any signed origin; wraps inner call with `extra_gas` converted to weight via `GasWeightMapping` |
+| call_index | Name | Description |
+|---|---|---|
+| 0 | `dispatch_as_treasury` | `TreasuryManagerOrigin` dispatches call as `TreasuryAccount` signed origin |
+| 1 | `dispatch_as_aave_manager` | `AaveManagerOrigin` dispatches call as `AaveManagerAccount` signed origin |
+| 2 | `note_aave_manager` | Root sets the `AaveManagerAccount` in storage (mainly for testnet) |
+| 3 | `dispatch_with_extra_gas` | Any signed origin; sets `ExtraGas` for the duration of the inner call, then clears |
+| 4 | `dispatch_evm_call` | Signed; requires inner call to be `pallet_evm::Call::call`; verifies `LastEvmCallExitReason ∈ {Succeed(Returned), Succeed(Stopped)}` or returns `EvmCallFailed` |
+| 5 | `dispatch_as_emergency_admin` | `EmergencyAdminOrigin` (TC majority or Root) dispatches as `EmergencyAdminAccount` — fast path to react to incidents (e.g. pause an exploited market) without a full referendum |
+| 7 | `dispatch_with_fee_payer` | Signed; sets the EVM fee payer to the signer for the duration of the inner call (via `EvmFeePayerSupport`); restores the previous payer afterwards |
+
+(Call index 6 is unused.)
 
 ## Hooks
 
-`on_idle(_, remaining)` — calls `pallet_ismp::Pallet::cleanup_requests(CLEANUP_LIMIT)` if enough weight; returns consumed weight.
+`on_finalize` — `LastEvmCallExitReason::kill()` resets the per-block storage. No `on_idle` cleanup any more; the previous ISMP cleanup hook was removed alongside the Hyperbridge pallets in spec 419.
 
 ## Integration
 
-- **Traits implemented:** none external
-- **Traits consumed:** `GasWeightMapping` (EVM gas ↔ Substrate weight conversion)
-- **Pallets depended on:** `pallet_ismp` (for cleanup), otherwise none
+- **Traits implemented:** `ExtraGasSupport` for `Pallet<T>` (`set_extra_gas`, `clear_extra_gas`, `out_of_gas_error`)
+- **Traits consumed:** `GasWeightMapping`, `MaybeEvmCall`, `EvmFeePayerSupport`
+- **Pallets depended on:** `pallet_evm` (for `ExitReason`, `GasWeightMapping`)
+- **Public API:** `Pallet::decrease_extra_gas(amount)`, `Pallet::set_last_evm_call_exit_reason(reason)` — called from the EVM runner wrapper
 
 ## Key extrinsic
 
 ```rust
 // pallets/dispatcher/src/lib.rs
-pub fn dispatch_as_treasury(
+pub fn dispatch_as_emergency_admin(
     origin: OriginFor<T>, call: Box<<T as Config>::RuntimeCall>,
 ) -> DispatchResultWithPostInfo {
-    T::TreasuryManagerOrigin::ensure_origin(origin)?;
-    let treasury_origin = RawOrigin::Signed(T::TreasuryAccount::get()).into();
-    let res = call.dispatch(treasury_origin);
-    Self::deposit_event(Event::TreasuryManagerCallDispatched {
-        result: res.map(|_| ()).map_err(|e| e.error),
-    });
-    res
+    T::EmergencyAdminOrigin::ensure_origin(origin)?;
+    let call_hash = T::Hashing::hash_of(&call);
+    let (result, actual_weight) = Self::do_dispatch(
+        frame_system::Origin::<T>::Signed(T::EmergencyAdminAccount::get()).into(),
+        *call,
+    );
+    Self::deposit_event(Event::<T>::EmergencyAdminCallDispatched { call_hash, result });
+    Ok(actual_weight.map(|w| w.saturating_add(/* base */)).into())
 }
 ```
 
 ## Gotchas
 
-- `dispatch_with_extra_gas` is a gas inflation tool — be careful with weight accounting; the post-dispatch weight equals declared-extra + actual inner.
-- Treasury/Aave manager accounts dispatched as `Signed` — the inner call runs with that account as the caller's AccountId; they can therefore hold balances, be referenced in asset registrations, etc.
-- `AaveManagerAccount` being empty means callers get `DefaultAaveManagerAccount` — never a panic, always a fallback.
-- `on_idle` ISMP cleanup only triggers if `pallet_ismp` is present in the runtime; otherwise it's a no-op (guarded by trait bound).
-- No pausable / emergency-halt functionality here — see [[wiki/pallet-transaction-pause\|pallet-transaction-pause]].
+- **No more ISMP / Hyperbridge support.** The `on_idle` hook that called `pallet_ismp::cleanup_requests` was removed in spec 419 along with the deletion of Hyperbridge / ISMP / token-gateway pallets. Old wiki notes referencing `CLEANUP_LIMIT` and ISMP housekeeping are obsolete.
+- **`dispatch_with_extra_gas`** is a gas inflation tool — be careful with weight accounting; post-dispatch weight equals declared-extra (via `GasWeightMapping`) + actual inner.
+- **`dispatch_evm_call`** rejects any call that is not `pallet_evm::Call::call` (checked by `EvmCallIdentifier`). It also reads `LastEvmCallExitReason` set by the EVM runner wrapper and fails the extrinsic if the EVM execution returned anything other than `Succeed(Returned)` or `Succeed(Stopped)`. This is the only path where EVM call failures bubble up as proper substrate errors.
+- **`dispatch_with_fee_payer`** sets `T::EvmFeePayer::set_fee_payer(signer)` for the duration of the inner call and restores the previous payer (or clears) afterwards. Used to let one account sponsor another's EVM gas.
+- **`EmergencyAdminOrigin`** wired to TC majority — this is the chain's emergency response lever. Dispatched calls run as the `EmergencyAdminAccount` signed origin, so the inner call sees that account as the caller.
+- Treasury / Aave manager / EmergencyAdmin accounts are dispatched as `Signed` — they can therefore hold balances, hold positions, be referenced as `from` in asset operations, etc.
+- **`AaveManagerAccount`** uses `ValueQuery` with `DefaultAaveManagerAccount` — never panics on read, always returns the runtime-default if `note_aave_manager` has not been called.
+- **No pause functionality** here — see [[wiki/pallet-transaction-pause\|pallet-transaction-pause]].
 
 ## Sources
 
 - [[wiki/source-hydration-node-codebase\|source-hydration-node-codebase]]
+- [[wiki/hydration-runtime\|hydration-runtime]]

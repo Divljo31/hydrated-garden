@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-route-executor/","title":"pallet-route-executor","tags":["router","multi-hop","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-route-executor","repo":"hydration-node","paths":["pallets/route-executor/src/lib.rs","pallets/route-executor/src/types.rs","pallets/route-executor/src/weights.rs"],"symbols":["Pallet","Config","Route","Trade","PoolType","sell","buy","set_route","update_route","Routes","TradeExecution","RouteProvider"],"traits_impl":["RouteProvider"],"depends_on":["pallet-broadcast","pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-ema-oracle"],"runtime_index":67,"tags":["router","multi-hop","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-route-executor/","title":"pallet-route-executor","tags":["router","multi-hop","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-route-executor","repo":"hydration-node","paths":["pallets/route-executor/src/lib.rs","pallets/route-executor/src/types.rs","pallets/route-executor/src/weights.rs"],"symbols":["Pallet","Config","Route","Trade","PoolType","sell","buy","set_route","force_insert_route","Routes","TradeExecution","RouteProvider","router_account","do_sell"],"traits_impl":["RouteProvider"],"depends_on":["pallet-broadcast","pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-ema-oracle","pallet-circuit-breaker"],"runtime_index":67,"tags":["router","multi-hop","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -101,6 +101,8 @@ pub fn buy(
 - Empty `route` → falls back to `DefaultRoutePoolType` (Omnipool) using the direct pair.
 - Oracle validation requires every intermediate asset to have an oracle price — else `RouteHasNoOracle`.
 - Execution context: sets [[wiki/pallet-broadcast\|pallet-broadcast]] `ExecutionType::Router` so downstream AMMs emit `Swapped` events tagged as a single router trade.
+- **`set_swapper` ordering matters.** `do_sell` now calls `pallet_broadcast::set_swapper(who)` *before* the first `Currency::transfer` into the router account, so the entire window in which the router holds user funds is inside a trade context. [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]]'s `InTradeContext` is exactly `get_swapper().is_some()`, and its `DepositLockWhitelist` exemption for the router account is only honoured while that holds — with the old ordering (`set_swapper` after the transfer and after `add_to_context`) the first deposit fell outside the context and got locked instead of erroring.
+- `router_account()` is the account the whitelist/whitelist-exemption in [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] is keyed on.
 - `set_route`/`update_route` dry-runs in both directions and picks the better path.
 
 ## Sources

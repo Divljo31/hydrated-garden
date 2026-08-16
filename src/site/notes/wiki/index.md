@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/index/","title":"Wiki Index","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"index","title":"Wiki Index","last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/index/","title":"Wiki Index","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"index","title":"Wiki Index","last_updated":"2026-08-15"}}
 ---
 
 
@@ -7,22 +7,29 @@
 
 Master catalog of all pages in the wiki. Updated on every ingest.
 
+## Start here
+
+- [[wiki/overview\|overview]] — 30-second briefing: what's indexed, protocol pillars, per-repo summary
+- [[wiki/routing\|routing]] — task → pages cheat sheet ("I need to X → read Y, Z")
+- [[wiki/hydration\|hydration]] — the protocol itself, if you need the ground truth before routing
+
 ## Sources
 
 - [[wiki/source-hydration-general-context\|source-hydration-general-context]] — Foundational protocol overview: products, architecture, governance, tokenomics, cross-chain design
 - [[wiki/source-omnipool-deep-context\|source-omnipool-deep-context]] — Deep technical reference: AMM model, swap math, LP mechanics, fees, risk controls, on-chain data model
 - [[wiki/source-sdk-codebase\|source-sdk-codebase]] — Galactic SDK monorepo: trading SDK, cross-chain transfers, WASM math, tooling
-- [[wiki/source-hydration-node-codebase\|source-hydration-node-codebase]] — Hydration parachain node: 38 pallets, runtime, precompiles, math, traits
+- [[wiki/source-hydration-node-codebase\|source-hydration-node-codebase]] — Hydration parachain node: 42 pallets, runtime, precompiles, math, traits, `pepl-worker/`, `ai_skills/`
 - [[wiki/source-papi-docs\|source-papi-docs]] — papi.how documentation (Vocs site, 36 markdown pages)
 - [[wiki/source-polkadot-api-codebase\|source-polkadot-api-codebase]] — polkadot-api monorepo: 24 packages (client, descriptors, cli, smoldot, signers, ink, substrate-bindings)
-- [[wiki/source-hydration-ui-codebase\|source-hydration-ui-codebase]] — Hydration frontend monorepo: React 19 + Vite + Tanstack Router, apps/main + 7 workspace packages
+- [[wiki/source-hydration-ui-codebase\|source-hydration-ui-codebase]] — Hydration frontend monorepo: React 19 + Vite 8 (Rolldown) + Tanstack Router, apps/main (13 modules) + 7 workspace packages
 
 ## Entities
 
 ### Protocol & Products
-- [[wiki/hydration\|hydration]] — The protocol itself: largest DeFi on Polkadot, vertically integrated trading + lending + stablecoin
+- [[wiki/hydration\|hydration]] — The protocol itself: largest DeFi on Polkadot, vertically integrated trading + lending + stablecoin + liquid staking
 - [[omnipool\|omnipool]] — Flagship single-pool AMM with hub token routing
 - [[wiki/hollar\|hollar]] — Native over-collateralized stablecoin ($1 peg), built on GHO architecture
+- [[wiki/gigahdx\|gigahdx]] — HDX liquid staking: HDX → internal stHDX (asset 670) → GIGAHDX aTokens (asset 67) on the Aave fork, exchange-rate yield, non-transferable via lock-manager precompile
 - [[wiki/hydration-borrow\|hydration-borrow]] — Aave v3 fork for lending/borrowing
 - [[wiki/lrna\|lrna]] — Internal hub token (H2O) powering Omnipool routing
 - [[wiki/hdx\|hdx]] — Native governance and incentive token
@@ -48,30 +55,33 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/papi-unsafe-static\|papi-unsafe-static]] — UnsafeApi (dynamic) vs StaticApis (sync snapshot)
 - [[wiki/papi-recipes\|papi-recipes]] — Recipes: simple-transfer, multi-chain, upgrade, metadata-caching
 
-### SDK Packages (`galacticcouncil/sdk`)
-- [[wiki/sdk-next\|sdk-next]] — Trade router, pool queries, smart order router, DCA/TWAP, tx building
-- [[wiki/sdk-common\|sdk-common]] — Shared utilities (big numbers, XCM, EVM, substrate RPC)
-- [[wiki/sdk-descriptors\|sdk-descriptors]] — Hydration papi type-safe metadata descriptors
+### SDK Packages (`galacticcouncil/sdk`) — 17 published packages, all on papi v2 as of August 2026
+- [[wiki/sdk-next\|sdk-next]] — v1.6.0 trade router (Omni / Stableswap / XYK / LBP / HSM / Aave), smart order router, DCA/TWAP, tx building; historical reads (`at`), `SnapshotPoolCtxProvider`, `StakingClient`, ICE intent builders, `src/indexer/`, money-market oracles, `StableSwapPeg`, EVM log parsers
+- [[wiki/sdk-common\|sdk-common]] — Shared utilities (big numbers, XCM, EVM, substrate RPC via `createWsClient`)
+- [[wiki/sdk-descriptors\|sdk-descriptors]] — Hydration papi type-safe metadata descriptors (v2.6.0, `hydrationIce` chain + `wasm/ice/ice.wasm`; GigaHdx / GigaHdxRewards / FeeProcessor present in metadata but NOT whitelisted)
 - [[wiki/xc-package\|xc-package]] — Cross-chain context factory (batteries-included entry point); tag-based multi-bridge route selection
 - [[wiki/xc-sdk\|xc-sdk]] — Wallet interface for multi-platform transfers (Substrate, EVM, Solana, Sui)
-- [[wiki/xc-cfg\|xc-cfg]] — Pre-built route configs, DEX integrations, bridge builders (Basejump, Wormhole, Snowbridge)
-- [[wiki/xc-core\|xc-core]] — Core types, chain & asset definitions, bridge primitives (basejump, snowbridge, wormhole)
+- [[wiki/xc-swap\|xc-swap]] — NEAR Intent Routing cross-chain swaps: any Hydration asset → NEAR-ecosystem asset in one EVM tx via `IntentEmitter.swapAndBridge` + 1Click API; sibling of [[wiki/xc-package\|xc-package]], bypasses the transfer stack
+- [[wiki/xc-cfg\|xc-cfg]] — Pre-built route configs, DEX integrations, bridge builders (NTT, Snowbridge V1 + V2, Basejump); transfer-validation framework with Hydration circuit-breaker deposit/withdraw limits
+- [[wiki/xc-core\|xc-core]] — Core types, chain & asset definitions, bridge primitives (`Tag.Ntt` / `Tag.NttExecutor` / `Tag.SnowbridgeV1`, `*_wh` keys); Hydration is Wormhole chain id 73
 - [[wiki/xc-scan\|xc-scan]] — Cross-chain transaction scanning and journey tracking
 - [[wiki/route-suggester\|route-suggester]] — Rust crate for high-performance DEX route discovery
 
 ### Runtime & Node (`hydration-node`)
-- [[wiki/hydration-runtime\|hydration-runtime]] — `construct_runtime!`, pallet wiring, fee config, XCM config, spec_version 411
-- [[wiki/hydration-precompiles\|hydration-precompiles]] — EVM precompiles: call-permit (gasless), flash-loan (HSM mint)
+- [[wiki/hydration-runtime\|hydration-runtime]] — `construct_runtime!`, pallet wiring, fee config, XCM config, spec_version 439, 42 pallets (new: `GigaHdx = 86`, `GigaHdxRewards = 87`, `FeeProcessor = 207`; trade-fee split rewired so 50% leaves the pool)
+- [[wiki/hydration-precompiles\|hydration-precompiles]] — EVM precompiles: call-permit (gasless), flash-loan (HSM mint), lock-manager `0x…0806` (`getLockedBalance`, makes GIGAHDX non-transferable)
+- [[wiki/pepl-worker\|pepl-worker]] — PEPL v2 node-side liquidation worker (`pepl-worker/`): multi-money-market, oracle fast path
+- [[wiki/note-ai-skills\|note-ai-skills]] — Upstream `ai_skills/`: `hydration_cl0wdit` security-audit skill + `circuit-breaker-incident` triage skill, symlinked from `.claude/` and `.codex/`
 
 ### Pallets — AMM core
 - [[wiki/pallet-omnipool\|pallet-omnipool]] — Single-pool AMM with LRNA hub asset
-- [[wiki/pallet-stableswap\|pallet-stableswap]] — Curve-style pools (up to 5 assets)
+- [[wiki/pallet-stableswap\|pallet-stableswap]] — Curve-style pools (up to 5 assets); storage v2 virtual share issuance (`ShareIssuance`, `mint_shares`/`burn_shares`) — do NOT derive share supply from `total_issuance`
 - [[wiki/pallet-xyk\|pallet-xyk]] — Constant-product two-asset pools
 - [[wiki/pallet-lbp\|pallet-lbp]] — Liquidity bootstrapping pool
 - [[wiki/pallet-route-executor\|pallet-route-executor]] — Multi-hop trade router
 
 ### Pallets — Risk & infrastructure
-- [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] — Per-block trade/liquidity/egress volume limits
+- [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] — Per-block trade/liquidity/egress volume limits; `Config::InTradeContext` covers the whole router window
 - [[wiki/pallet-dynamic-fees\|pallet-dynamic-fees]] — Volume-based fee adjustment
 - [[wiki/pallet-dynamic-evm-fee\|pallet-dynamic-evm-fee]] — EVM base-fee-per-gas oracle
 - [[wiki/pallet-ema-oracle\|pallet-ema-oracle]] — EMA price oracle store
@@ -81,23 +91,27 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/pallet-transaction-pause\|pallet-transaction-pause]] — Pause arbitrary extrinsics
 
 ### Pallets — Finance & orchestration
-- [[wiki/pallet-dca\|pallet-dca]] — Dollar-cost averaging schedules
-- [[wiki/pallet-staking\|pallet-staking]] — HDX staking + democracy points
+- [[wiki/pallet-dca\|pallet-dca]] — Dollar-cost averaging schedules (buy schedules retired — `Error::NoLongerSupported`; existing ones still execute)
+- [[wiki/pallet-staking\|pallet-staking]] — HDX staking + democracy points (legacy; superseded on the frontend by [[wiki/gigahdx\|gigahdx]])
+- [[wiki/pallet-gigahdx\|pallet-gigahdx]] — Runtime index 86: `giga_stake` / `giga_unstake` / `migrate`, `ghdxlock` lock id, 28-day cooldown, exchange-rate yield, gigapot `PalletId(*b"gigahdx!")`
+- [[wiki/pallet-gigahdx-rewards\|pallet-gigahdx-rewards]] — Runtime index 87: referendum-linked reward accumulator, per-track Permill split pro rata by `staked_vote × conviction`, `claim_rewards` compounds
+- [[wiki/pallet-fee-processor\|pallet-fee-processor]] — Runtime index 207: central trade-fee splitter (`process_trade_fee`), `on_idle` conversion of non-HDX slices to HDX, `HeldFees` ED buffering
 - [[wiki/pallet-hsm\|pallet-hsm]] — Hollar Stability Mechanism
 - [[wiki/pallet-otc\|pallet-otc]] — Peer-to-peer orders
 - [[wiki/pallet-otc-settlements\|pallet-otc-settlements]] — OTC ↔ router arbitrage worker
 - [[wiki/pallet-referrals\|pallet-referrals]] — Referral codes + tiered rewards
 - [[wiki/pallet-bonds\|pallet-bonds]] — Fungible bonds with maturity
-- [[wiki/pallet-liquidation\|pallet-liquidation]] — MM collateral liquidations via flash loan
+- [[wiki/pallet-liquidation\|pallet-liquidation]] — MM collateral liquidations via flash loan; adds unsigned `liquidate_with_pool` and protocol-funded `liquidate_gigahdx`
 - [[wiki/pallet-liquidity-mining\|pallet-liquidity-mining]] — Core yield-farming engine
 - [[wiki/pallet-omnipool-liquidity-mining\|pallet-omnipool-liquidity-mining]] — LM wrapper for Omnipool NFT positions
 - [[wiki/pallet-xyk-liquidity-mining\|pallet-xyk-liquidity-mining]] — LM wrapper for XYK LP shares
 
 ### Pallets — Currency & accounts
 - [[wiki/pallet-currencies\|pallet-currencies]] — Multi-currency adapter
-- [[wiki/pallet-evm-accounts\|pallet-evm-accounts]] — EVM ↔ Substrate account mapping
+- [[wiki/pallet-evm-accounts\|pallet-evm-accounts]] — EVM ↔ Substrate account mapping; NTT minter registry (`NttMinters`, `set_ntt_minter`, `NttEmergencyOrigin`)
 - [[wiki/pallet-duster\|pallet-duster]] — Dust removal + whitelist
 - [[wiki/pallet-collator-rewards\|pallet-collator-rewards]] — Collator payout
+- [[wiki/pallet-collator-rotation\|pallet-collator-rotation]] — SessionManager wrapper that benches one collator each odd session (runtime index 58)
 - [[wiki/pallet-democracy\|pallet-democracy]] — Legacy democracy (pre-OpenGov bridge)
 - [[wiki/pallet-claims\|pallet-claims]] — HDX claims via ETH signatures
 - [[wiki/pallet-dispenser\|pallet-dispenser]] — One-time faucet for ETH accounts
@@ -107,22 +121,22 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/pallet-broadcast\|pallet-broadcast]] — Shared Swapped event bus
 - [[wiki/pallet-dispatcher\|pallet-dispatcher]] — Proxy-style dispatch with custom origins
 - [[wiki/pallet-genesis-history\|pallet-genesis-history]] — Chain-migration lineage marker
-- [[wiki/pallet-parameters\|pallet-parameters]] — On-chain runtime parameters
+- [[wiki/pallet-parameters\|pallet-parameters]] — Genesis-set runtime flags (`IsTestnet`, `RelayParentOffsetOverride`)
 - [[wiki/pallet-relaychain-info\|pallet-relaychain-info]] — Relay metadata exposure
 - [[wiki/pallet-signet\|pallet-signet]] — Authenticated off-chain data signing
 
 ### Frontend (`hydration-ui`)
 - [[wiki/hydration-ui\|hydration-ui]] — Top-level entry: Yarn + Turbo monorepo, `apps/main` + 7 packages
 - [[wiki/hydration-ui-main-app\|hydration-ui-main-app]] — `apps/main` — App.tsx, routing, providers, Zustand stores, modules, workers
-- [[wiki/hydration-ui-api\|hydration-ui-api]] — `apps/main/src/api` — React Query domain hooks (30+ domains, incl. new `multisig`)
-- [[wiki/hydration-ui-modules\|hydration-ui-modules]] — Product modules: trade, liquidity, borrow, xcm, wallet, staking, stats, transactions, submit-transaction, layout
-- [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] — Transaction signing / review / status flow (incl. `ReviewMultisig`)
-- [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]] — `packages/web3-connect` wallet abstraction (PJS, WalletConnect, EVM, Solana)
-- [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] — `packages/ui` — Radix + Emotion + style-dictionary tokens, Storybook
-- [[wiki/hydration-ui-money-market\|hydration-ui-money-market]] — `packages/money-market` — Aave v3 UI hooks for [[wiki/hydration-borrow\|hydration-borrow]]
-- [[wiki/hydration-ui-indexer\|hydration-ui-indexer]] — `packages/indexer` — three GraphQL clients: indexer, squid, snowbridge
-- [[wiki/hydration-ui-utils\|hydration-ui-utils]] — `packages/utils` — shared helpers
-- [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]] — Cross-cutting: React 19, Tanstack Router/Query, Emotion, viem, papi 1.23.3, full integration picture
+- [[wiki/hydration-ui-api\|hydration-ui-api]] — `apps/main/src/api` — React Query domain hooks (30+ domains, incl. `multisig`, `gigaStake`, `gigaApr`, `grafana`, NTT + cross-chain circuit-breaker limits)
+- [[wiki/hydration-ui-modules\|hydration-ui-modules]] — 13 product modules: trade (incl. `TradeOrdersHistory`), liquidity, borrow, xcm, wallet, staking (`/staking` now [[wiki/gigahdx\|gigahdx]]; legacy at `/staking-old`), strategies (BIL RWA vault, Hollar bonds), onramp (CEX + bank wizard), governance (stub), stats, transactions, submit-transaction, layout
+- [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] — Transaction signing / review / status flow (incl. `ReviewMultisig`, `ReviewMultiTransaction`, JSON-view inspector)
+- [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]] — `packages/web3-connect` wallet abstraction (PJS, WalletConnect, EVM permit, Solana, Near, Zcash) + persisted address book / contacts
+- [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] — `packages/ui` — Radix + Emotion + style-dictionary tokens, Storybook 10.3; `BannerTop`, `TradingViewChart`, `CBreaker*` limit components
+- [[wiki/hydration-ui-money-market\|hydration-ui-money-market]] — `packages/money-market` — Aave v3 UI hooks for [[wiki/hydration-borrow\|hydration-borrow]]; three markets `CustomMarket.{hydration_v3, gigahdx_v3, bil_v3}`, `MoneyMarketProvider` now takes `market` not `env` (breaking)
+- [[wiki/hydration-ui-indexer\|hydration-ui-indexer]] — `packages/indexer` — three GraphQL clients: indexer, squid, multix (snowbridge client deleted); farms queries; charts migrating squid → Grafana SQL (`api/grafana/`)
+- [[wiki/hydration-ui-utils\|hydration-ui-utils]] — `packages/utils` — shared helpers including `basejumpscan`
+- [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]] — Cross-cutting: React 19, Tanstack Router/Query, Emotion, viem, papi `^2.1.7`, Vite 8 (Rolldown) + MDX, zod 4, no wagmi; full integration picture
 
 ### Ecosystem
 - [[wiki/polkadot\|polkadot]] — Relay chain providing shared security
@@ -149,9 +163,10 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/protocol-owned-liquidity\|protocol-owned-liquidity]] — POL as liquidity floor and IL mitigation
 
 ### Governance & Tokenomics
-- [[wiki/opengov\|opengov]] — On-chain governance framework (referenda, token listings, parameter changes)
-- [[wiki/bonding-curve\|bonding-curve]] — HDX staking reward distribution model
-- [[wiki/referrals\|referrals]] — Fee-sharing referral system
+- [[wiki/opengov\|opengov]] — On-chain governance framework (referenda, token listings, parameter changes); referendum completion drives [[wiki/pallet-gigahdx-rewards\|pallet-gigahdx-rewards]] payouts
+- [[wiki/bonding-curve\|bonding-curve]] — HDX staking reward distribution model (legacy [[wiki/pallet-staking\|pallet-staking]] path)
+- [[wiki/gigahdx\|gigahdx]] — Liquid staking as the current HDX governance-and-yield primitive (conviction-weighted rewards, 28-day cooldown)
+- [[wiki/referrals\|referrals]] — Fee-sharing referral system (5% slice, now routed by [[wiki/pallet-fee-processor\|pallet-fee-processor]])
 
 ### Trading Tools & Routing
 - [[wiki/smart-order-router\|smart-order-router]] — BFS-based multi-hop trade routing across all pool types
@@ -164,9 +179,15 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 
 ### Cross-Chain
 - [[wiki/xcm\|xcm]] — Polkadot's native cross-chain messaging
-- [[wiki/snowbridge\|snowbridge]] — Trustless Polkadot↔Ethereum bridge
-- [[wiki/wormhole\|wormhole]] — Multi-chain bridge for broader connectivity
+- [[wiki/snowbridge\|snowbridge]] — Trustless Polkadot↔Ethereum bridge; V1 and V2 ship side by side (`Tag.SnowbridgeV1` = legacy cheaper route)
+- [[wiki/wormhole\|wormhole]] — NTT bridge: direct Hydration ↔ Ethereum / Base / Solana / Sui, Hydration is Wormhole chain id 73 (MRL retired, Moonbeam removed)
+- [[wiki/xc-swap\|xc-swap]] — NEAR Intent Routing swaps (IntentEmitter + 1Click), outside the XCM/bridge transfer stack
 - [[wiki/pallet-frontier\|pallet-frontier]] — EVM compatibility layer (MetaMask, Solidity tooling)
+
+## Runbooks
+
+- [[wiki/runbook-run-collator\|runbook-run-collator]] — Run a Hydration collator: machine specs, runtime gate (`MaxCandidates = 0`, Invulnerables via `GeneralAdmin`), session keys, rewards (455 HDX/session), onboarding sequence
+- [[wiki/runbook-request-judgement\|runbook-request-judgement]] — Request an identity judgement: `pallet_identity` `setIdentity` → `requestJudgement(reg_index, max_fee)` flow, 2 mainnet registrars (HydraSik=0, stakenode=1), NOT a Technical Committee action, registrars managed by Root/GeneralAdmin
 
 ## Analyses
 

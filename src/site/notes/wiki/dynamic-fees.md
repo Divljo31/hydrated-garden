@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/dynamic-fees/","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"source_count":2,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/dynamic-fees/","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Dynamic Fees","tags":["fees","economics","security","omnipool"],"source_count":2,"last_updated":"2026-08-15"}}
 ---
 
 
@@ -10,10 +10,16 @@
 ## Trading Fees
 
 Two components per trade:
-- **Asset fee (`fA`)** — charged in the output asset, stays in the pool as LP rewards
-- **Protocol fee (`fP`)** — charged in [[wiki/lrna\|lrna]], used for [[wiki/hdx\|hdx]] buybacks distributed to stakers
+- **Asset fee (`fA`)** — charged in the output asset; the remainder after distribution stays in the pool as LP rewards
+- **Protocol fee (`fP`)** — charged in [[wiki/lrna\|lrna]]; intended for [[wiki/hdx\|hdx]] buybacks for stakers, but at HEAD `consume_protocol_fee` simply transfers it to the treasury (`ProtocolFeeRecipient`, TODO in `runtime/adapters/src/lib.rs`)
 
 Both adjust based on current market volatility: higher volatility → higher fees. This accelerates [[wiki/lrna\|lrna]] imbalance recovery during volatile periods.
+
+### Asset-fee distribution (Aug 2026)
+
+`OmnipoolHookAdapter::on_trade_fee` no longer chains referrals → staking; it calls `pallet_fee_processor::process_trade_fee` only. The runtime splits **50% of every non-LRNA asset fee out of the pool**: gigahdx 15% + gigahdx-rewards 25% + staking 5% + referrals 5% ([[wiki/pallet-fee-processor\|pallet-fee-processor]], [[wiki/gigahdx\|gigahdx]], [[wiki/referrals\|referrals]]). Non-HDX slices are converted to HDX on `on_idle`.
+
+There is also a **slip fee** component on the [[omnipool\|omnipool]]; `max_slip_fee` is now honoured on the buy side as well as the sell side.
 
 ## Dynamic Withdrawal Fee
 

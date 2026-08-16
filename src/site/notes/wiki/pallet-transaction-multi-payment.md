@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-transaction-multi-payment/","title":"pallet-transaction-multi-payment","tags":["fees","payment","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-transaction-multi-payment","repo":"hydration-node","paths":["pallets/transaction-multi-payment/src/lib.rs","pallets/transaction-multi-payment/src/types.rs","pallets/transaction-multi-payment/src/traits.rs"],"symbols":["Pallet","Config","AcceptedCurrencies","AccountCurrencyMap","TransferFees","set_currency","add_currency","remove_currency","dispatch_permit","CurrencyBalanceCheck"],"traits_impl":["OnChargeTransaction","PaymentSwapResult"],"depends_on":["pallet-transaction-payment","pallet-route-executor"],"runtime_index":9,"tags":["fees","payment","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-transaction-multi-payment/","title":"pallet-transaction-multi-payment","tags":["fees","payment","evm","paymaster","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-transaction-multi-payment","repo":"hydration-node","paths":["pallets/transaction-multi-payment/src/lib.rs","pallets/transaction-multi-payment/src/traits.rs","pallets/transaction-multi-payment/src/weights.rs"],"symbols":["Pallet","Config","AcceptedCurrencies","AccountCurrencyMap","TransferFees","set_currency","add_currency","remove_currency","dispatch_permit","do_dispatch_permit_unsigned","do_dispatch_permit_signed","restore_fee_payer","EvmFeePayer","EvmFeePayerSupport","FeeSponsored","TransactionCurrencyOverride","AcceptedCurrencyPrice","AddTxAssetOnAccount","RemoveTxAssetOnKilled"],"traits_impl":["OnChargeTransaction","PaymentSwapResult"],"depends_on":["pallet-transaction-payment","pallet-route-executor","pallet-evm-accounts"],"runtime_index":9,"tags":["fees","payment","evm","paymaster","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -30,6 +30,10 @@ pub trait Config: frame_system::Config + pallet_transaction_payment::Config {
     type EvmAssetId: Get<AssetId>;
     type InspectEvmAccounts: InspectEvmAccounts<Self::AccountId>;
     type EvmPermit: EvmPermitHandler<Self>;
+    type TryCallCurrency<'a>: TryConvert<&'a RuntimeCall, AssetIdOf<Self>>;
+    /// EVM fee-payer override; used by the signed branch of `dispatch_permit`
+    /// to charge the paymaster instead of `permit.from`.
+    type EvmFeePayer: EvmFeePayerSupport<AccountId = Self::AccountId>;
 }
 ```
 
@@ -44,7 +48,7 @@ pub trait Config: frame_system::Config + pallet_transaction_payment::Config {
 
 ## Events
 
-`CurrencySet`, `CurrencyAdded`, `CurrencyRemoved`, `FeeWithdrawn`.
+`CurrencySet`, `CurrencyAdded`, `CurrencyRemoved`, `FeeWithdrawn`, `FeeSponsored { from: H160, fee_payer: AccountId }`.
 
 ## Errors
 
@@ -58,7 +62,35 @@ pub trait Config: frame_system::Config + pallet_transaction_payment::Config {
 | `add_currency` | Governance adds an accepted fee currency with fallback price |
 | `remove_currency` | Governance removes an accepted fee currency |
 | `reset_payment_currency` | Resets account's fee currency to native (HDX) |
-| `dispatch_permit` | Dispatches an EVM permit transaction (consumed by EVM call-permit precompile) |
+| `dispatch_permit` | Dispatches a pre-signed EVM permit. **Dual-origin** since the paymaster change — see below. Root is rejected. |
+
+### `dispatch_permit` — unsigned vs signed (paymaster) branches
+
+`dispatch_permit` now branches on the origin instead of requiring `ensure_none`:
+
+| Branch | Origin | Who pays | Failure handling |
+|---|---|---|---|
+| `do_dispatch_permit_unsigned` | none | `permit.from`, via `withdraw_fee` in its chosen currency | Invalid permit → `on_dispatch_permit_error()` (auto-pause) and `Ok(default)`; runner error → `on_dispatch_permit_error()` |
+| `do_dispatch_permit_signed` | signed (paymaster) | the **signer** pays both the Substrate extrinsic fee and the EVM gas | Invalid permit → `Err`; runner error → `Err` (`Pays::Yes`, so the paymaster still pays the extrinsic fee); revert → `Ok(post_info)` |
+
+```rust
+// pallets/transaction-multi-payment/src/lib.rs
+pub(crate) fn do_dispatch_permit_signed(signer, from, to, value, data, gas_limit, deadline, v, r, s)
+    -> DispatchResultWithPostInfo
+{
+    let previous_fee_payer = T::EvmFeePayer::set_fee_payer(signer.clone());
+    if let Err(e) = T::EvmPermit::validate_permit(from, to, data.clone(), value, gas_limit, deadline, v, r, s) {
+        Self::restore_fee_payer(previous_fee_payer);
+        return Err(e.into());
+    }
+    let (gas_price, _) = T::EvmPermit::gas_price();
+    let result = T::EvmPermit::dispatch_permit(from, to, data, value, gas_limit, gas_price, None, None, vec![]);
+    // Restore AFTER the dispatch so the runner's post-execution refund
+    // (`correct_and_deposit_fee`) also routes to the paymaster.
+    Self::restore_fee_payer(previous_fee_payer);
+    // ... FeeSponsored event on success
+}
+```
 
 ## Hooks
 
@@ -96,6 +128,10 @@ impl<T: Config> OnChargeTransaction<T> for Pallet<T> {
 - Per-user currency preference persists across sessions (stored in `AccountCurrencyMap`).
 - Fee swap uses the router's default route (cached in `pallet-route-executor`'s `Routes` storage).
 - `dispatch_permit` bridges EVM EIP-2612 permits into Substrate dispatch for gasless-style UX.
+- **Never call `on_dispatch_permit_error()` on the signed branch.** The unsigned branch auto-pauses `dispatch_permit` on a bad permit because there is no cost to the submitter; on the signed branch the paymaster's per-attempt extrinsic fee is what replaces that defence.
+- Signed-branch **revert** returns `Ok(e.post_info)`, not `Err`. The EVM already consumed the nonce and charged gas — returning `Err` would roll the nonce back and make the permit replayable.
+- The fee-payer override is restored *after* `dispatch_permit` so the runner's post-execution refund (`correct_and_deposit_fee`) also routes to the paymaster; `restore_fee_payer` clears the override when there was no previous payer.
+- On the signed branch `permit.from` is touched only by the inner call's effects — it is not charged.
 
 ## Sources
 

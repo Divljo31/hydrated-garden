@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-hsm/","title":"pallet-hsm","tags":["stablecoin","hsm","hollar","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-hsm","repo":"hydration-node","paths":["pallets/hsm/src/lib.rs","pallets/hsm/src/types.rs","pallets/hsm/src/trade_execution.rs","pallets/hsm/src/provider.rs"],"symbols":["Pallet","Config","CollateralInfo","Collaterals","sell","buy","add_collateral_asset","update_collateral_asset","remove_collateral_asset","set_flash_minter","execute_arbitrage","MMOracle"],"traits_impl":["TradeExecution","MMOracle"],"depends_on":["pallet-stableswap","pallet-broadcast","pallet-evm"],"runtime_index":82,"tags":["stablecoin","hsm","hollar","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-hsm/","title":"pallet-hsm","tags":["stablecoin","hsm","hollar","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-hsm","repo":"hydration-node","paths":["pallets/hsm/src/lib.rs","pallets/hsm/src/types.rs","pallets/hsm/src/trade_execution.rs","pallets/hsm/src/traits.rs"],"symbols":["Pallet","Config","CollateralInfo","Collaterals","sell","buy","add_collateral_asset","update_collateral_asset","remove_collateral_asset","set_flash_minter","execute_arbitrage","ArbitrageProfitReceiver","MMOracle"],"traits_impl":["TradeExecution","MMOracle"],"depends_on":["pallet-stableswap","pallet-broadcast","pallet-evm"],"runtime_index":82,"tags":["stablecoin","hsm","hollar","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -31,6 +31,8 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
     type FlashMinter: GetFlashMinterAddress;
     type OraclePriceProvider: PriceOracle<Self::AssetId, Price = EmaPrice>;
     type OraclePeriod: Get<OraclePeriod>;
+    /// Account credited with the collateral profit of `execute_arbitrage`.
+    type ArbitrageProfitReceiver: Get<Self::AccountId>;
     #[pallet::constant] type MaxAllowedCollaterals: Get<u32>;
     type WeightInfo: WeightInfo;
 }
@@ -92,6 +94,7 @@ None.
 - `buyback_fee` + `buy_back_rate` limit how fast protocol reserves can be drawn down.
 - `MMOracle` trait: feeds per-peg price to [[wiki/pallet-stableswap\|pallet-stableswap]] for drifting-peg pools.
 - `max_in_holding` per-collateral prevents over-concentration (governance-tunable).
+- **`ArbitrageExecuted.profit` snapshot ordering was a bug.** `execute_arbitrage` computes `profit = receiver_balance_final - receiver_balance_initial` on `ArbitrageProfitReceiver`'s collateral balance. `receiver_balance_initial` used to be read *after* `T::Evm::call(...)`, i.e. after the flash-loan arbitrage had already credited the receiver, so the reported profit was understated (typically zero) and `NoArbitrageOpportunity` could fire spuriously. It is now read **before** the EVM call. Regression test: `pallets/hsm/src/tests/arb.rs`.
 
 ## Sources
 

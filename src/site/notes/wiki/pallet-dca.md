@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dca/","title":"pallet-dca","tags":["dca","scheduled","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dca","repo":"hydration-node","paths":["pallets/dca/src/lib.rs","pallets/dca/src/types.rs","pallets/dca/src/weights.rs"],"symbols":["Pallet","Config","Schedule","Order","Bond","ScheduleIdsPerBlock","Schedules","RemainingAmounts","RetriesOnError","schedule","terminate","RandomnessProvider"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-broadcast"],"runtime_index":66,"tags":["dca","scheduled","runtime","rust","substrate"],"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dca/","title":"pallet-dca","tags":["dca","scheduled","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dca","repo":"hydration-node","paths":["pallets/dca/src/lib.rs","pallets/dca/src/types.rs","pallets/dca/src/weights.rs"],"symbols":["Pallet","Config","Schedule","Order","ScheduleIdsPerBlock","ScheduleExecutionBlock","ScheduleExtraGas","ScheduleOwnership","Schedules","RemainingAmounts","RetriesOnError","schedule","terminate","RandomnessProvider","NoLongerSupported"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-broadcast"],"runtime_index":66,"tags":["dca","scheduled","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -9,7 +9,9 @@
 
 ## Role
 
-Implements [[wiki/dca\|dca]]. Lets users automate recurring sells/buys (e.g. "sell 10 HDX every hour for 100 hours, fail if price deviates >5% from oracle"). Block space is allocated fairly via per-block slot buckets.
+Implements [[wiki/dca\|dca]]. Lets users automate recurring sells (e.g. "sell 10 HDX every hour for 100 hours, fail if price deviates >5% from oracle"). Block space is allocated fairly via per-block slot buckets.
+
+> **`Order::Buy` schedules can no longer be created.** `schedule` rejects them with `Error::NoLongerSupported`. Buy schedules already in storage keep executing until they complete or are terminated, so the whole buy execution path in `on_initialize` is still live code.
 
 ## Config trait (excerpt)
 
@@ -51,8 +53,11 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
 | `RemainingAmounts` | StorageMap | `ScheduleId → Balance` |
 | `RetriesOnError` | StorageMap | `ScheduleId → u8` |
 | `ScheduleIdsPerBlock` | StorageMap | `BlockNumber → BoundedVec<ScheduleId, MaxSchedulePerBlock>` |
-| `Bonds` | StorageMap | `ScheduleId → Bond<Balance>` |
+| `ScheduleExecutionBlock` | StorageMap | `ScheduleId → BlockNumber` |
+| `ScheduleExtraGas` | StorageMap | `ScheduleId → u64` |
 | `ScheduleIdSequencer` | StorageValue | `ScheduleId` |
+
+There is no `Bonds` storage map — the schedule's budget is held via `Currencies::reserve_named(NamedReserveId, ...)` on the owner's account and released with `unreserve_named` on termination/completion.
 
 ## Events
 
@@ -60,7 +65,7 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
 
 ## Errors
 
-`ScheduleNotFound`, `InvalidState`, `NotScheduleOwner`, `BlockNumberIsNotInFuture`, `PriceUnstable`, `InvalidPeriod`, `SlippageLimitReached`, `BudgetTooLow`, `NoFreeBlockFound`, `MinTradeAmountNotReached`, `NoParentHashFound`, `CalculatingPriceError`, `TotalAmountIsSmallerThanMinBudget`, `MaxNumberOfRetriesReached`, `NoFreeExecutionSlotsAvailable`.
+`ScheduleNotFound`, `InvalidState`, `NotScheduleOwner`, `BlockNumberIsNotInFuture`, `PriceUnstable`, `InvalidPeriod`, `SlippageLimitReached`, `BudgetTooLow`, `NoFreeBlockFound`, `MinTradeAmountNotReached`, `NoParentHashFound`, `CalculatingPriceError`, `TotalAmountIsSmallerThanMinBudget`, `MaxNumberOfRetriesReached`, `NoFreeExecutionSlotsAvailable`, `HasActiveSchedules`, `NoReservesLocked`, `NoLongerSupported` (buy orders can no longer be scheduled).
 
 ## Extrinsics
 
@@ -89,6 +94,11 @@ pub fn schedule(
     start_execution_block: Option<BlockNumberFor<T>>,
 ) -> DispatchResult {
     let who = ensure_signed(origin)?;
+    ensure!(who == schedule.owner, Error::<T>::Forbidden);
+    // Buy execution stays live for schedules stored before this restriction, so the
+    // benchmarks that measure it still need to create one.
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    ensure!(matches!(schedule.order, Order::Sell { .. }), Error::<T>::NoLongerSupported);
     ensure!(schedule.total_amount >= T::MinBudgetInNativeCurrency::get(), Error::<T>::BudgetTooLow);
     ensure!(schedule.period >= T::MinimalPeriod::get(), Error::<T>::InvalidPeriod);
     let id = Self::next_schedule_id()?;
@@ -106,6 +116,9 @@ pub fn schedule(
 - Price-stability check: if spot deviates > `stability_threshold` from oracle, trade skips without consuming retry budget.
 - Slippage check: actual execution against user's `min_out` / `max_in` is still enforced by route-executor.
 - After `MaxNumberOfRetriesOnError` retries, schedule auto-terminates and remaining bond is slashed to the fee receiver.
+- `schedule`'s weight annotation no longer adds `AmmTradeWeights::calculate_buy_trade_amounts_weight(...)` — it is plain `WeightInfo::schedule()` now that only sell orders can be created.
+- **Retriable errors are a runtime-level list**, not pallet state: `RetryOnErrorForDca` in `runtime/hydradx/src/assets.rs`. It gained `pallet_route_executor::Error::TradingLimitReached` — erc20/aToken rounding can undershoot the dry-run output that DCA passes as the router's min limit, and that is the same class as DCA's own retriable `TradeLimitReached`. Existing members: omnipool `InsufficientBalance`, `pallet_dispatcher::EvmOutOfGas`, circuit-breaker `DepositLimitExceededForWhitelistedAccount`.
+- `pallets/dca/src/tests/storage_injection_fidelity.rs` is the reference for how test fixtures inject schedule storage — check it before hand-rolling DCA state in a test.
 
 ## Sources
 

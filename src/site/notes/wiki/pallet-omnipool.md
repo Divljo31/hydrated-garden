@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-omnipool/","title":"pallet-omnipool","tags":["amm","omnipool","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-omnipool","repo":"hydration-node","paths":["pallets/omnipool/src/lib.rs","pallets/omnipool/src/types.rs","pallets/omnipool/src/traits.rs","pallets/omnipool/src/router_execution.rs","pallets/omnipool/src/weights.rs"],"symbols":["Pallet","Config","AssetState","Position","Tradability","sell","buy","add_liquidity","remove_liquidity","add_token","set_asset_tradable_state","sacrifice_position","withdraw_protocol_liquidity","HubAssetId","HdxAssetId","Assets","Positions"],"traits_impl":["AMM","AssetPairSpotPrice","TradeExecution","RouteProvider"],"depends_on":["pallet-broadcast","pallet-nft","pallet-ema-oracle","pallet-circuit-breaker","pallet-asset-registry","pallet-dynamic-fees"],"runtime_index":59,"tags":["amm","omnipool","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-omnipool/","title":"pallet-omnipool","tags":["amm","omnipool","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-omnipool","repo":"hydration-node","paths":["pallets/omnipool/src/lib.rs","pallets/omnipool/src/types.rs","pallets/omnipool/src/traits.rs","pallets/omnipool/src/router_execution.rs","pallets/omnipool/src/weights.rs"],"symbols":["Pallet","Config","AssetState","Position","Tradability","SlipFeeConfig","sell","buy","add_liquidity","add_liquidity_with_limit","add_all_liquidity","remove_liquidity","remove_liquidity_with_limit","remove_all_liquidity","add_token","set_asset_tradable_state","sacrifice_position","withdraw_protocol_liquidity","refund_refused_asset","HubAssetId","HdxAssetId","BurnProtocolFee","NFTCollectionId","Assets","Positions","SlipFee","SlipFeeHubReserveAtBlockStart","SlipFeeDelta","HubAssetTradability"],"traits_impl":["AMM","AssetPairSpotPrice","TradeExecution","RouteProvider"],"depends_on":["pallet-broadcast","pallet-nft","pallet-ema-oracle","pallet-circuit-breaker","pallet-asset-registry","pallet-dynamic-fees"],"runtime_index":59,"tags":["amm","omnipool","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
 ---
 
 
@@ -34,6 +34,10 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
     type OmnipoolHooks: OmnipoolHooks<...>;
     type PriceBarrier: ShouldAllow<Self::AccountId, Self::AssetId, EmaPrice>;
     type ExternalPriceOracle: ExternalPriceProvider<Self::AssetId, EmaPrice>;
+    type CollectionId: TypeInfo + MaxEncodedLen;
+    #[pallet::constant] type NFTCollectionId: Get<NFTCollectionIdOf<Self>>;
+    /// Fraction of every charged protocol fee that is burned.
+    #[pallet::constant] type BurnProtocolFee: Get<Permill>;
 }
 ```
 
@@ -79,6 +83,8 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
 
 Dispatches `OmnipoolHooks::on_liquidity_changed`, `on_trade`, `on_trade_fee` on every liquidity / trade action. No lifecycle hooks (`on_initialize`, etc.) beyond standard pallet machinery.
 
+`Pallet::process_trade_fee` (`pallets/omnipool/src/lib.rs`, called from `sell`/`buy` and both router-execution paths) calls `on_trade_fee` and enforces that no more than the fee amount leaves the pool. The runtime's `OmnipoolHookAdapter::on_trade_fee` (`runtime/adapters/src/lib.rs`) now delegates the whole split to **[[wiki/pallet-fee-processor\|pallet-fee-processor]]** — the old inline "referrals then staking" chain is gone. LRNA fees short-circuit before the call.
+
 ## Integration
 
 - **Traits implemented:** partial `AMM`, `AssetPairSpotPrice`, `TradeExecution` (consumed by route-executor), `RouteProvider` via storage
@@ -117,7 +123,11 @@ pub fn sell(
 - NFT position captures the exact price at provision; [[wiki/impermanent-loss\|impermanent-loss]] is calculated against that snapshot.
 - Withdrawal fee is dynamic, derived from oracle; can differ significantly from spot due to [[wiki/price-barrier\|price-barrier]].
 - `SlipFee` storage cleared per-block, lazily populated on first trade, tracks net hub-reserve delta.
+- **`max_slip_fee` is now honoured on the `buy` side too.** The buy-path inversions in `math/src/omnipool/slip_fee.rs` (`invert_buy_side_slip`, `invert_sell_side_fees`) previously solved only the *uncapped* quadratic, so a large `buy` could be charged slip above `SlipFeeConfig::max_slip_fee` (`sell` already capped correctly via `calculate_slip_fee_amount`). Both now take `max_slip_fee`, try the uncapped root, and fall through to the closed-form capped inverse (`D_gross = D_net·10⁶/(10⁶ − max_parts)`; `u = D_gross·10⁶/(10⁶ − pf_parts − max_parts)`) when the cap binds or when the uncapped inverse has no real root. Tests: `pallets/omnipool/src/tests/slip_fee.rs`, `math/src/omnipool/tests.rs`.
+- `max_slip_fee` is validated at `set_slip_fee` time to be `<= 90%` (`pallets/omnipool/src/lib.rs`), which keeps the capped-inverse denominators non-zero.
+- Asset fee no longer stays entirely with LPs: the runtime routes 50% of it out of the pool through [[wiki/pallet-fee-processor\|pallet-fee-processor]] (gigahdx 15% + gigahdx-rewards 25% + staking 5% + referrals 5%).
 - `sacrifice_position` → `withdraw_protocol_liquidity` flow is the [[wiki/protocol-owned-liquidity\|protocol-owned-liquidity]] mechanism.
+- `BurnProtocolFee` (Permill) controls how much of every charged protocol fee is burned vs accrued — wired in runtime via `assets.rs` parameter `BurnProtocolFee`.
 
 ## Sources
 

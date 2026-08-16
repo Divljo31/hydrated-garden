@@ -1,129 +1,116 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration-ui/","title":"hydration-ui","tags":["ui","frontend","hydration","react","typescript"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"package","title":"hydration-ui","repo":"hydration-ui","paths":["apps/main/src/App.tsx","packages/ui/src","packages/web3-connect/src","packages/money-market/src","packages/indexer/src","packages/utils/src"],"key_exports":["App","ThemeProvider","Web3ConnectModal","useAccount","useSquidClient"],"tags":["ui","frontend","hydration","react","typescript"],"last_updated":"2026-04-20"}}
+{"dg-publish":true,"permalink":"/wiki/hydration-ui/","title":"hydration-ui","tags":["ui","frontend","hydration","react","typescript","monorepo"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"package","title":"hydration-ui","repo":"hydration-ui","paths":["apps/main/src/App.tsx","apps/main/src/modules","apps/main/src/api","apps/main/src/states","apps/main/src/providers","packages/ui/src","packages/web3-connect/src","packages/money-market/src","packages/indexer/src","packages/utils/src"],"key_exports":["App","RouterContext","ThemeProvider","MoneyMarketProvider","useAccount","useSquidClient","useIndexerClient","useMultixClient"],"symbols":["DataProviderResolver","AssetRegistryGate","MultisigProvider","rpcProvider","assetsProvider","routeTree"],"tags":["ui","frontend","hydration","react","typescript","monorepo"],"last_updated":"2026-08-15"}}
 ---
 
 
 # hydration-ui
 
-**TL;DR:** The primary frontend monorepo for the Hydration protocol — Yarn workspace with the main app (`apps/main`) and 6 packages implementing the design system, wallet connectors, lending hooks, GraphQL clients, and shared utilities.
+**TL;DR:** The frontend monorepo for the Hydration protocol — one deployable app (`apps/main`) plus 7 workspace packages. As of `b469e8a` (2026-08-12) it ships **13 feature modules**, a **GigaHDX liquid-staking** front page for `/staking`, three money markets, an NTT-based bridge stack, and no Snowbridge.
 
 ## Role
 
-Implements the user-facing interface for all [[wiki/hydration\|hydration]] protocol features: trading ([[omnipool\|omnipool]], [[wiki/stableswap\|stableswap]]), liquidity management ([[wiki/nft-lp-positions\|nft-lp-positions]]), lending ([[wiki/hydration-borrow\|hydration-borrow]]), cross-chain transfers ([[wiki/xc-sdk\|xc-sdk]]), staking, and governance. The main app orchestrates these via [[wiki/papi\|papi]]-based data fetching and [[wiki/sdk-next\|sdk-next]] for transaction construction.
+The user-facing surface for every [[wiki/hydration\|hydration]] product: trading ([[omnipool\|omnipool]], [[wiki/stableswap\|stableswap]], [[wiki/otc-trading\|otc-trading]], [[wiki/dca\|dca]]), liquidity, lending ([[wiki/hydration-borrow\|hydration-borrow]]), [[wiki/gigahdx\|gigahdx]] liquid staking, RWA/bond strategies, cross-chain transfers ([[wiki/xc-sdk\|xc-sdk]]), fiat on/off-ramp, and stats. Chain access is [[wiki/papi\|papi]]; trade construction and pool math come from [[wiki/sdk-next\|sdk-next]]; cross-chain routing from [[wiki/xc-sdk\|xc-sdk]] / [[wiki/xc-package\|xc-package]] / [[wiki/xc-swap\|xc-swap]].
 
-## App entry point: `apps/main/`
-
-Root file: `src/App.tsx`. Sets up:
-- [[wiki/papi\|papi]] RPC provider (via `rpcProvider` context)
-- Tanstack Query client with error boundary
-- Tanstack Router with file-based routes (`src/routes/`)
-- i18next for translations
-- Emotion CSS-in-JS + [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] theme
-- Sonner toast notifications
-- DataProviderResolver (chain selection)
+## App entry point — `apps/main/src/App.tsx`
 
 ```typescript
 // apps/main/src/App.tsx (excerpt)
-export const App = () => {
-  return (
-    <I18nextProvider i18n={i18n}>
-      <QueryClientProvider client={queryClient}>
-        <DataProviderResolver>
-          <ThemeProvider>
-            <TooltipProvider delayDuration={0}>
-              <RouterProvider router={router} />
-              <Toaster />
-            </TooltipProvider>
-          </ThemeProvider>
-        </DataProviderResolver>
-      </QueryClientProvider>
-    </I18nextProvider>
-  )
-}
+export const App = () => (
+  <I18nextProvider i18n={i18n}>
+    <QueryClientProvider client={queryClient}>
+      <DataProviderResolver>
+        <ThemeProvider>
+          <TooltipProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
+      </DataProviderResolver>
+    </QueryClientProvider>
+  </I18nextProvider>
+)
 ```
 
-## Product modules
+- `createRouter({ routeTree, context: { queryClient, i18n }, defaultPreload: "intent", defaultNotFoundComponent: Page404, defaultErrorComponent: RouteError, scrollRestoration: true })`; `RouterContext` is the typed router context interface, and `declare module "@tanstack/react-router"` registers the router type globally.
+- `QueryClient` installs `QueryCache` / `MutationCache` `onError` handlers that `console.error("[RQ]", …)` — there is no global toast on query failure.
+- A `window.addEventListener("vite:preloadError", () => window.location.reload())` guard handles stale chunk hashes after a deploy.
+- `import "@galacticcouncil/ui/fonts.css"` is the first statement — fonts come from the design-system package.
 
-Organized under `src/modules/`:
-- `trade/` — Swap UI (omnipool, stableswap, OTC orders) → links [[omnipool\|omnipool]], [[wiki/smart-order-router\|smart-order-router]]
-- `liquidity/` — LP position management → links [[wiki/nft-lp-positions\|nft-lp-positions]]
-- `borrow/` — Lending UI (Aave v3 protocol) → links [[wiki/hydration-ui-money-market\|hydration-ui-money-market]], [[wiki/pallet-liquidation\|pallet-liquidation]]
-- `xcm/` — Cross-chain transfer UI → links [[wiki/xc-sdk\|xc-sdk]], [[wiki/xc-package\|xc-package]]
-- `wallet/` — Asset portfolio + history
-- `staking/` — HDX staking → links [[wiki/pallet-staking\|pallet-staking]]
-- `stats/` — Analytics dashboard
-- `transactions/` — Tx history display
-- `submit-transaction/` — Centralized tx signing modal
-- `layout/` — App shell + navigation
+Deeper walkthrough: [[wiki/hydration-ui-main-app\|hydration-ui-main-app]].
 
-For details on each, see [[wiki/hydration-ui-modules\|hydration-ui-modules]].
+## Product modules — `apps/main/src/modules/` (13)
 
-## Data layer: `src/api/`
+| Module | What it covers |
+|---|---|
+| `trade/` | Swap, limit/DCA orders, `orders/TradeOrdersHistory` (replaced wallet tx history) → [[omnipool\|omnipool]], [[wiki/smart-order-router\|smart-order-router]], [[wiki/dca\|dca]] |
+| `liquidity/` | LP positions, farms → [[wiki/nft-lp-positions\|nft-lp-positions]] |
+| `borrow/` | Aave v3 lending UI → [[wiki/hydration-ui-money-market\|hydration-ui-money-market]], [[wiki/pallet-liquidation\|pallet-liquidation]] |
+| `staking/` | **[[wiki/gigahdx\|gigahdx]] liquid staking** at `/staking`; legacy HDX staking survives at `/staking-old` → [[wiki/pallet-staking\|pallet-staking]], [[wiki/pallet-gigahdx\|pallet-gigahdx]] |
+| `strategies/` | **new** — BIL RWA vault (ERC-4626 + ERC-7540 async redeem) and [[wiki/hollar\|hollar]] stable bonds sold via OTC offers |
+| `onramp/` | **new** — CEX (Kraken, Binance, Kucoin, Coinbase, Gate.io) + bank wizard, routed via the `assethub_cex` chain; served at `/deposit` and `/withdraw` |
+| `governance/` | **new** — stub; nav entry commented out |
+| `xcm/` | Cross-chain transfers, bridge selection (NTT / Snowbridge V1+V2 / Basejump) → [[wiki/xc-sdk\|xc-sdk]], [[wiki/snowbridge\|snowbridge]] |
+| `wallet/` | Portfolio and balances (transaction history removed) |
+| `stats/` | Analytics dashboards |
+| `transactions/` | Tx construction helpers and history display |
+| `submit-transaction/` | Central signing modal → [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] |
+| `layout/` | App shell, navigation, banners |
 
-React Query hooks organized by domain:
-- `aave.ts` — Aave market data (via @aave/contract-helpers)
-- `account.ts` — Account state, balances, nonces
-- `assets.ts` — Asset metadata + registry
-- `borrow/` — Lending market queries
-- `omnipool.ts` — Pool state, asset pricing
-- `stableswap.ts` — Stableswap pool data
-- `spotPrice.ts` — Real-time pricing subscriptions
-- `staking.ts` — Staking rewards, locks
-- `trade.ts` — Trade execution data
-- `xcm.ts` — Cross-chain transfer state
+Per-module detail: [[wiki/hydration-ui-modules\|hydration-ui-modules]].
 
-See [[wiki/hydration-ui-api\|hydration-ui-api]] for the full inventory.
+## Data layer — `apps/main/src/api/`
 
-## State stores: `src/states/`
+React Query hooks by domain. Notable additions this cycle: **`gigaStake.ts`** and **`gigaApr.ts`** ([[wiki/gigahdx\|gigahdx]]) and **`grafana/`** (`fetchGrafana`, `TradeChartApi`, plus `.sql`/`.ts` pairs for `tradeChart`, `dcaAmount`, `reserveRate`) as charts migrate off squid. Existing: `aave` `account` `assets` `balances` `bonds` `borrow/` `chain` `democracy` `dryRun` `evm` `external/` `farms` `locks` `multisig` `omnipool` `otc` `payments` `pools` `provider` `referrals` `rpc` `spotPrice` `stableswap` `staking` `stats` `subscriptions` `trade` `transaction` `xcm` `xyk`. Full inventory: [[wiki/hydration-ui-api\|hydration-ui-api]].
 
-Zustand-based stores (with immer for immutability):
-- `account.ts` — Account address, sign method, permissions
-- `assetRegistry.ts` — Asset metadata cache
-- `displayAsset.ts` — UI-level asset selection
-- `liquidity.ts` — LP position form state
-- `provider.ts` — RPC provider endpoint + chain selection
-- `toasts.ts` — Toast notification queue
-- `tradeSettings.ts` — Trade slippage, execution mode
-- `transactions.ts` — Pending/confirmed tx queue
+## State — `apps/main/src/states/` (Zustand + Immer)
 
-## Providers: `src/providers/`
+`account` `assetRegistry` `banners` `displayAsset` `externalApy` `liquidity` `multisigWatch` `provider` `swapForm` `toasts` `tradeSettings` `transactions`.
 
-Context providers wrapping SDK/papi integration:
-- `rpcProvider.tsx` — [[wiki/papi\|papi]] RPC client initialization; exposes `useRpcProvider()` hook
-- `assetsProvider.tsx` — Asset registry fetching + caching
+## Providers — `apps/main/src/providers/`
 
-## Cross-chain: [[wiki/xc-sdk\|xc-sdk]] integration
+`rpcProvider.tsx` ([[wiki/papi\|papi]] client + `useRpcProvider()`), `assetsProvider.tsx`, `AssetRegistryGate.tsx` (blocks render until the registry resolves), `MultisigProvider.tsx` (multix-backed multisig context — the multix GraphQL client itself now lives in [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]]).
 
-[[wiki/hydration-ui\|hydration-ui]] consumes [[wiki/xc-sdk\|xc-sdk]] and [[wiki/xc-package\|xc-package]] for the `xcm/` module. Chain selection, balance transfers, and XCMP message handling are orchestrated here.
+## Packages
 
-## Tech stack highlights
+| Package | Page |
+|---|---|
+| `packages/ui/` — design system, 76 components, Storybook 10 | [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] |
+| `packages/web3-connect/` — wallets (Substrate, EVM, Solana, Sui, Near, Zcash) + address book | [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]] |
+| `packages/money-market/` — Aave v3 for `hydration_v3`, `gigahdx_v3`, `bil_v3` | [[wiki/hydration-ui-money-market\|hydration-ui-money-market]] |
+| `packages/indexer/` — three GraphQL clients | [[wiki/hydration-ui-indexer\|hydration-ui-indexer]] |
+| `packages/utils/` — address guards, Neckwork explorer links, formatting | [[wiki/hydration-ui-utils\|hydration-ui-utils]] |
+| `packages/eslint-config/`, `packages/typescript-config/` | [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]] |
 
-- React 19, Tanstack Router (file-based routing), Tanstack Query (data fetching)
-- Emotion + [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] (Radix-based component library)
-- i18next (i18n)
-- Zustand (state)
-- viem + ethers (EVM integration for [[wiki/hydration-ui-money-market\|hydration-ui-money-market]])
-- [[wiki/papi\|papi]] 1.23.3 (pinned) for runtime type-safety
-- comlink (Web Workers for async tasks)
+### Build order
 
-## Monorepo structure
+```
+Level 0:  utils, indexer, eslint-config, typescript-config
+Level 1:  ui           → utils
+Level 2:  web3-connect → ui, utils, indexer
+Level 3:  money-market → ui, utils, web3-connect
+Level 4:  apps/main    → ui, utils, web3-connect, money-market, indexer
+```
 
-- **apps/main/** — The web app
-- **packages/ui/** — Design system (see [[wiki/hydration-ui-design-system\|hydration-ui-design-system]])
-- **packages/web3-connect/** — Wallet abstraction (see [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]])
-- **packages/money-market/** — Aave hooks (see [[wiki/hydration-ui-money-market\|hydration-ui-money-market]])
-- **packages/indexer/** — GraphQL clients (see [[wiki/hydration-ui-indexer\|hydration-ui-indexer]])
-- **packages/utils/** — Utilities (see [[wiki/hydration-ui-utils\|hydration-ui-utils]])
-- **packages/eslint-config, typescript-config/** — Workspace config
+Packages ship **source TypeScript**, not `dist/` — every consumer re-bundles through Vite/Rolldown.
+
+## Stack in one line
+
+React 19.2 + Vite 8 (Rolldown) + TanStack Router/Query + Emotion on a Theme-UI theme + Zustand; papi resolved to 2.1.7, `sdk-next` 1.6.0, `descriptors` 2.6.0, `xc-*` 2.3.0; viem 2.48 + ethers 5.7 (Aave only) + Reown AppKit for EVM. No test runner, **no wagmi**. Version matrix and build-pipeline detail: [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]].
+
+## Gotchas
+
+- The repo's own `CLAUDE.md` / `README.md` are stale on toolchain facts (Vite 7, `vite-tsconfig-paths`, Node 22.13, CI Node 20) — [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]] is the corrected version.
+- `MoneyMarketProvider` changed shape (`market: CustomMarket`, not `env: MoneyMarketEnv`) — any older snippet will not compile.
+- Money-market APY fields are `number | null` now; unguarded arithmetic on them is a live runtime hazard ([[wiki/hydration-ui-money-market\|hydration-ui-money-market]]).
+- `@galacticcouncil/ui` has **directory-level** exports only — `@galacticcouncil/ui/components`, never `@galacticcouncil/ui/button`.
 
 ## For developers
 
-To understand a specific flow (trade, lend, stake, cross-chain):
-1. Start with [[wiki/hydration-ui-modules\|hydration-ui-modules]]
-2. Drill into the module's API hooks in [[wiki/hydration-ui-api\|hydration-ui-api]]
-3. Check the state stores in `src/states/`
-4. Review [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] for tx signing
-5. Cross-reference [[wiki/papi\|papi]] + [[wiki/sdk-next\|sdk-next]] docs for chain-level details
+1. [[wiki/hydration-ui-modules\|hydration-ui-modules]] — find the feature
+2. [[wiki/hydration-ui-api\|hydration-ui-api]] — its data hooks
+3. `src/states/` — its client state
+4. [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] — how it signs and submits
+5. [[wiki/papi\|papi]] / [[wiki/sdk-next\|sdk-next]] / [[wiki/xc-sdk\|xc-sdk]] — chain-level semantics
 
 ## Sources
 

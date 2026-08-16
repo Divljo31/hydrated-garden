@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hollar/","title":"HOLLAR","tags":["stablecoin","defi","lending","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"HOLLAR","tags":["stablecoin","defi","lending","core-product"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/hollar/","title":"HOLLAR","tags":["stablecoin","defi","lending","core-product"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"HOLLAR","tags":["stablecoin","defi","lending","core-product"],"source_count":1,"last_updated":"2026-08-15"}}
 ---
 
 
@@ -31,6 +31,16 @@ Partial automated liquidations occur at the start of each block — restoring he
 
 HOLLAR integrates with all three pillars of the [[wiki/hydration\|hydration]] protocol: trading (four dedicated [[wiki/stableswap\|stableswap]] pools outside the [[omnipool\|omnipool]]), lending, and staking. It introduces a new smart contract attack surface (HSM, liquidation engine) that extends [[wiki/hydration\|hydration]]'s security considerations.
 
+## Stable bonds and strategies (Aug 2026)
+
+The UI's new `strategies/` module ([[wiki/hydration-ui-modules\|hydration-ui-modules]]) added two HOLLAR products:
+
+- **Hollar stable bonds** — fixed-yield bonds are **sold via [[wiki/otc-trading\|OTC]] offers, not minted by a bond pallet**: `strategies/stable-bonds/config/bonds.ts` pins `HOLLAR_BOND_25_08_26_ID` to `otcOfferIds: ["1488", "1489"]`, accepting USDT / USDC, fixed yield 1.725%. Buying is `pallet-otc` `fill_order` against those offers; holdings surface in the wallet's `MyBonds`.
+- **BIL vault** — the RWA strategy supplies BIL as collateral and **borrows HOLLAR** against it, with instant redeem through a BIL/HOLLAR [[wiki/stableswap\|stableswap]] pool (id `10055`).
+
+[[wiki/pallet-hsm\|pallet-hsm]] itself is unchanged this cycle apart from an arbitrage balance-snapshot ordering fix.
+
 ## Sources
 
 - [[wiki/source-hydration-general-context\|source-hydration-general-context]]
+- [[wiki/source-hydration-ui-codebase\|source-hydration-ui-codebase]]
