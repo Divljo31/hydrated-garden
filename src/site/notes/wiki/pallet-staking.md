@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-staking/","title":"pallet-staking","tags":["staking","governance","gigahdx","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-staking","repo":"hydration-node","paths":["pallets/staking/src/lib.rs","pallets/staking/src/types.rs","pallets/staking/src/integrations.rs","pallets/staking/src/integrations/conviction_voting.rs","pallets/staking/src/integrations/democracy_legacy.rs","pallets/staking/src/traits.rs"],"symbols":["Pallet","Config","Position","Staking","Vote","ConvictionVote","initialize_staking","stake","increase_stake","claim","unstake","force_unstake","process_votes","pot_account_id","get_user_position_id","Positions","Votes","VotesRewarded","PositionVotes","ProcessedVotes","SixSecBlocksSince","ExternalClaims","StakingConvictionVoting"],"traits_impl":["DemocracyHooks","VotingHooks","PayablePercentage"],"depends_on":["pallet-democracy","pallet-nft","pallet-referenda","pallet-conviction-voting","pallet-gigahdx"],"runtime_index":69,"tags":["staking","governance","gigahdx","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-staking/","title":"pallet-staking","tags":["staking","governance","gigahdx","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-staking","repo":"hydration-node","paths":["pallets/staking/src/lib.rs","pallets/staking/src/types.rs","pallets/staking/src/integrations.rs","pallets/staking/src/integrations/conviction_voting.rs","pallets/staking/src/traits.rs"],"symbols":["Pallet","Config","Position","Staking","Vote","ConvictionVote","initialize_staking","stake","increase_stake","claim","unstake","force_unstake","process_votes","pot_account_id","get_user_position_id","Positions","Votes","VotesRewarded","SixSecBlocksSince","TwoSecBlocksSince","ExternalClaims","StakingConvictionVoting"],"traits_impl":["VotingHooks","PayablePercentage"],"depends_on":["pallet-nft","pallet-parameters","pallet-referenda","pallet-conviction-voting","pallet-gigahdx"],"runtime_index":69,"tags":["staking","governance","gigahdx","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -57,9 +57,9 @@ pub trait Config: frame_system::Config {
 | `NextPositionId` | StorageValue | `PositionItemId` |
 | `Votes` | StorageMap | `PositionItemId → Voting<MaxVotes>` — conviction-voting votes (getter `get_position_votes`) |
 | `VotesRewarded` | StorageDoubleMap | `(AccountId, ReferendumIndex) → Vote` — processed votes, drives the lock-on-losing-vote decision (getter `processed_votes`) |
-| `PositionVotes` | StorageMap | **Legacy** — democracy-era votes, kept until `pallet-democracy` is removed |
-| `ProcessedVotes` | StorageDoubleMap | **Legacy** — democracy-era processed votes |
-| `SixSecBlocksSince` | StorageValue | `BlockNumber` at which the chain moved to 6 s blocks (time-point math) |
+| `SixSecBlocksSince` | StorageValue | `BlockNumber` at which the chain moved 12 s → 6 s blocks (period math) |
+
+Config `TwoSecBlocksSince: Get<BlockNumber>` — the 6 s → 2 s switch block, read from [[wiki/pallet-parameters\|pallet-parameters]] `TwoSecBlocksSince` (runtime). `get_period_number` feeds both into `math::calculate_period_number`, so periods stay wall-clock-consistent across both block-time changes.
 
 ## Events
 
@@ -131,14 +131,13 @@ Wired as `pallet_gigahdx::traits::LegacyStakeMigrator` via `LegacyStakingMigrato
 
 - `VotingHooks` via `StakingConvictionVoting<T>` (`pallets/staking/src/integrations/conviction_voting.rs`). In the runtime this is the *first* half of `CombinedVotingHooks<StakingConvictionVoting<Runtime>, pallet_gigahdx_rewards::voting_hooks::VotingHooksImpl<Runtime>>` (`runtime/hydradx/src/governance/mod.rs`) — both consumers see every vote.
 - `on_before_vote` caps the recorded vote at `min(amount, position.stake, free_balance − vested − accumulated_locked_rewards)` so overlapping locks don't earn points twice.
-- Legacy `DemocracyHooks` retained in `pallets/staking/src/integrations/democracy_legacy.rs`.
 
 ## Integration
 
-- **Traits implemented:** `VotingHooks` (conviction voting), `DemocracyHooks` (legacy, [[wiki/pallet-democracy\|pallet-democracy]])
+- **Traits implemented:** `VotingHooks` (conviction voting)
 - **Traits consumed:** `ReferendumInfo`/`GetReferendumState`, `VestingDetails`, `ExternalClaims`, `NFTHandler`, `SigmoidPercentage`
 - **Called by:** [[wiki/pallet-gigahdx\|pallet-gigahdx]] `migrate()` → `force_unstake`
-- **Pallets depended on:** [[wiki/pallet-democracy\|pallet-democracy]], [[wiki/pallet-nft\|pallet-nft]], `pallet-conviction-voting`, vesting
+- **Pallets depended on:** [[wiki/pallet-nft\|pallet-nft]], `pallet-conviction-voting`, vesting, [[wiki/pallet-parameters\|pallet-parameters]] (`TwoSecBlocksSince`)
 
 ## Reward formula (high-level)
 
@@ -154,7 +153,8 @@ Wired as `pallet_gigahdx::traits::LegacyStakeMigrator` via `LegacyStakingMigrato
 - Action-point system penalizes non-voting stakers — "stake and forget" yields minimal rewards.
 - Unstaking forfeits all unclaimed rewards (have to `claim` first) — but `force_unstake` (migration only) does not.
 - `ActiveVotesOngoing` is dead API surface kept only to preserve error indices; migration refuses with `ExistingVotes` instead.
-- `Votes` / `VotesRewarded` are the live storage items; `PositionVotes` / `ProcessedVotes` are democracy-era leftovers with confusingly similar names.
+- Gov v1 (`pallet-democracy`) was removed in the 2026-10 `govv1_cleanup`; the democracy-era storage (`PositionVotes`, `ProcessedVotes`) and `DemocracyHooks` integration are gone. Only `Votes` / `VotesRewarded` exist.
+- Block time is 2 s (`MILLISECS_PER_BLOCK = 2_000`); `PeriodLength` is in blocks, so any period math must go through `get_period_number`, never raw block deltas.
 - A `ghdxlock` lock blocks `stake` and `increase_stake` — users must fully exit gigahdx (including pending unstake positions) before legacy-staking again.
 - Behavioural coverage: `pallets/staking/src/tests/force_unstake.rs`; end-to-end migration in `integration-tests/src/gigahdx.rs`.
 

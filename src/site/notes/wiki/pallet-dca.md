@@ -1,126 +1,89 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dca/","title":"pallet-dca","tags":["dca","scheduled","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dca","repo":"hydration-node","paths":["pallets/dca/src/lib.rs","pallets/dca/src/types.rs","pallets/dca/src/weights.rs"],"symbols":["Pallet","Config","Schedule","Order","ScheduleIdsPerBlock","ScheduleExecutionBlock","ScheduleExtraGas","ScheduleOwnership","Schedules","RemainingAmounts","RetriesOnError","schedule","terminate","RandomnessProvider","NoLongerSupported"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-broadcast"],"runtime_index":66,"tags":["dca","scheduled","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dca/","title":"pallet-dca","tags":["dca","scheduled","ice","migration","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dca","repo":"hydration-node","paths":["pallets/dca/src/lib.rs","pallets/dca/src/types.rs","pallets/dca/src/weights.rs","runtime/hydradx/src/assets.rs"],"symbols":["Pallet","Config","Schedule","Order","ScheduleIdsPerBlock","ScheduleExecutionBlock","ScheduleExtraGas","ScheduleOwnership","Schedules","RemainingAmounts","RetriesOnError","MigrationEnabled","schedule","terminate","unlock_reserves","set_migration_enabled","force_cancel_schedules","migrate_or_cancel","convert_schedule","cancel_for_migration","CancelReason","IntentMigrator","AccountFeeCurrency","RetryOnErrorForDca","NoLongerSupported","MigrationInProgress"],"traits_impl":[],"depends_on":["pallet-route-executor","pallet-broadcast","pallet-intent","pallet-transaction-multi-payment"],"runtime_index":66,"tags":["dca","scheduled","ice","migration","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
 # pallet-dca
 
-**TL;DR:** Scheduled periodic trades ("dollar-cost averaging") with price-bounds safety. Users lock a bond; on-chain block hook triggers trades through [[wiki/pallet-route-executor\|pallet-route-executor]] at a cadence. Runtime index = 66.
+**TL;DR:** Legacy scheduled periodic trades ("dollar-cost averaging"), executed in `on_initialize` through [[wiki/pallet-route-executor\|pallet-route-executor]]. **Being replaced by DCA intents in [[wiki/pallet-intent\|pallet-intent]] / [[wiki/pallet-ice\|pallet-ice]]**: when governance sets `MigrationEnabled`, each schedule that comes due is converted into an ICE DCA intent (or cancelled and refunded) instead of executing, and new schedules are refused. Only `Order::Sell` can be created. Runtime index = 66.
 
 ## Role
 
-Implements [[wiki/dca\|dca]]. Lets users automate recurring sells (e.g. "sell 10 HDX every hour for 100 hours, fail if price deviates >5% from oracle"). Block space is allocated fairly via per-block slot buckets.
+Implements the classic [[wiki/dca\|dca]] flow: owner reserves a budget, the pallet plans executions at `period` cadence into per-block buckets, and each due schedule trades via the router with oracle-based stability and slippage checks. New DCA work should target ICE DCA intents ([[wiki/pallet-intent\|pallet-intent]]); this pallet is the migration source.
 
-> **`Order::Buy` schedules can no longer be created.** `schedule` rejects them with `Error::NoLongerSupported`. Buy schedules already in storage keep executing until they complete or are terminated, so the whole buy execution path in `on_initialize` is still live code.
-
-## Config trait (excerpt)
+## Config trait (runtime-relevant items)
 
 ```rust
 // pallets/dca/src/lib.rs
-pub trait Config: frame_system::Config + pallet_broadcast::Config {
-    type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-    type RandomnessProvider: RandomProvider;
-    type Currencies: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance>
-        + MultiReservableCurrency<Self::AccountId>;
-    type RelayChainBlockHashProvider: RelayChainBlockHashProvider;
-    type NativeAssetId: Get<AssetId>;
-    type FeeReceiver: Get<Self::AccountId>;
-    type NamedReserveId: Get<NamedReserveIdentifier>;
-    type WeightToFee: WeightToFee<Balance = Balance>;
-    type RouteExecutor: TradeExecution<Self::RuntimeOrigin, Self::AccountId, AssetId, Balance>;
-    type RouteProvider: RouteProvider<AssetId>;
-    type OraclePriceProvider: PriceOracle<AssetId, Price = EmaPrice>;
-    type SpotPriceProvider: SpotPriceProvider<AssetId, Price = FixedU128>;
-    type MaxPriceDifferenceBetweenBlocks: Get<Permill>;
-    type MaxConfigurablePriceDifferenceBetweenBlocks: Get<Permill>;
-    type MinimalPeriod: Get<BlockNumberFor<Self>>;
-    type BumpChance: Get<Percent>;
-    type MaxSchedulePerBlock: Get<u32>;
-    type MaxNumberOfRetriesOnError: Get<u8>;
-    #[pallet::constant] type MinBudgetInNativeCurrency: Get<Balance>;
-    #[pallet::constant] type MinimumTradingLimit: Get<Balance>;
-    #[pallet::constant] type SlippageLimitPercentage: Get<Permill>;
-    type WeightInfo: WeightInfo;
-}
+type AssetId: Parameter + Member + Copy + MaybeSerializeDeserialize + MaxEncodedLen + Into<ice_support::AssetId>;
+type IntentMigrator: IntentMigrator<Self::AccountId>;          // runtime: Intent
+type TerminateOrigin: EnsureOrigin<Self::RuntimeOrigin>;       // runtime: Root | TC majority | GeneralAdmin
+type AccountFeeCurrency: AccountFeeCurrency<Self::AccountId, AssetId = Self::AssetId>;
+type RetryOnError: Contains<DispatchError>;                    // runtime: RetryOnErrorForDca
+type MinimalPeriod: Get<u32>;                                  // runtime: 15 blocks (= 30 s at 2 s blocks)
+type MaxSchedulePerBlock: Get<u32>;                            // runtime: 6
+// + RouteExecutor, RouteProvider, OraclePriceProvider, NativePriceOracle, ExtraGasSupport,
+//   GasWeightMapping, MaxPriceDifferenceBetweenBlocks, MaxConfigurablePriceDifferenceBetweenBlocks,
+//   MaxNumberOfRetriesOnError, BumpChance, MinimumTradingLimit, NativeAssetId,
+//   MinBudgetInNativeCurrency, FeeReceiver, NamedReserveId, WeightToFee, AmmTradeWeights, WeightInfo
 ```
 
 ## Storage
 
 | Name | Kind | Key → Value |
 |------|------|-------------|
+| `ScheduleIdSequencer` | StorageValue | `ScheduleId` |
 | `Schedules` | StorageMap | `ScheduleId → Schedule` |
-| `ScheduleOwnership` | StorageMap | `(AccountId, ScheduleId) → ()` |
+| `ScheduleOwnership` | StorageDoubleMap | `(AccountId, ScheduleId) → ()` |
 | `RemainingAmounts` | StorageMap | `ScheduleId → Balance` |
 | `RetriesOnError` | StorageMap | `ScheduleId → u8` |
-| `ScheduleIdsPerBlock` | StorageMap | `BlockNumber → BoundedVec<ScheduleId, MaxSchedulePerBlock>` |
 | `ScheduleExecutionBlock` | StorageMap | `ScheduleId → BlockNumber` |
+| `ScheduleIdsPerBlock` | StorageMap | `BlockNumber → BoundedVec<ScheduleId, MaxSchedulePerBlock>` |
 | `ScheduleExtraGas` | StorageMap | `ScheduleId → u64` |
-| `ScheduleIdSequencer` | StorageValue | `ScheduleId` |
+| `MigrationEnabled` | StorageValue | `bool` — when true, due schedules migrate instead of execute |
 
-There is no `Bonds` storage map — the schedule's budget is held via `Currencies::reserve_named(NamedReserveId, ...)` on the owner's account and released with `unreserve_named` on termination/completion.
-
-## Events
-
-`Scheduled`, `ExecutionPlanned`, `TradeExecuted`, `ExecutionFailed`, `Terminated`, `Completed`, `RandomnessGenerationFailed`.
-
-## Errors
-
-`ScheduleNotFound`, `InvalidState`, `NotScheduleOwner`, `BlockNumberIsNotInFuture`, `PriceUnstable`, `InvalidPeriod`, `SlippageLimitReached`, `BudgetTooLow`, `NoFreeBlockFound`, `MinTradeAmountNotReached`, `NoParentHashFound`, `CalculatingPriceError`, `TotalAmountIsSmallerThanMinBudget`, `MaxNumberOfRetriesReached`, `NoFreeExecutionSlotsAvailable`, `HasActiveSchedules`, `NoReservesLocked`, `NoLongerSupported` (buy orders can no longer be scheduled).
+Budget is held with `reserve_named(NamedReserveId, …)` on the owner, not in a pallet account.
 
 ## Extrinsics
 
-| Name | Description |
-|------|-------------|
-| `schedule` | Create DCA schedule with order, period, slippage, stability threshold, max retries |
-| `terminate` | Cancel schedule, return remaining bond + budget |
+| # | Name | Origin | Description |
+|---|------|--------|-------------|
+| 0 | `schedule` | Signed (owner) | Create a **sell** schedule. Rejected with `NoLongerSupported` for `Order::Buy`, `MigrationInProgress` while migration is on |
+| 1 | `terminate` | Owner, or `TerminateOrigin` | Cancel; unreserve remaining budget |
+| 2 | `unlock_reserves(who, asset_id)` | Signed | Release stale named reserves when the account has no active schedules |
+| 3 | `set_migration_enabled(bool)` | `TerminateOrigin` | Turn the DCA → ICE migration on/off |
+| 4 | `force_cancel_schedules(ids)` | `TerminateOrigin` | Cancel + refund listed schedules (`CancelReason::ForceCancelled`) |
 
-## Hooks
+## Events / errors
 
-`on_initialize` executes scheduled trades for the current block (consumes from `ScheduleIdsPerBlock[block]`). Each execution routes through `RouteExecutor::execute_sell/buy`.
+Events: `ExecutionStarted`, `Scheduled`, `ExecutionPlanned`, `TradeExecuted`, `TradeFailed`, `Terminated`, `Completed`, `RandomnessGenerationFailed`, `ReserveUnlocked`, `Migrated { id, who, intent_id }`, `MigrationCancelled { id, who, asset, refunded, reason }`, `MigrationEnabledSet { enabled }`.
 
-## Integration
+Errors: `ScheduleNotFound`, `MinTradeAmountNotReached`, `Forbidden`, `BlockNumberIsNotInFuture`, `PriceUnstable`, `Bumped`, `CalculatingPriceError`, `TotalAmountIsSmallerThanMinBudget`, `BudgetTooLow`, `NoFreeBlockFound`, `ManuallyTerminated`, `MaxRetryReached`, `TradeLimitReached`, `SlippageLimitReached`, `NoParentHashFound`, `InvalidState`, `PeriodTooShort`, `StabilityThresholdTooHigh`, `HasActiveSchedules`, `NoReservesLocked`, `NoLongerSupported`, `MigrationInProgress`.
 
-- **Traits implemented:** none external
-- **Traits consumed:** `TradeExecution`, `RouteProvider`, `PriceOracle`, `SpotPriceProvider`, `RandomnessProvider`, `RelayChainBlockHashProvider`
-- **Pallets depended on:** [[wiki/pallet-route-executor\|pallet-route-executor]], [[wiki/pallet-broadcast\|pallet-broadcast]], [[wiki/pallet-ema-oracle\|pallet-ema-oracle]]
+## Migration to ICE intents
 
-## Key extrinsic: schedule
+In `on_initialize`, if `MigrationEnabled`, every schedule due in the block goes through `migrate_or_cancel` instead of trading:
 
-```rust
-// pallets/dca/src/lib.rs
-pub fn schedule(
-    origin: OriginFor<T>,
-    schedule: Schedule<T::AccountId, AssetId, BlockNumberFor<T>>,
-    start_execution_block: Option<BlockNumberFor<T>>,
-) -> DispatchResult {
-    let who = ensure_signed(origin)?;
-    ensure!(who == schedule.owner, Error::<T>::Forbidden);
-    // Buy execution stays live for schedules stored before this restriction, so the
-    // benchmarks that measure it still need to create one.
-    #[cfg(not(feature = "runtime-benchmarks"))]
-    ensure!(matches!(schedule.order, Order::Sell { .. }), Error::<T>::NoLongerSupported);
-    ensure!(schedule.total_amount >= T::MinBudgetInNativeCurrency::get(), Error::<T>::BudgetTooLow);
-    ensure!(schedule.period >= T::MinimalPeriod::get(), Error::<T>::InvalidPeriod);
-    let id = Self::next_schedule_id()?;
-    Self::reserve_bond(&who, id)?;
-    Self::plan_execution(id, start_block)?;
-    // ...
-}
-```
+1. `Order::Buy` → cancel (`CancelReason::BuyOrder` — intents are sell-only).
+2. Fixed-budget schedule whose `RemainingAmounts < amount_in` → cancel (`BudgetBelowTrade`).
+3. Otherwise build `DcaParams { asset_in, asset_out, amount_in, amount_out: min_amount_out, slippage: schedule.slippage or MaxPriceDifferenceBetweenBlocks, budget (None for rolling schedules), period }` and `convert_schedule`: unreserve the DCA reserve (non-zero remainder → `UnreserveRemainder`), delete the schedule, call `IntentMigrator::add_migrated_intent` (= `pallet_intent::do_add_migrated_intent`, which takes its own reserve). Success → `Migrated`; intent rejection → `IntentCreationFailed(err)` cancel.
+
+Every cancel path refunds via `try_unreserve_all` and emits `MigrationCancelled`. `CancelReason = BuyOrder | BudgetBelowTrade | UnreserveRemainder | IntentCreationFailed(DispatchError) | ForceCancelled`. Migration is off by default.
+
+## Fees
+
+Execution fees are charged in `asset_in` only if it is a payment currency (`AccountFeeCurrency::is_payment_currency`, i.e. in [[wiki/pallet-transaction-multi-payment\|pallet-transaction-multi-payment]] `AcceptedCurrencies` or HDX); otherwise the fee is taken from the owner's fee currency by a separate transfer, and the min-budget check is skipped for that asset (`budget_transaction_fee` returns zero).
 
 ## Gotchas
 
-- Bond size = `WeightToFee(execution_weight) * MaxRetries` — refunded when schedule completes or terminates voluntarily.
-- Randomness bumps execution to later block with probability `BumpChance` to prevent MEV slot-squatting.
-- `MaxSchedulePerBlock` caps executions per block; when a slot is full, planning jumps to the next available slot.
-- Price-stability check: if spot deviates > `stability_threshold` from oracle, trade skips without consuming retry budget.
-- Slippage check: actual execution against user's `min_out` / `max_in` is still enforced by route-executor.
-- After `MaxNumberOfRetriesOnError` retries, schedule auto-terminates and remaining bond is slashed to the fee receiver.
-- `schedule`'s weight annotation no longer adds `AmmTradeWeights::calculate_buy_trade_amounts_weight(...)` — it is plain `WeightInfo::schedule()` now that only sell orders can be created.
-- **Retriable errors are a runtime-level list**, not pallet state: `RetryOnErrorForDca` in `runtime/hydradx/src/assets.rs`. It gained `pallet_route_executor::Error::TradingLimitReached` — erc20/aToken rounding can undershoot the dry-run output that DCA passes as the router's min limit, and that is the same class as DCA's own retriable `TradeLimitReached`. Existing members: omnipool `InsufficientBalance`, `pallet_dispatcher::EvmOutOfGas`, circuit-breaker `DepositLimitExceededForWhitelistedAccount`.
-- `pallets/dca/src/tests/storage_injection_fidelity.rs` is the reference for how test fixtures inject schedule storage — check it before hand-rolling DCA state in a test.
+- Randomness bumps execution to a later block with probability `BumpChance` to prevent slot-squatting; full buckets push planning to the next free block.
+- Price-stability check: spot vs oracle deviation beyond the threshold skips the trade without consuming retries.
+- **Retriable errors are a runtime list**, `RetryOnErrorForDca` (`runtime/hydradx/src/assets.rs`): omnipool `AssetNotFound` / `NotAllowed` / `InsufficientBalance` (aToken rounding), router `TradingLimitReached`, dispatcher `EvmOutOfGas` / `UniswapV3InsufficientLiquidity`, circuit-breaker `DepositLimitExceededForWhitelistedAccount`.
+- Periods are in blocks; with 2 s blocks `MinimalPeriod = 15` is 30 s.
+- Existing `Order::Buy` schedules still execute (when migration is off) — the buy path in `on_initialize` is live code.
+- `pallets/dca/src/tests/storage_injection_fidelity.rs` is the reference for injecting schedule storage in tests.
 
 ## Sources
 
 - [[wiki/source-hydration-node-codebase\|source-hydration-node-codebase]]
-- [[wiki/dca\|dca]]
+- [[wiki/dca\|dca]], [[wiki/pallet-intent\|pallet-intent]], [[wiki/pallet-ice\|pallet-ice]]

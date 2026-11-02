@@ -1,24 +1,26 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/hydration-runtime/","title":"hydration-runtime","tags":["runtime","construct_runtime","xcm","evm","frontier","cumulus","parachain","gigahdx","synthetic-logs"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"runtime","title":"hydration-runtime","repo":"hydration-node","paths":["runtime/hydradx/src/lib.rs","runtime/hydradx/src/assets.rs","runtime/hydradx/src/xcm.rs","runtime/hydradx/src/evm/mod.rs","runtime/hydradx/src/evm/precompiles/mod.rs","runtime/hydradx/src/evm/synthetic_logs.rs","runtime/hydradx/src/evm/event_logs.rs","runtime/hydradx/src/gigahdx.rs","runtime/hydradx/src/governance/mod.rs","runtime/hydradx/src/governance/tracks.rs","runtime/hydradx/src/system.rs","runtime/hydradx/src/migrations/mod.rs","runtime/adapters/src/lib.rs","primitives/src/lib.rs"],"symbols":["Runtime","RuntimeCall","RuntimeEvent","RuntimeOrigin","construct_runtime","VERSION","BlockNumber","Balance","AssetId","AccountId","EvmAddress","HydraDXPrecompiles","GigaHdx","GigaHdxRewards","FeeProcessor","UnreleasedSingleBlockMigrations","CombinedVotingHooks","AaveMoneyMarket","TrackRewardConfig","InTradeContext","WETH_ASSET_ID","LOCK_MANAGER","SENTINEL_ADDRESS"],"traits_impl":[],"depends_on":["pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-route-executor","pallet-asset-registry","pallet-ema-oracle","pallet-circuit-breaker","pallet-dynamic-fees","pallet-dynamic-evm-fee","pallet-currencies","pallet-evm-accounts","pallet-transaction-multi-payment","pallet-hsm","pallet-staking","pallet-dca","pallet-referrals","pallet-fee-processor","pallet-gigahdx","pallet-gigahdx-rewards","pallet-otc","pallet-otc-settlements","pallet-bonds","pallet-liquidation","pallet-liquidity-mining","pallet-omnipool-liquidity-mining","pallet-xyk-liquidity-mining","pallet-duster","pallet-nft","pallet-claims","pallet-dispenser","pallet-signet","pallet-broadcast","pallet-dispatcher","pallet-parameters","pallet-democracy","pallet-collator-rewards","pallet-collator-rotation","pallet-xcm-rate-limiter","pallet-transaction-pause","pallet-relaychain-info","pallet-genesis-history"],"tags":["runtime","construct_runtime","xcm","evm","frontier","cumulus","parachain","gigahdx","synthetic-logs"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/hydration-runtime/","title":"hydration-runtime","tags":["runtime","construct_runtime","xcm","evm","frontier","cumulus","parachain","gigahdx","synthetic-logs"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"runtime","title":"hydration-runtime","repo":"hydration-node","paths":["runtime/hydradx/src/lib.rs","runtime/hydradx/src/assets.rs","runtime/hydradx/src/xcm.rs","runtime/hydradx/src/evm/mod.rs","runtime/hydradx/src/evm/precompiles/mod.rs","runtime/hydradx/src/evm/synthetic_logs.rs","runtime/hydradx/src/evm/event_logs.rs","runtime/hydradx/src/gigahdx.rs","runtime/hydradx/src/governance/mod.rs","runtime/hydradx/src/governance/tracks.rs","runtime/hydradx/src/system.rs","runtime/hydradx/src/migrations/mod.rs","runtime/hydradx/src/evm/uniswap_v3_trade_executor.rs","runtime/hydradx/src/ice_simulator_provider.rs","runtime/hydradx/src/ice_oracle_routes.rs","primitives/src/constants.rs","runtime/adapters/src/lib.rs","primitives/src/lib.rs"],"symbols":["Runtime","RuntimeCall","RuntimeEvent","RuntimeOrigin","construct_runtime","VERSION","BlockNumber","Balance","AssetId","AccountId","EvmAddress","HydraDXPrecompiles","GigaHdx","GigaHdxRewards","FeeProcessor","LazyExecutor","Intent","ICE","UniswapV3TradeExecutor","HydrationSimulatorConfig","PausableRouter","XcmExecutionPausedQuery","MILLISECS_PER_BLOCK","UnreleasedSingleBlockMigrations","CombinedVotingHooks","AaveMoneyMarket","TrackRewardConfig","InTradeContext","WETH_ASSET_ID","LOCK_MANAGER","SENTINEL_ADDRESS"],"traits_impl":[],"depends_on":["pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-route-executor","pallet-asset-registry","pallet-ema-oracle","pallet-circuit-breaker","pallet-dynamic-fees","pallet-dynamic-evm-fee","pallet-currencies","pallet-evm-accounts","pallet-transaction-multi-payment","pallet-hsm","pallet-staking","pallet-dca","pallet-referrals","pallet-fee-processor","pallet-gigahdx","pallet-gigahdx-rewards","pallet-otc","pallet-otc-settlements","pallet-bonds","pallet-liquidation","pallet-liquidity-mining","pallet-omnipool-liquidity-mining","pallet-xyk-liquidity-mining","pallet-duster","pallet-nft","pallet-claims","pallet-dispenser","pallet-signet","pallet-broadcast","pallet-dispatcher","pallet-parameters","pallet-ice","pallet-intent","pallet-lazy-executor","pallet-collator-rewards","pallet-collator-rotation","pallet-xcm-rate-limiter","pallet-transaction-pause","pallet-relaychain-info","pallet-genesis-history"],"tags":["runtime","construct_runtime","xcm","evm","frontier","cumulus","parachain","gigahdx","synthetic-logs"],"last_updated":"2026-11-02"}}
 ---
 
 
 # hydration-runtime
 
-**TL;DR:** The HydraDX parachain runtime crate. Wires all 42 pallets into one `construct_runtime!`, defines primitives (Balance=u128, AssetId=u32, BlockNumber=u32, AccountId=sr25519-32, EvmAddress=H160), XCM configuration, EVM/Frontier configuration with custom precompiles, OpenGov tracks, and runtime APIs. Current `spec_version = 439`, `impl_name = "hydradx"`. Spec 439 (Aug 2026) added the [[wiki/gigahdx\|gigahdx]] stack ([[wiki/pallet-gigahdx\|pallet-gigahdx]]=86, [[wiki/pallet-gigahdx-rewards\|pallet-gigahdx-rewards]]=87), [[wiki/pallet-fee-processor\|pallet-fee-processor]]=207, the `LOCK_MANAGER` precompile, NTT mint/burn on the multicurrency precompile, and off-chain **synthetic EVM logs**.
+**TL;DR:** The HydraDX parachain runtime crate. Wires every pallet into one `construct_runtime!`, defines primitives (Balance=u128, AssetId=u32, BlockNumber=u32, AccountId=sr25519-32, EvmAddress=H160), XCM configuration, EVM/Frontier configuration with custom precompiles, OpenGov tracks, and runtime APIs. Current `spec_version = 458`, `impl_name = "hydradx"`. **2-second blocks** (`MILLISECS_PER_BLOCK = 2_000`, elastic scaling `BLOCK_PROCESSING_VELOCITY = 3` on 6 s relay slots). Notable components: the [[wiki/gigahdx\|gigahdx]] stack (86/87), [[wiki/pallet-fee-processor\|pallet-fee-processor]]=207, the ICE intent stack ([[wiki/pallet-lazy-executor\|pallet-lazy-executor]]=97, [[wiki/pallet-intent\|pallet-intent]]=98, [[wiki/pallet-ice\|pallet-ice]]=99), Uniswap v3 as a native router venue (`PoolType::UniswapV3(fee)`), single-call XCM suspension in [[wiki/pallet-parameters\|pallet-parameters]], off-chain synthetic EVM logs. Gov v1 (`pallet-democracy`) is gone.
 
 ## Entrypoints
 
 - `runtime/hydradx/src/lib.rs` — `construct_runtime!`, `VERSION`, runtime APIs, benchmark list
 - `runtime/hydradx/src/assets.rs` — pallet `Config` impls for the AMM / fee / gigahdx stack (incl. `pallet_fee_processor::Config`, `pallet_gigahdx::Config`, `pallet_gigahdx_rewards::Config`)
 - `runtime/hydradx/src/system.rs` — `frame_system::Config`, base weights, `BlockWeights`, `BlockLength`, `pallet_transaction_multi_payment::Config`
-- `runtime/hydradx/src/xcm.rs` — XCM executor config, asset registry adapter, fee trader (**unchanged** since spec 419)
+- `runtime/hydradx/src/xcm.rs` — XCM executor config, asset registry adapter, fee trader, `PausableRouter` / `XcmExecutionPausedQuery` (XCM suspension), circuit-breaker egress/deposit netting
 - `runtime/hydradx/src/evm/mod.rs` — Frontier config, ChainId, gas weight mapping, `WethAssetId`
 - `runtime/hydradx/src/evm/precompiles/mod.rs` — `HydraDXPrecompiles` set, precompile addresses
 - `runtime/hydradx/src/evm/synthetic_logs.rs`, `evm/event_logs.rs` — substrate-event → synthetic ETH tx/log translation primitives
 - `runtime/hydradx/src/gigahdx.rs` — gigahdx runtime wiring (AAVE money-market adapter, reward-track table, external-claims / liquidation adapters)
 - `runtime/hydradx/src/governance/mod.rs` — OpenGov origins, conviction voting, treasury
 - `runtime/hydradx/src/migrations/mod.rs` — single-block + multi-block migration tuples
+- `runtime/hydradx/src/evm/uniswap_v3_trade_executor.rs` — `UniswapV3TradeExecutor`: router `TradeExecution` for `PoolType::UniswapV3(fee)` (factory/router/quoter addresses from [[wiki/pallet-parameters\|pallet-parameters]])
+- `runtime/hydradx/src/ice_simulator_provider.rs`, `ice_oracle_routes.rs` — ICE simulator data providers + `DerivedRouteShortPrice` oracle for [[wiki/pallet-intent\|pallet-intent]] DCA floors (in-source note: "tmp. implementation")
 - `runtime/adapters/` — cross-pallet trait adapters (`OmnipoolHookAdapter`, price oracles, `XcmAssetExchanger`)
 
 ## Version
@@ -29,7 +31,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: Cow::Borrowed("hydradx"),
     impl_name: Cow::Borrowed("hydradx"),
     authoring_version: 1,
-    spec_version: 439,          // was 419 at the previous vault sync
+    spec_version: 458,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -37,7 +39,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 };
 ```
 
-Crate version tracks spec: `runtime/hydradx/Cargo.toml → version = "439.0.0"`.
+Crate version tracks spec (`runtime/hydradx/Cargo.toml → version`).
 
 `frame_system`'s prefix is `SS58Prefix: u16 = 0` in `runtime/hydradx/src/system.rs` (the `63` commonly quoted for Hydration is the ss58-registry entry used by wallets, not a runtime constant).
 
@@ -64,9 +66,11 @@ pub type Moment = u64;              // timestamp in ms
 
 System & consensus: System=1, Timestamp=3, Scheduler=5, Balances=7, TransactionPayment=9, Treasury=11, Utility=13, Preimage=15, Identity=17, Authorship=161, CollatorSelection=163, Session=165, Aura=167, AuraExt=169.
 
-Governance: Democracy=19, TechnicalCommittee=25, Proxy=29, Multisig=31, Uniques=32, StateTrieMigration=35, ConvictionVoting=36, Referenda=37, Origins(custom)=38, Whitelist=39, Dispatcher=40.
+Governance: TechnicalCommittee=25, Proxy=29, Multisig=31, Uniques=32, StateTrieMigration=35, ConvictionVoting=36, Referenda=37, Origins(custom)=38, Whitelist=39, Dispatcher=40.
 
-HydraDX modules: AssetRegistry=51, Claims=53, GenesisHistory=55, CollatorRewards=57, CollatorRotation=58, Omnipool=59, TransactionPause=60, Duster=61, OmnipoolWarehouseLM=62, OmnipoolLiquidityMining=63, OTC=64, CircuitBreaker=65, DCA=66, Router=67, DynamicFees=68, Staking=69, Stableswap=70, Bonds=71, OtcSettlements=72, LBP=73, XYK=74, Referrals=75, Liquidation=76, HSM=82, Parameters=83, Signet=84, EthDispenser=85, **GigaHdx=86**, **GigaHdxRewards=87**.
+HydraDX modules: AssetRegistry=51, Claims=53, GenesisHistory=55, CollatorRewards=57, CollatorRotation=58, Omnipool=59, TransactionPause=60, Duster=61, OmnipoolWarehouseLM=62, OmnipoolLiquidityMining=63, OTC=64, CircuitBreaker=65, DCA=66, Router=67, DynamicFees=68, Staking=69, Stableswap=70, Bonds=71, OtcSettlements=72, LBP=73, XYK=74, Referrals=75, Liquidation=76, HSM=82, Parameters=83, Signet=84, EthDispenser=85, GigaHdx=86, GigaHdxRewards=87.
+
+ICE: **LazyExecutor=97, Intent=98, ICE=99**.
 
 ORML: Tokens=77, Currencies=79, Vesting=81, OrmlXcm=135, XTokens=137, UnknownTokens=139.
 
@@ -76,31 +80,23 @@ Liquidity mining (XYK): XYKLiquidityMining=95, XYKWarehouseLM=96.
 
 Parachain / cross-chain: ParachainSystem=103, ParachainInfo=105, PolkadotXcm=107, CumulusXcm=109, XcmpQueue=111, MessageQueue=114, WeightReclaim=115, MultiBlockMigrations=116.
 
-Infra: RelayChainInfo=201, EmaOracle=202, MultiTransactionPayment=203, Broadcast=204, **FeeProcessor=207**.
+Infra: RelayChainInfo=201, EmaOracle=202, MultiTransactionPayment=203, Broadcast=204, FeeProcessor=207.
 
-Hyperbridge / ISMP / token-gateway: **removed** in spec 419; the `CleanupHyperbridge` migration ran on that upgrade and its file was deleted in spec 439. Nothing to reference any more.
-
-Retired index notes carried in-source: 19/21/23/27 were gov-v1; 113 was `DmpQueue` (replaced by `MessageQueue`=114).
-
-New in spec 439: `GigaHdx=86`, `GigaHdxRewards=87`, `FeeProcessor=207`. (Exact indices tracked in `runtime/hydradx/src/lib.rs`; the above reflects the ordering at spec_version=439.)
+Retired indices: 19/21/23/27 were gov v1 (Democracy=19 removed in the 2026-10 `govv1_cleanup`); 113 was `DmpQueue` (replaced by `MessageQueue`=114). Exact indices: `runtime/hydradx/src/lib.rs`.
 
 ## Migrations (runtime/hydradx/src/migrations/mod.rs)
 
 ```rust
 // runtime/hydradx/src/migrations/mod.rs
-pub type UnreleasedSingleBlockMigrations = pallet_stableswap::migrations::v2::MigrateV1ToV2<Runtime>;
+pub type UnreleasedSingleBlockMigrations = (democracy::RemoveDemocracy,);
 pub type PermanentSingleBlockMigrations = pallet_xcm::migration::MigrateToLatestXcmVersion<Runtime>;
-pub type MultiBlockMigrations = ();
+pub type SingleBlockMigrationsList = (PermanentSingleBlockMigrations, UnreleasedSingleBlockMigrations);
+pub type MultiBlockMigrationsList = (); // non-benchmark build
 ```
 
-| Spec | Migration | Notes |
-|---|---|---|
-| 439 | `pallet_stableswap::migrations::v2::MigrateV1ToV2` | [[wiki/pallet-stableswap\|pallet-stableswap]] storage v1 → v2 (share mint/burn rework) |
-| 419 (gone) | `pallet_ema_oracle::migrations::v2::MigrateV1ToV2`, `CleanupHyperbridge` | dropped from the tuple; `migrations/cleanup_hyperbridge.rs` deleted |
+`UnreleasedSingleBlockMigrations` is "what ships in the next runtime upgrade", not history — it is emptied after each upgrade. Next upgrade: `RemoveDemocracy` (clears gov-v1 storage). Other files in `migrations/` (circuit_breaker, conviction_voting, dynamic_fees, referenda, scheduler, stableswap, …) are not in the tuple; check `mod.rs` before citing one as live.
 
-`UnreleasedSingleBlockMigrations` is emptied out after every runtime upgrade — treat its current contents as "what ships in the next runtime", not history.
-
-## Trade-fee routing (spec 439 rewire)
+## Trade-fee routing
 
 `hydradx_adapters::OmnipoolHookAdapter::on_trade_fee` (`runtime/adapters/src/lib.rs`) no longer chains referrals-then-staking itself. It delegates the whole asset fee to [[wiki/pallet-fee-processor\|pallet-fee-processor]]:
 
@@ -156,7 +152,11 @@ Key types:
 - `ReserveAssetFilter` — via asset-registry-configured reserve locations
 - XCM rate limiting: hooked through [[wiki/pallet-xcm-rate-limiter\|pallet-xcm-rate-limiter]]
 
-`runtime/hydradx/src/xcm.rs` itself is unchanged since spec 419. The XCM **exchange** adapter did change (`runtime/adapters/src/xcm_exchange.rs`, `XcmAssetExchanger`):
+**XCM suspension** (emergency lever, see [[wiki/note-emergency-levers\|note-emergency-levers]]): outbound — `XcmRouter = PausableRouter<WithUniqueTopic<(ParentAsUmp, XcmpQueue)>>` refuses every send while `pallet_parameters::XcmSendSuspended`; inbound — `MessageQueue::QueuePausedQuery = XcmExecutionPausedQuery<NarrowOriginToSibling<XcmpQueue>>` pauses relay **and** sibling queues while `XcmExecutionSuspended`. Inbound messages are held in the queue, not dropped.
+
+**Egress netting:** the XCM message processor nets withdrawn vs deposited per message: `withdrawn > deposited` → `CircuitBreaker::note_egress(diff)`; `deposited > withdrawn` → `note_deposit(diff)`, so inbound reserve transfers offset earlier egress against the global withdraw limit. Adds a fixed `process_xcm_with_breaker_weight()` overhead (8 reads / 4 writes) per message.
+
+XCM **exchange** adapter (`runtime/adapters/src/xcm_exchange.rs`, `XcmAssetExchanger`):
 
 - `pallet_broadcast::add_to_context(ExecutionType::XcmExchange)` is now pushed **after** the circuit-breaker mint check, not before — a rejected exchange no longer leaves a stale broadcast context (paired with the `BatchHook::on_batch_end` signature change below).
 - Buy path checks `IssuanceIncreaseFuse::can_mint(asset_in, max_sell_amount)` instead of the router's quoted `amount_in` — the deposit limit must apply to what is actually minted (the ceiling), not the quote.
@@ -184,9 +184,11 @@ impl pallet_evm::Config for Runtime {
 
 See [[wiki/hydration-precompiles\|hydration-precompiles]] for the precompile set.
 
-### EVM changes in spec 439
+**Uniswap v3 venue.** `pallet_route_executor::Config::AMM = (Omnipool, Stableswap, XYK, LBP, Aave, HSM, UniswapV3)`; `UniswapV3TradeExecutor` executes `PoolType::UniswapV3(fee)` hops via EVM calls to the Uniswap v3 SwapRouter/Quoter whose addresses live in [[wiki/pallet-parameters\|pallet-parameters]] (`UniswapV3Factory`, `UniswapV3SwapRouter`, `UniswapV3Quoter`). aToken legs have explicit rounding handling (`atoken_rounding_state`); a sell fails if the pool cannot take the full amount. Runtime API `UniswapV3Api { pool, quote_sell, quote_buy, liquidity_depth }`.
 
-**WETH asset id is pinned, not resolved.** `WethAssetId` used to look up a hard-coded Moonbeam `AssetLocation` in the asset registry. It is now a constant, because the MRL→NTT repoint of asset 20 to a local ERC-20 would have zeroed the gas asset the moment the registry entry moved:
+### EVM notes
+
+**WETH asset id is pinned, not resolved.** `WethAssetId` is a constant (asset 20) rather than a registry-location lookup, so a registry repoint can never zero the EVM gas asset:
 
 ```rust
 // runtime/hydradx/src/evm/mod.rs
@@ -198,7 +200,6 @@ impl Get<AssetId> for WethAssetId {
 }
 ```
 
-`weth_asset_location()` and `MOONBEAM_PARA_ID` are gone.
 
 **New precompile: `LOCK_MANAGER` at `0x…0806`** (`precompiles/lock-manager/`, crate `pallet-evm-precompile-lock-manager`). Consumed by `LockableAToken.sol`; gated to a single caller via `GigaHdxATokenAddress`, which resolves the GIGAHDX aToken address through `HydraErc20Mapping` at call time. `is_precompile()` now includes it.
 
@@ -230,9 +231,7 @@ OpenGov Tracks (examples): Root(0), WhitelistedCaller(1), GeneralAdmin(10), Stak
 
 Origins: `TechCommittee`, `TreasuryOrigin`, `MajorityCouncil`, `SuperMajorityCouncil`, `UnanimousCouncil`.
 
-Legacy Gov1 [[wiki/pallet-democracy\|pallet-democracy]] retained at index 19; OpenGov [[pallet-referenda\|pallet-referenda]]=37 + ConvictionVoting=36 are the active path.
-
-**No track or origin was added in spec 439** — `governance/tracks.rs` and `governance/origins.rs` are unchanged. What changed is the conviction-voting wiring:
+Only OpenGov exists: [[pallet-referenda\|pallet-referenda]]=37 + ConvictionVoting=36 (+ TechnicalCommittee=25, Whitelist=39). Gov v1 is removed; `governance/old.rs` is deleted. Conviction-voting wiring:
 
 ```rust
 // runtime/hydradx/src/governance/mod.rs — pallet_conviction_voting::Config
@@ -253,7 +252,7 @@ Voting on a referendum earns gigahdx rewards sized by `crate::gigahdx::TrackRewa
 
 - `pallet_transaction_payment` (native) — HDX fees
 - [[wiki/pallet-transaction-multi-payment\|pallet-transaction-multi-payment]] — accepts any registered asset, auto-swaps to HDX via Omnipool/Stableswap, uses EmaOracle for quoting
-- New in 439: `pallet_transaction_multi_payment::Config::EvmFeePayer = evm::EvmFeePayerImpl` (`runtime/hydradx/src/evm/evm_fee.rs`) — lets an EVM call set/clear the account charged for fees (backs [[wiki/pallet-dispatcher\|pallet-dispatcher]]'s `dispatch_with_fee_payer`)
+- `pallet_transaction_multi_payment::Config::EvmFeePayer = evm::EvmFeePayerImpl` (`runtime/hydradx/src/evm/evm_fee.rs`) — lets an EVM call set/clear the account charged for fees (backs [[wiki/pallet-dispatcher\|pallet-dispatcher]]'s `dispatch_with_fee_payer`)
 
 ## Circuit breaker wiring
 
@@ -283,15 +282,17 @@ Standard: `Core`, `Metadata`, `BlockBuilder`, `TaggedTransactionQueue`, `Offchai
 
 EVM/Frontier: `EthereumRuntimeRPCApi`, `ConvertTransactionRuntimeApi`, `DebugRuntimeApi`, `TxPoolRuntimeApi`.
 
-Cross-chain: `CollectCollationInfo` (cumulus), `AuraApi`, `CumulusPrimitivesAuraApi`. ISMP-related APIs were removed alongside the Hyperbridge pallets in spec 419.
+Cross-chain: `CollectCollationInfo` (cumulus), `AuraApi`, `CumulusPrimitivesAuraApi`.
 
 AMM quoting (custom): Some runtime APIs expose omnipool / stableswap / router quotes for SDK clients (see SDK packages).
 
-**No runtime API was added or removed in spec 439.** The synthetic-logs feature deliberately avoids one — the node translates events client-side so it works across runtime versions. The [[wiki/pepl-worker\|pepl-worker]] consumes existing APIs only: `EthereumRuntimeRPCApi`, `Erc20MappingApi`, `CurrenciesApi`, `xcm_runtime_apis::dry_run::DryRunApi`.
+ICE: `pallet_ice_runtime_api::IceSolverApi::solver_input()` and `LiquidityStateApi::liquidity_state()` (consumed by the node's `ice_solver_worker`). Uniswap v3: `UniswapV3Api` (above). The XCM fee-asset location list is now filtered to `MultiTransactionPayment::AcceptedCurrencies`.
+
+The synthetic-logs feature deliberately avoids a runtime API — the node translates events client-side so it works across runtime versions. The [[wiki/pepl-worker\|pepl-worker]] consumes existing APIs only: `EthereumRuntimeRPCApi`, `Erc20MappingApi`, `CurrenciesApi`, `xcm_runtime_apis::dry_run::DryRunApi`.
 
 ## Benchmarks
 
-New entries in `mod benches` (`runtime/hydradx/src/lib.rs`): `[pallet_gigahdx, GigaHdx]`, `[pallet_gigahdx_rewards, GigaHdxRewards]`, and `[pallet_fee_processor, benchmarking::fee_processor::Benchmark]` (runtime-side benchmark in `runtime/hydradx/src/benchmarking/fee_processor.rs`). New weight files: `weights/pallet_fee_processor.rs`, `weights/pallet_gigahdx.rs`, `weights/pallet_gigahdx_rewards.rs`. Regenerated: omnipool, omnipool-liquidity-mining, stableswap, referrals, referenda, conviction-voting, liquidation, evm-accounts, xcm.
+`mod benches` in `runtime/hydradx/src/lib.rs` lists every pallet; ICE stack: `[pallet_intent, benchmarking::intent::Benchmark]`, `[pallet_lazy_executor, benchmarking::lazy_executor::Benchmark]`, `[pallet_ice, benchmarking::ice::Benchmark]` (runtime-side benches). Weight files under `runtime/hydradx/src/weights/` were regenerated for 2 s blocks.
 
 ## Gotchas
 
@@ -299,9 +300,10 @@ New entries in `mod benches` (`runtime/hydradx/src/lib.rs`): `[pallet_gigahdx, G
 - `ChainId` for EVM is `222_222` on mainnet — different from Ethereum.
 - `pallet_uniques` at index 32 is shared storage for the [[wiki/pallet-nft\|pallet-nft]] wrapper — don't double-register collections.
 - `XcmpQueue`, `PolkadotXcm`, `CumulusXcm`, `MessageQueue` are interconnected — changes to one affect others; see `runtime/hydradx/src/xcm.rs`.
-- Pallet `Parameters` (index 83) is **not** the FRAME generic parameters pallet — it's a small Hydration-specific store for `IsTestnet` / `RelayParentOffsetOverride` flags. See [[wiki/pallet-parameters\|pallet-parameters]].
+- Pallet `Parameters` (index 83) is **not** the FRAME generic parameters pallet — it's a Hydration-specific store (testnet flag, `TwoSecBlocksSince`, Aave gas limits, Uniswap v3 addresses, XCM suspension flags). See [[wiki/pallet-parameters\|pallet-parameters]].
+- **Blocks are 2 s.** Anything expressed in blocks (DCA periods, lockdown `until`, LBP durations, staking periods, `DeferDuration`) is 3× shorter in wall-clock than under 6 s. Pallets that need wall-clock continuity read `TwoSecBlocksSince`.
 - Many pallet wirings use adapter types in `runtime/adapters/` — e.g. `OmnipoolHookAdapter`, `PriceProviderAdapter`, `FeeCurrencyAdapter`. When tracing trait implementations, check there.
-- Hyperbridge / ISMP / token-gateway integration was deleted in spec 419 and its cleanup migration file was removed in spec 439. `runtime/hydradx/src/migrations/cleanup_hyperbridge.rs` **no longer exists** — do not cite it, and do not add wiki references to those pallets.
+- No Hyperbridge / ISMP / token-gateway and no gov v1 in the runtime — do not cite them.
 - Trade fees no longer flow through the adapter's referrals→staking chain. Anything reasoning about fee destinations must go through [[wiki/pallet-fee-processor\|pallet-fee-processor]] (`runtime/hydradx/src/assets.rs` holds the split). LRNA fees are still dropped in the adapter before the processor is reached.
 - `WethAssetId` is a **hard-coded id (20)**, not a registry lookup. Repointing asset 20 in the registry silently changes the EVM gas asset.
 - `MaxVotes` lives in `governance/mod.rs` and is asserted equal across `pallet_staking` and `pallet_conviction_voting` — change both or the build fails.

@@ -1,241 +1,129 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xc-cfg/","title":"xc-cfg","tags":["sdk","cross-chain","configuration","routing","validation","ntt","wormhole","snowbridge"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-cfg","repo":"sdk","paths":["packages/xc-cfg/src/index.ts","packages/xc-cfg/src/assets.ts","packages/xc-cfg/src/tags.ts","packages/xc-cfg/src/chains","packages/xc-cfg/src/configs","packages/xc-cfg/src/builders","packages/xc-cfg/src/bridges","packages/xc-cfg/src/clients/ntt","packages/xc-cfg/src/clients/wormhole","packages/xc-cfg/src/resolvers","packages/xc-cfg/src/validations"],"key_exports":["assetsMap","chainsMap","routesMap","validations","builders","clients","dex","tags","HydrationConfigService"],"tags":["sdk","cross-chain","configuration","routing","validation","ntt","wormhole","snowbridge"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/xc-cfg/","title":"xc-cfg","tags":["sdk","cross-chain","xcm","wormhole","ntt","snowbridge","omni","near","zcash","typescript"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-cfg","repo":"sdk","paths":["packages/xc-cfg/src/index.ts","packages/xc-cfg/src/chains","packages/xc-cfg/src/configs","packages/xc-cfg/src/configs/polkadot/hydration/index.ts","packages/xc-cfg/src/configs/polkadot/hydration/templates.ts","packages/xc-cfg/src/builders","packages/xc-cfg/src/bridges","packages/xc-cfg/src/clients","packages/xc-cfg/src/validations","packages/xc-cfg/src/tags.ts","packages/xc/docs"],"key_exports":["assetsMap","chainsMap","routesMap","validations","builders","clients","dex","tags","HydrationConfigService","Tag","viaNttTemplate","viaNttExecutorTemplate","viaOmniTemplate","viaSnowbridgeTemplate","nttClient","ExecutorClient","OmniClient","OMNI_CONNECTORS","NttRateLimitValidation","NttCustodyValidation","OmniValidation","HydrationEvmValueValidation"],"tags":["sdk","cross-chain","xcm","wormhole","ntt","snowbridge","omni","near","zcash","typescript"],"last_updated":"2026-11-02"}}
 ---
 
 
 # xc-cfg
 
-**TL;DR:** `@galacticcouncil/xc-cfg` (v2.3.0) is the **data + builder layer** of the XC stack — concrete chain / asset / route definitions, DEX integrations for fee conversion, contract/extrinsic/program/move builders per bridge, and the transfer-validation framework. **Aug 2026: the legacy Wormhole TokenBridge / TokenRelayer / MRL stack was ripped out and replaced by Wormhole NTT** (Native Token Transfers), which removed the Moonbeam hop entirely.
+**TL;DR:** `@galacticcouncil/xc-cfg` (**v2.9.1**; deps `xc-core
+{ #2}
+.8.0`, peer `sdk-next >=2.0.0`) is the **data + builder layer** of the XC stack: chain / asset / route definitions, per-bridge contract / extrinsic / program / move / deposit builders, bridge clients, DEX fee conversion and transfer validations. Bridges at d16ff85: **XCM**, **Snowbridge** (V2 default + V1), **Wormhole NTT** (self-redeem + Executor), **Omni** (NEAR One; Zcash UTXO corridor), and one **Basejump** route on Ethereum. Long-form references live in `packages/xc/docs/` (`ntt.md`, `ntt-reorg-recovery.md`, `overview.md`, `chain-native-balances.md`, `unidirectional-routes.md`).
 
-> 131 files changed since the May 2026 sync — the single biggest churn in the repo. It is a **bridge-model replacement**, not a chain expansion: 5 chains deleted, 1 added.
+## Chain inventory (`chainsMap`, `src/chains/`)
 
-## Headline change: MRL → NTT
-
-| Before (≤ May 2026) | After (Aug 2026) |
+| Ecosystem | Chain keys |
 |---|---|
-| Wormhole via **MRL** — Hydration → Moonbeam → Ethereum, XCM `Transact` payload | Wormhole **NTT** — Hydration ↔ Ethereum / Base / Solana / Sui **direct** |
-| `builders/contracts/Wormhole/TokenBridge.ts`, `TokenRelayer.ts` | `builders/contracts/Wormhole/Ntt.ts` (+ `programs/`, `moves/` twins) |
-| `xc-core/utils/mrl.ts`, `evm/abi/{TokenBridge,TokenRelayer,Gmp}.ts` | `xc-core/bridge/ntt.ts`, `evm/abi/{NttManager,NttManagerWithExecutor,WormholeTransceiver,Executor}.ts` |
-| `Tag.Mrl` | `Tag.Ntt`, `Tag.NttExecutor` |
-| assets keyed `*_mwh` (moonbeam-wormhole) | assets keyed `*_wh` |
-| `AssetRoute.transact` (intermediate-chain hop) | **removed** — see [[wiki/xc-core\|xc-core]] |
-| `HydrationMrlFeeValidation` (GLMR balance) | **removed**; `NttRateLimitValidation` added |
+| Polkadot | `hydration`, `assethub`, `assethub_cex` (test chain, CEX forwarding), `astar`, `bifrost`, `energywebx`, `mythos`, `neuroweb`, `pendulum`, `polkadot`, `unique` |
+| Kusama | `assethub_kusama`, `basilisk` |
+| EVM | `ethereum` (wh 2), `base` (wh 30), **`hyperevm`** (EVM 999, wh 47), **`robinhood`** (EVM 4663, wh 72) |
+| Solana | `solana` (wh 1) |
+| Sui | `sui` (wh 21) |
+| NEAR | **`near`** (wh 15), `near_testnet` |
+| Zcash | **`zec`** (`ZecChain`) |
 
-Hydration is now a first-class Wormhole chain (wormhole id `73`, EVM chain id `222222`, registered in `@wormhole-foundation/sdk-base`, pinned at exactly `6.1.4` across xc-core). Long-form reference: `packages/xc/docs/ntt.md`.
+Hydration itself is wormhole id **73**, EVM chain id 222222.
 
-### NTT model
+## Tags (`src/tags.ts`)
 
-No shared bridge contract — each token has its own deployment per chain:
+`Basejump`, `Ntt`, `NttExecutor`, **`Omni`**, `Wormhole`, `Relayer`, `Snowbridge`, `SnowbridgeV1`. `ConfigBuilder.build(assetOnDest, tag?)` picks among routes sharing a `sourceAsset-destChain-destAsset` key.
 
-- **NttManager** — locks/burns on source, mints/unlocks on destination; holds the per-direction rate limits.
-- **WormholeTransceiver** — emits/verifies the VAA. **The VAA emitter is the transceiver**, not the manager (on Solana a PDA of it, on Sui its `EmitterCap` object id — declared explicitly via the optional `emitter` field).
+## Outbound routes from Hydration (`configs/polkadot/hydration/index.ts`)
 
-Registry lives inline in each chain def under `wormhole.ntt`, keyed by asset key, typed as `NttTokenDef` in [[wiki/xc-core\|xc-core]]. Lookups: `Ntt.fromChain()`, `Ntt.isKnown()`, `Ntt.find()`, `Ntt.findByEmitter()`.
-
-**Registry contract:** one asset key per token across all chains — `WormholeTransfer` resolves the destination deployment with the *source* asset key, so chain-local key variants would silently break the redeem callback. Chain-side cross-check: `pallet-evm-accounts` keeps `NttMinters: StorageMap<AssetId, EvmAddress>`.
-
-### NTT deployments (as configured)
-
-| Chain | wormhole id | NTT assets |
+| Bridge | Destination | Pairs |
 |---|---|---|
-| Hydration | 73 | `dai_wh`, `eurc_wh`, `jito_sol`, `prime`, `sol`, `sui`, `susds_wh`, `usdc_wh`, `usdt_wh`, `wbtc_wh`, `weth_wh` — **burning** managers; `token` = the erc20 precompile of the asset id |
-| Ethereum | 2 | `dai`, `susds`, `usdc`, `usdt`, `wbtc`, `weth`, `eth` — locking. `eth` shares the `weth` deployment (the manager only locks the erc20, so a native source is wrapped upfront via `ContractConfig.wrapNative`); registered **after** `weth` so a VAA from the shared transceiver resolves back to the erc20 key |
-| Base | 30 | `eurc` — locking |
-| Solana | 1 | `sol`, `wsol` (same deployment, keyed separately), `jito_sol`, `prime` |
-| Sui | 21 | `sui` — locking; `manager` / `transceiver.wormhole` are State **object ids**, `emitter` is the transceiver's `EmitterCap` object id |
+| XCM | Asset Hub | `dot`, `ksm`, `usdt`, `usdc` (`toHubTemplate`), `wud` (`toHubExtTemplate`) |
+| XCM | Kusama Asset Hub | `ksm`, `dot` (`toKusamaHubTemplate`) |
+| XCM | Asset Hub CEX | `dot`, `usdt`, `usdc` |
+| XCM | parachains | astar, bifrost (`bnc`, `vdot`, `vastr`, `astr`, `usdt`, `usdc`), mythos, unique (`unq`), energywebx, pendulum, neuroweb (`neuro`) |
+| NTT | Ethereum | `dai_wh→dai`, `susds_wh→susds`, `usdc_wh→usdc`, `usdt_wh→usdt`, `wbtc_wh→wbtc`, `weth_wh→eth` |
+| NTT | Base | `eurc_wh→eurc` |
+| NTT | HyperEVM | `hype→hype` |
+| NTT | Robinhood | `hdx`, `hollar`, `spy`, `weth_wh→eth` |
+| NTT | Solana | `sol`, `jito_sol`, `prime` (executor variant delivers `sol→wsol`) |
+| NTT | Sui | `sui` |
+| NTT | NEAR | `near→wnear`, `zec→zec` — **self-redeem only** (no Executor serves NEAR) |
+| Omni | Zcash | `zec` via `viaOmniTemplate(zec, zcash, near_chain)` |
+| Snowbridge V2 (default) + V1 (`Tag.SnowbridgeV1`) | Ethereum | `eth`, `aave`, `apyusd`, `cfg_new`, `ena`, `paxg`, `susde`, `tbtc`, `trac`, `lbtc`, `ldo`, `link`, `sky`, `wsteth`, `usdc_eth→usdc`, `usdt_eth→usdt` |
 
-### Configured NTT routes (`configs/polkadot/hydration/index.ts`)
+Every NTT pair except NEAR is registered twice: `viaNttTemplate` (`Wormhole+Ntt`, self-redeem) and `viaNttExecutorTemplate` (`+NttExecutor`). The **destination asset key picks the bridge**: `usdc_wh` = NTT, `usdc_eth` = Snowbridge, same underlying.
 
-| Direction | Pairs |
-|---|---|
-| Hydration → Ethereum | `dai_wh→dai`, `susds_wh→susds`, `usdc_wh→usdc`, `usdt_wh→usdt`, `wbtc_wh→wbtc`, `weth_wh→eth` |
-| Hydration → Base | `eurc_wh→eurc` |
-| Hydration → Solana | `sol→sol`, `jito_sol→jito_sol`, `prime→prime` (the executor variant sends `sol→wsol`) |
-| Hydration → Sui | `sui→sui` |
+Inbound routes: `configs/evm/{ethereum,base,hyperevm,robinhood}`, `configs/solana`, `configs/sui`, `configs/near` (`toHydrationViaNttTemplate` for `near`, `wnear`, `zec`), `configs/zcash` (Omni deposit), `configs/polkadot/{assethub,astar,bifrost,energywebx,mythos,pendulum}`, `configs/kusama/*`. **Inbound routes were dropped** (Oct 2026) for assets no longer accepted as Hydration fee currency — e.g. KSM from Kusama Asset Hub, and the whole Neuroweb and Unique inbound configs. Basejump survives only as one Ethereum→Hydration USDC route (`configs/evm/ethereum`, `ContractBuilder().Basejump().bridgeViaWormhole()`).
 
-Every pair above is registered twice — plain (`viaNttTemplate`) and executor (`viaNttExecutorTemplate`). Reverse legs live in `configs/evm/{ethereum,base}`, `configs/solana`, `configs/sui/sui.ts`. Sui is wired **both ways at HEAD**, though `packages/xc/docs/ntt.md` still describes those two route lines as commented out — the doc lags the config.
+## NTT registry (`wormhole.ntt` per chain def, `NttTokenDef` in [[wiki/xc-core\|xc-core]])
 
-### Delivery: self-redeem vs Executor
+| Chain | Assets | Mode |
+|---|---|---|
+| Hydration (73) | `dai_wh`, `eurc_wh`, `jito_sol`, `prime`, `sol`, `sui`, `susds_wh`, `usdc_wh`, `usdt_wh`, `wbtc_wh`, `weth_wh`, `hype`, `near`, `spy`, `zec` — **burning**, `token` = erc20 precompile of the asset id; **`hdx`, `hollar` — locking** (Hydration is the hub) |
+| Ethereum (2) | `dai`, `susds`, `usdc`, `usdt`, `wbtc`, `weth`, `eth` (shares `weth`) | locking |
+| Base (30) | `eurc` | locking |
+| HyperEVM (47) | `hype`, `whype` (native wrapped upfront via `wrapNative`) | locking WHYPE |
+| Robinhood (72) | `hdx`, `hollar`, `weth`, `eth` — burning (Hydration hub); `spy` — locking (minted on Hydration) |
+| Solana (1) | `sol`, `wsol`, `jito_sol`, `prime` | — |
+| Sui (21) | `sui` | locking; object ids |
+| NEAR (15) | `near` / `wnear` → `ntt-near.hydration-whm.near` (locks `wrap.near`, peered with Hydration asset 1001358); `zec` → `ntt-zec.hydration-whm.near` (locks `zec.omft.near`, Omni's bridged ZEC, peered with asset 1001357) | locking; manager = transceiver; `platformAddressFormat: 'sha256'` |
 
-Each NTT pair carries **two** routes, picked by tag (same shape as the Snowbridge V1/V2 pair):
+**One asset key per token across all chains** — the redeem callback resolves the destination deployment by the *source* key. Hydration-side cross-check: `EVMAccounts.NttMinters`. The NEAR managers are deployed from [[wiki/source-whm-codebase\|WHM]].
 
-- `Tag.Wormhole + Tag.Ntt` — plain `NttManager.transfer`; **self-redeem**, the user completes via `receiveMessage` on the destination.
-- `Tag.Wormhole + Tag.Ntt + Tag.NttExecutor` — the sender pays `deliveryPrice + estimatedCost` and the Wormhole Executor service delivers.
+## Delivery: self-redeem vs Executor
 
-**The executor route is built two different ways depending on source chain** — `ContractBuilder().Wormhole().Ntt()` exposes both:
+- `Tag.Wormhole + Tag.Ntt` — `NttManager.transfer`; user redeems on destination (`receiveMessage`; NEAR: `complete`).
+- `+ Tag.NttExecutor` — sender prepays; Wormhole Executor delivers.
 
 | Builder | Used by | Shape |
 |---|---|---|
-| `transferWithExecutor()` | Ethereum / Base templates (`configs/evm/*/templates.ts`) | one call into the `NttManagerWithExecutor` shim (selector `0xce972e0e`), which pulls the erc20 and forwards |
-| `transferViaExecutor()` | **Hydration** template (`viaNttExecutorTemplate`) | two calls the sender owns: `NttManager.transfer` (value = `deliveryPrice`) then `Executor.requestExecution` (value = `estimatedCost`), with an exact-amount approve as prerequisite |
+| `transferWithExecutor()` | Ethereum / Base templates | one call into the `NttManagerWithExecutor` shim |
+| `transferViaExecutor()` | Hydration (`viaNttExecutorTemplate`) | `NttManager.transfer` (value `deliveryPrice`) + `Executor.requestExecution` (value `estimatedCost`) |
 
-**Why Hydration can't use the shim:** `NttManagerWithExecutor` approves the manager for `type(uint256).max`, and Hydration's erc20 precompile carries a **u128** balance — anything above `uint128` max reverts with `"value too big for type"`. Inside `EVM.call` the revert is swallowed and surfaces as `Utility.BatchCompleted` over an `EVM.ExecutedFailed`; `allowance(shim → manager)` on Hydration has never been non-zero.
+Hydration can't use the shim: it approves `uint256.max`, Hydration's erc20 precompile holds u128 → revert, swallowed as `EVM.ExecutedFailed` inside `Utility.BatchCompleted`. Executor cost is charged in **WETH (asset 20)** — `EVM.call { value }` debits WETH regardless of signer — so the template prices it with `FeeAmountBuilder().Wormhole().quoteExecutorCost()` in `weth_wh` and prepends a fee swap for ss58 senders with no WETH. `requestBytes` = `encodeNttRequest` (70-byte `ERN1`) with the sequence read at build time — a concurrent transfer through the same manager can make the request point at the wrong message (transfer then stays claimable by hand). Amounts floored to `min(8, decimals)` dp (`TrimmedAmount`).
 
-Two distinct addresses per chain def: `wormhole.executor` (the Executor service) and `wormhole.nttExecutor` (the shim). The Hydration executor template also prices its destination fee as `FeeAmountBuilder().Wormhole().quoteExecutorCost()` denominated in `weth_wh`, and decorates the extrinsic path with a fee swap (`ExtrinsicDecorator(isDestinationFeeSwapSupported, swapExtrinsicBuilder).prior(...)`).
+Dual signer origin: NTT / Snowbridge / Omni templates declare both `contract` (h160 signer) and `extrinsic` (`ExtrinsicBuilder().evm().call(...)` → `EVM.call` + `Utility.batch_all`, needs a **bound** EVM address; `HydrationEvmResolver` throws otherwise).
 
-`Executor.requestExecution` is generic — it moves no tokens and knows nothing about NTT — so `requestBytes` (`encodeNttRequest`, 70-byte `ERN1` layout) is what names the message. The sequence comes from `nextMessageSequence()` read at build time: **another transfer through the same manager landing in between leaves the request pointing at the wrong message**, nothing is relayed, and the transfer stays claimable by hand.
+## Omni / Zcash corridor (`bridges/omni/`, `builders/{contracts,deposits}/Omni/`)
 
-EVM amounts are floored to NTT wire precision (`TrimmedAmount`, `min(8, decimals)` dp) or the manager reverts with `TransferAmountHasDust`. Sui trims internally and hands the remainder back.
+- **Hydration → Zcash:** `viaOmniTemplate` calls the `UtxoEmitter` contract on Hydration EVM (`OMNI_CONNECTORS.zec.withdrawal.emitter = 0xb3e365a6…259e`), which settles over NTT to a NEAR account derived from the Zcash address; `withdraw-zec.hydration-whm.near` signs the withdrawal via the NEAR MPC signer (`v1.signer`, Ed25519 domain). Fee = `FeeAmountBuilder().Omni().withdrawFee(hub)`; miner fee fixed at 10,000 zat (ZIP-317).
+- **Zcash → Hydration:** `DepositBuilder().Omni().Ntt().transfer(near_chain)` — Omni mints `zec.omft.near` into the NEAR NTT manager, which publishes to Hydration. Connector `zcash-connector.bridge.near`, `minDeposit` 100,000 zat (smaller deposits are neither minted nor refunded). Failed publishes refund to `hydration.sputnik-dao.near` (DAO refunds by hand).
+- API: `OMNI_BRIDGE_API = https://mainnet.api.bridge.nearone.org/api/v3`; `OmniClient.getConfig()`, `getWithdrawFee()`. The deposit message itself is built in [[wiki/xc-swap\|xc-swap]].
+- The earlier NEAR **1Click** path for Zcash was dropped from xc-cfg; 1Click remains only as a quote source in [[wiki/xc-swap\|xc-swap]].
 
-## Chain inventory
-
-`chainsMap` (`src/chains/`). **Removed** this cycle: `moonbeam`, `interlay`, `crust`, `ajuna`, `laos`. **Added:** `assethub_cex`.
-
-| Ecosystem | Chains |
-|---|---|
-| Polkadot | `hydration`, `assethub`, **`assethub_cex`** (new), `astar`, `bifrost`, `energywebx`, `mythos`, `neuroweb`, `pendulum`, `polkadot`, `unique` |
-| Kusama | `assethub_kusama`, `basilisk` |
-| EVM | `ethereum`, `base` |
-| Solana | `solana` |
-| Sui | `sui` |
-
-`assethub_cex` is defined at the bottom of `src/chains/polkadot/assethub.ts` — it shares AssetHub's config but is `isTestChain`, `usesSignerFee`, and clears `balanceOverrides` (CEX forwarding reads *every* asset incl. DOT from the `assets` pallet). It reuses AssetHub's DEX via the new `dexAlias` map in [[wiki/xc-package\|xc-package]] (`packages/xc/src/dex.ts`). Routes into it are the `toCex` block on the Hydration config: `dot`, `usdt`, `usdc` via `toHubTemplate`.
-
-RPC: Bifrost's IBP endpoint (`wss://bifrost-polkadot.ibp.network`) dropped in favour of `wss://hk.p.bifrost-rpc.liebi.com/ws`.
-
-## Asset key rename
-
-All Moonbeam-wormhole assets renamed and multilocations updated:
-
-`dai_mwh → dai_wh`, `eurc_mwh → eurc_wh`, `susds_mwh → susds_wh`, `usdc_mwh → usdc_wh`, `usdt_mwh → usdt_wh`, `wbtc_mwh → wbtc_wh`, `weth_mwh → weth_wh`.
-
-New: `apyusd`, `wsol` (Executor delivery stops at the ATA and leaves SOL wrapped, so that route names `wsol` as what arrives). Removed: `laos`.
-
-## Tags
-
-```ts
-// packages/xc-cfg/src/tags.ts
-export enum Tag {
-  Basejump = 'Basejump',
-  Ntt = 'Ntt',
-  NttExecutor = 'NttExecutor',
-  Wormhole = 'Wormhole',
-  Relayer = 'Relayer',
-  Snowbridge = 'Snowbridge',
-  SnowbridgeV1 = 'SnowbridgeV1',
-}
-```
-
-`ConfigBuilder.build(assetOnDest, tag?)` still selects among multiple routes sharing a `sourceAsset-destChain-destAsset` key.
-
-## Route templates
-
-`src/configs/polkadot/hydration/templates.ts`, `src/configs/evm/{ethereum,base}/templates.ts`:
-
-| Template | Tags |
-|---|---|
-| `viaNttTemplate` | `Wormhole`, `Ntt` |
-| `viaNttExecutorTemplate` | `Wormhole`, `Ntt`, `NttExecutor` |
-| `viaSnowbridgeTemplate` | `Snowbridge` (V2) |
-| `viaSnowbridgeV1Template` | `Snowbridge`, `SnowbridgeV1` |
-| `toTransferTemplate`, `toParaTemplate`, `toHubTemplate`, `toHubExtTemplate`, `toKusamaHubTemplate`, `toParaErc20Template` | plain XCM |
-
-Snowbridge is unchanged in shape but now runs V1 and V2 side by side: V2 routes (`eth`, `aave`, **`apyusd`** (new), `cfg_new`, `ena`, `paxg`, `susde`, `tbtc`, `trac`, `lbtc`, `ldo`, `link`, `sky`, `wsteth`, `usdc_eth`, `usdt_eth`) are registered **first** so default / `Tag.Snowbridge` selection resolves to V2; the cheaper legacy V1 route for the same pairs is reachable only via `Tag.SnowbridgeV1` (a UI switch). Note `usdc_eth`/`usdt_eth` (Snowbridge) and `usdc_wh`/`usdt_wh` (NTT) are **different asset keys for the same underlying token** — the destination asset key, not the chain pair, is what picks the bridge.
-
-### Dual signer origin
-
-NTT / Snowbridge templates declare **both** a `contract` and an `extrinsic`:
-
-```ts
-// packages/xc-cfg/src/configs/polkadot/hydration/templates.ts → viaNttTemplate
-const transfer = ContractBuilder().Wormhole().Ntt().transfer();
-return new AssetRoute({
-  source: { asset: assetIn, fee: fee() },
-  destination: { chain: to, asset: assetOut, fee: { amount: 0, asset: assetIn } },
-  contract: transfer,
-  extrinsic: ExtrinsicBuilder().evm().call(transfer), // new: src/builders/extrinsics/evm.ts
-  tags: [Tag.Wormhole, Tag.Ntt],
-});
-```
-
-`DataOriginProcessor` ([[wiki/xc-sdk\|xc-sdk]]) hands the `contract` to an h160 signer and the `extrinsic` to everyone else. The extrinsic path wraps the EVM calls in `EVM.call` + `Utility.batch_all` — one signature, fee quoted by the runtime in the sender's fee currency. Requires the account to be **bound** on chain (`EVMAccounts.bind_evm_address`); otherwise `EnsureAddressTruncated` resolves to the unrelated `ETH\0` phantom account. `HydrationEvmResolver` (`src/resolvers/hydration.ts`) throws rather than deriving silently.
-
-Contract builders now return an **ordered vector** of configs (`ContractConfigBuilder.build → Promise<ContractConfig[]>`) — `[manager.transfer]` for self-redeem, `[manager.transfer, executor.requestExecution]` for the executor bypass.
-
-## Clients
-
-`src/clients/` (exported as `clients`):
+## Clients (`src/clients/`)
 
 | Client | Purpose |
 |---|---|
-| `nttClient(chain, asset?)` → `NttEvmClient` / `NttSolanaClient` / `NttSuiClient` | `getOutboundLimit()`, `getInboundLimit(from)`, `getRedeemBudget(recipient?)` — the `recipient` arg only matters on Solana, where an unopened ATA changes the budget |
-| `ExecutorClient` (`clients/wormhole/`) | signed delivery quotes (`signedQuote`, `estimatedCost`, `relayInstructions`), `ExecutorBudget { gasLimit, msgValue }`, `QUOTE_SAFETY_MS = 5 min` quote-reuse window |
-| `HydrationClient` (`clients/chain/hydration/`) | ED, token balances, circuit-breaker limits (unchanged) |
-| `AssethubClient` | AssetHub ED / frozen-asset state |
+| `nttClient(chain, asset?)` → `NttEvmClient` / `NttSolanaClient` / `NttSuiClient` / **`NttNearClient`** | outbound / inbound rate limits, redeem budget, custody |
+| `ExecutorClient` | signed delivery quotes; `QUOTE_SAFETY_MS` = 5 min; checks the executor fee currency |
+| `OmniClient` | connector config, withdraw fee |
+| `HydrationClient` (+ `circuit-breaker.ts`) | ED, balances, [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] deposit / withdraw limits (`ASSET_LOCKDOWN_PERIOD_BLOCKS`) |
+| `AssethubClient` | AssetHub ED / frozen assets |
 
-`NttRateLimit { capacity, limit, windowMs, capacityAtLastTx, lastTxMs }`; `windowMs === 0` means the direction is unmetered (`UNMETERED` sentinel); `capacityAt()` mirrors the manager's linear refill (`rate_limit::capacity_at`). Sources per platform:
+## Transfer validations (`src/validations/`)
 
-- **EVM** — `rateLimitDuration()`, `getCurrent{Out,In}boundCapacity()`, `get{Out,In}boundLimitParams()` (packed `TrimmedAmount`s needing untrimming).
-- **Solana** — `outbox_rate_limit` / inbound rate-limit PDAs fetched with `getAccountInfo` and decoded locally at a fixed offset, because upstream returns the un-refilled stored value.
-- **Sui** — manager `State.fields.outbox.rate_limit`, inbound via the `peers` table (`inbound_rate_limit`).
+| Validator | Purpose |
+|---|---|
+| `FeeValidation`, `DestFeeValidation` | source / destination fee balance |
+| `HubEdValidation`, `HubFrozenValidation` | AssetHub ED / frozen asset |
+| `HydrationEdValidation` | Hydration ED |
+| `HydrationDepositLimitValidation` | `CircuitBreaker.AssetLockdownState` + deposit headroom |
+| `HydrationWithdrawLimitValidation` | global withdraw lockdown |
+| **`HydrationEvmValueValidation`** | fee currency must cover the prepaid delivery `value` — Hydration's EVM runner checks it against the fee currency even though WETH pays (`EVM.BalanceLow` otherwise) |
+| `NttRateLimitValidation` | outbound + inbound NTT rate limits (only when both ends are NTT-registered) |
+| **`NttCustodyValidation`** | a **locking** destination can only release what it holds; unreadable custody fails closed |
+| **`OmniValidation`** | connector minimums, emitter fee, NTT leg via the NEAR hub (rate limits + custody); fails closed |
 
-## Bridge constants
+## DEX / resolvers / constants
 
-New `src/bridges/`:
-
-- `bridges/wormhole/constants.ts` — `NTT_DEFAULT_INSTRUCTIONS = '0x00'` (must match what the fee builder quoted), `NTT_TRIMMED_DECIMALS = 8`, `EXECUTOR_API = 'https://executor.labsapis.com'`, `encodeNttRequest(srcWormholeId, nttManager, sequence)` (70-byte `ERN1` Executor request layout, hand-written because the wormhole sdk ships the prefix enum but no body layout).
-- `bridges/snowbridge/constants.ts` — `SNOWBRIDGE_BASE_DISPATCH_GAS = 80_000n`, `SNOWBRIDGE_BASE_VERIFICATION_GAS = 120_000n`, `SNOWBRIDGE_TOKEN_DELIVERY_GAS = 100_000n`, `SNOWBRIDGE_SUBMIT_GAS = 2_000_000n`, `ASSETHUB_ETHER_ED = 15_000_000_000_000n`.
-
-Snowbridge builders moved to `builders/contracts/snowbridge/` with a dedicated `codec.ts`; the V2 XCM path adds `extrinsics/xcm/builder/Snowbridge.ts` and `buildParaERC20ReceivedV5.ts`.
-
-## Transfer validations
-
-`src/validations/` exports `validations: TransferValidation[]`, consumed by [[wiki/xc-sdk\|xc-sdk]]'s `TransferValidator`. Matchers unchanged (`isAny`, `isHydration` = para 2034, `isHub` = para 1000, `isEvm`).
-
-| Validator | Source → Dest | Purpose |
-|---|---|---|
-| `FeeValidation` | any → any | source fee balance |
-| `DestFeeValidation` | any → any | destination fee asset balance |
-| `HubEdValidation` | any → hub | AssetHub ED |
-| `HubFrozenValidation` | hub → any | AssetHub frozen-asset gating |
-| `HydrationEdValidation` | any → hydration | Hydration ED via `HydrationClient` |
-| `HydrationDepositLimitValidation` | any → hydration | `CircuitBreaker.AssetLockdownState` + per-asset deposit headroom |
-| `HydrationWithdrawLimitValidation` | hydration → any | global withdraw lockdown |
-| `NttRateLimitValidation` | any → any | **NEW** — outbound (source) + inbound (destination) NTT rate limits |
-| ~~`HydrationMrlFeeValidation`~~ | — | **REMOVED** with Moonbeam |
-
-`NttRateLimitValidation` skips unless **both** ends are NTT-registered — the chain pair alone doesn't identify an NTT route, only the destination asset key does (`usdc_wh` = NTT vs `usdc_eth` = Snowbridge, same source asset). Errors: `Ntt_Outbound_Limit_Exceeded`, `Ntt_Inbound_Limit_Exceeded`, `Ntt_Limit_Unreachable` (fails closed — an over-limit *inbound* transfer is already burned on source and parks in the destination queue with no cancel).
-
-### Circuit-breaker integration (unchanged)
-
-`src/clients/chain/hydration/circuit-breaker.ts` — `getAssetDepositLimit()`, `getGlobalWithdrawLimit()`, `getAllAssetDepositLimits()`, `ASSET_LOCKDOWN_PERIOD_BLOCKS = 14400`. Reads [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] storage via [[wiki/sdk-descriptors\|sdk-descriptors]].
-
-## DEX integrations
-
-`HydrationDex` (`src/dex/hydration.ts`) and `AssethubDex`, used for destination-fee asset conversion via the [[wiki/smart-order-router\|smart-order-router]] from [[wiki/sdk-next\|sdk-next]] (peer `>=1.5.0`). Fallback pricing via `MultiTransactionPayment.AcceptedCurrencies` — bug fixed this cycle: the lookup now resolves `chain.getAssetId(asset)` and passes `Number(id)`, instead of querying with the `Asset` object.
+`dex/{hydration,assethub}.ts` (destination-fee conversion via [[wiki/sdk-next\|sdk-next]] router; `dexAlias` in [[wiki/xc-package\|xc-package]]). `resolvers/hydration.ts` (`HydrationEvmResolver`). `bridges/wormhole/constants.ts` (`NTT_DEFAULT_INSTRUCTIONS`, `NTT_TRIMMED_DECIMALS = 8`, `EXECUTOR_API`, `encodeNttRequest`), `bridges/snowbridge/constants.ts` (gas constants, `ASSETHUB_ETHER_ED`). `testnet/near.ts` — NEAR testnet NTT config.
 
 ## Public exports
 
-```ts
-// packages/xc-cfg/src/index.ts
-export { assetsMap } from './assets';
-export { chainsMap } from './chains';
-export { routesMap } from './configs';
-export { validations } from './validations';
-export * as builders from './builders';
-export * as clients from './clients';
-export * as dex from './dex';
-export * as tags from './tags';
-export { HydrationConfigService } from './configs/HydrationConfigService';
-```
+`assetsMap`, `chainsMap`, `routesMap`, `validations`, `builders`, `clients`, `dex`, `tags`, `HydrationConfigService`.
 
-`BalanceBuilder` / `AssetMinBuilder` and `src/builders/balance/*` were **deleted** — balance and minimum reads moved onto the chain itself in [[wiki/xc-core\|xc-core]] (`chain.getBalance()` / `subscribeBalance()`), declared per chain via `balance:` + `balanceOverrides:`. See the "Chain-native Balance Reads" and "Unidirectional Route Resolution" specs under `packages/xc/docs/` for the design and the phased migration.
+## Gotchas
 
-## Reference docs (new, in `packages/xc/docs/`)
-
-| Doc | Covers |
-|---|---|
-| `ntt.md` (~500 lines) | the definitive NTT reference — model, registry, transfer flow, signer paths, rate limits, tracking/claim, executor vs self-redeem, support matrix, open items |
-| `overview.md` | XC stack architecture, route DSL, package layouts, navigation cheatsheet |
-| `chain-native-balances.md` | declarative balance/min model, per-platform typing, adding a chain |
-| `unidirectional-routes.md` | spec for one-way routes + the `reversible` flag on the Transfer DTO |
-
-## Dependencies
-
-`@galacticcouncil/xc-core
-{ #2}
-.3.0`, `@thi.ng/memoize`; peer `@galacticcouncil/sdk-next >=1.5.0`.
+- `configs/polkadot/hydration/templates.ts` still carries two unused leftover helpers — ignore anything there with no callers.
+- Executor routes need WETH (or a fee swap into it); `HydrationEvmValueValidation` catches the fee-currency side.
+- NEAR routes are self-redeem only.
 
 ## Sources
 
 - [[wiki/source-sdk-codebase\|source-sdk-codebase]]
+- [[wiki/source-whm-codebase\|source-whm-codebase]] (NEAR NTT managers, `UtxoEmitter`, withdraw contracts)

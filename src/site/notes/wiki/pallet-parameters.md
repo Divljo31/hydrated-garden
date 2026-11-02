@@ -1,79 +1,73 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-parameters/","title":"pallet-parameters","tags":["parameters","runtime","flags","testnet","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-parameters","repo":"hydration-node","paths":["pallets/parameters/src/lib.rs"],"symbols":["Pallet","Config","IsTestnet","RelayParentOffsetOverride","GenesisConfig","is_testnet","relay_parent_offset_override","set_testnet_flag","set_relay_parent_offset_override"],"traits_impl":[],"depends_on":[],"runtime_index":83,"tags":["parameters","runtime","flags","testnet","rust","substrate"],"last_updated":"2026-05-14"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-parameters/","title":"pallet-parameters","tags":["parameters","runtime","flags","xcm","emergency","uniswap-v3","aave","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-parameters","repo":"hydration-node","paths":["pallets/parameters/src/lib.rs","runtime/hydradx/src/system.rs","runtime/hydradx/src/xcm.rs"],"symbols":["Pallet","Config","AuthorityOrigin","EmergencyOrigin","IsTestnet","RelayParentOffsetOverride","TwoSecBlocksSince","AaveGasLimitsOverride","AaveGasLimits","UniswapV3Factory","UniswapV3SwapRouter","UniswapV3Quoter","XcmSendSuspended","XcmExecutionSuspended","set_uniswap_v3_addresses","set_aave_gas_limits","suspend_xcm_send","resume_xcm_send","suspend_xcm_execution","resume_xcm_execution","suspend_xcm","resume_xcm","PausableRouter","XcmExecutionPausedQuery"],"traits_impl":[],"depends_on":["hydration-runtime"],"runtime_index":83,"tags":["parameters","runtime","flags","xcm","emergency","uniswap-v3","aave","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
 # pallet-parameters
 
-**TL;DR:** Hydration-specific (NOT the FRAME `pallet_parameters`) storage for two genesis-set boolean flags: `IsTestnet` and `RelayParentOffsetOverride`. Used by adapters / runtime code to branch behaviour on testnet versus mainnet, and to override relay-parent-offset enforcement in test environments. Runtime index = 83. **No extrinsics, no events, no errors** — purely a state holder.
+> ⚠ **Live status (2026-11-02):** the XCM suspend / resume calls below are on master (spec 458) only. The live chain runs spec 455, whose `Parameters` exposes only `set_uniswap_v3_addresses` and `set_aave_gas_limits` — see [[wiki/note-live-chain-check\|note-live-chain-check]].
 
-## Role
-
-Two flags that need to be readable at runtime without rebuilding the WASM:
-
-- **`IsTestnet`** — distinguishes testnet from mainnet at runtime. Consulted by various adapters (e.g. relaxing assertions, gating mock behaviour).
-- **`RelayParentOffsetOverride`** — overrides the normal relay-parent offset rule. Used in fork-test environments where the relay-chain block number cannot be guaranteed to advance in the expected way.
-
-Both values are seeded at genesis (`GenesisConfig`) and never change on a running chain except in tests, where `set_testnet_flag` / `set_relay_parent_offset_override` are exposed under `#[cfg(feature = "std")]`.
+**TL;DR:** Hydration-specific (NOT the FRAME `pallet_parameters`) runtime-parameter store: testnet / relay-parent flags, the 2 s block switch point, Aave executor gas limits, Uniswap v3 contract addresses, and the **XCM kill switch**. `suspend_xcm` stops all inbound and outbound XCM in one `Operational` call and can be dispatched by **any single Technical Committee member**; resuming needs a full `AuthorityOrigin`. Runtime index = 83.
 
 ## Config trait
 
 ```rust
 // pallets/parameters/src/lib.rs
-pub trait Config: frame_system::Config {}
+pub trait Config: frame_system::Config {
+    /// Origin allowed to change parameters.
+    type AuthorityOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+    /// Origin allowed to stop all XCM in one call. Meant to be wider than `AuthorityOrigin`
+    /// (e.g. any single technical committee member), as it can only stop, never resume.
+    type EmergencyOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+}
 ```
 
-The entire Config is empty — the pallet is just a typed storage shell scoped to a runtime.
+Runtime (`runtime/hydradx/src/system.rs`):
+
+```rust
+type AuthorityOrigin = EitherOf<EnsureRoot<AccountId>, EitherOf<TechCommitteeSuperMajority, GeneralAdmin>>;
+type EmergencyOrigin = EitherOfDiverse<EnsureSignedBy<TechCommAccounts, AccountId>, Self::AuthorityOrigin>;
+```
 
 ## Storage
 
-| Name | Kind | Default |
-|---|---|---|
-| `IsTestnet` | `StorageValue<_, bool, ValueQuery>` | `false` |
-| `RelayParentOffsetOverride` | `StorageValue<_, bool, ValueQuery>` | `false` |
+| Name | Kind | Value | Used by |
+|---|---|---|---|
+| `IsTestnet` | Value | `bool` | adapters branching on testnet |
+| `RelayParentOffsetOverride` | Value | `bool` | fork/test environments |
+| `TwoSecBlocksSince` | Value | `BlockNumber` (default `u32::MAX`) — block at which the chain switched 6 s → 2 s | [[wiki/pallet-staking\|pallet-staking]], [[wiki/pallet-gigahdx\|pallet-gigahdx]] period math via `TwoSecBlocksSinceProvider` (`runtime/hydradx/src/assets.rs`) |
+| `AaveGasLimitsOverride` | Value | `Option<AaveGasLimits { trade, view, reserves_list }>` | Aave trade executor; `None` = runtime defaults |
+| `UniswapV3Factory` / `UniswapV3SwapRouter` / `UniswapV3Quoter` | Value | `Option<H160>` | `UniswapV3TradeExecutor` ([[wiki/pallet-route-executor\|pallet-route-executor]] `PoolType::UniswapV3`) |
+| `XcmSendSuspended` | Value | `bool` | `PausableRouter` (outbound) in `runtime/hydradx/src/xcm.rs` |
+| `XcmExecutionSuspended` | Value | `bool` | `XcmExecutionPausedQuery` (MessageQueue inbound, relay + siblings) |
 
-## Genesis config
+## Extrinsics
 
-```rust
-pub struct GenesisConfig<T: Config> {
-    pub is_testnet: bool,
-    pub relay_parent_offset_override: bool,
-    pub _phantom: PhantomData<T>,
-}
-```
+| # | Name | Origin | Effect |
+|---|---|---|---|
+| 0 | `set_uniswap_v3_addresses(factory, swap_router, quoter)` | Authority | Point the v3 venue at a deployment |
+| 1 | `set_aave_gas_limits(Option<AaveGasLimits>)` | Authority | Override / reset Aave executor gas limits |
+| 2 | `suspend_xcm_send` | Authority | Stop outbound XCM |
+| 3 | `resume_xcm_send` | Authority | Resume outbound |
+| 4 | `suspend_xcm_execution` | Authority | Stop inbound XCM processing |
+| 5 | `resume_xcm_execution` | Authority | Resume inbound |
+| 6 | `suspend_xcm` | **Emergency** (one TC member) — `DispatchClass::Operational` | Stop both directions |
+| 7 | `resume_xcm` | Authority (TC super-majority = 2/3) — `Operational` | Resume both |
 
-Both default to `false`, so mainnet builds do not need explicit configuration. Testnets / chopsticks / zombienet configurations set these in their chain specs.
+`IsTestnet` / `RelayParentOffsetOverride` are seeded by `GenesisConfig`; `set_testnet_flag` / `set_relay_parent_offset_override` are plain `pub fn` helpers for tests, not extrinsics.
 
-## Events / Errors / Extrinsics
-
-None — the pallet has no `#[pallet::event]`, `#[pallet::error]`, or `#[pallet::call]`. State is set only at genesis and via the test-only setters.
-
-## Helper API
-
-```rust
-#[cfg(feature = "std")]
-impl<T: Config> Pallet<T> {
-    pub fn set_testnet_flag(is_testnet: bool);
-    pub fn set_relay_parent_offset_override(override_enabled: bool);
-}
-```
-
-Used only from test mocks.
-
-## Integration
-
-- **Traits implemented:** none external
-- **Traits consumed:** none
-- **Pallets depended on:** none. Read directly via `pallet_parameters::IsTestnet::<Runtime>::get()` from runtime adapters and helpers.
+Events: `UniswapV3AddressesSet`, `AaveGasLimitsSet`, `XcmSendSuspended`, `XcmSendResumed`, `XcmExecutionSuspended`, `XcmExecutionResumed`, `XcmSuspended`, `XcmResumed`. Errors: `AlreadySuspended`, `AlreadyResumed`.
 
 ## Gotchas
 
-- **Not the FRAME `pallet_parameters`.** Do not confuse with `frame_support::parameter_types!` / the upstream `pallet_parameters` (which would let governance update typed key/value pairs). Hydration does **not** use that pallet today; all runtime knobs are either `pallet::constant` types or dedicated pallets (e.g. [[wiki/pallet-dynamic-fees\|pallet-dynamic-fees]], [[wiki/pallet-dynamic-evm-fee\|pallet-dynamic-evm-fee]]).
-- **Empty Config trait.** Adding new flags requires a runtime upgrade (new storage value + genesis migration). It is not a generic parameters store.
-- **Genesis-only mutability in production.** No extrinsic exposes a write path; `set_testnet_flag` and `set_relay_parent_offset_override` are gated behind `#[cfg(feature = "std")]` so they exist only in the host binary, not in the WASM runtime.
-- A previous wiki revision documented this pallet as a generic `AggregatedKeyValue` store with a `set_parameter` extrinsic — that was inaccurate. Disregard those references.
+- **Stop is cheap, resume is expensive by design.** Any one TC member can `suspend_xcm`; resuming needs TC super-majority / GeneralAdmin / Root. Plan the resume motion before pulling the lever.
+- Inbound suspension holds messages in `MessageQueue` (paused queues), it does not drop them — they execute after resume, including any malicious ones. Pair with asset-level controls ([[wiki/note-emergency-levers\|note-emergency-levers]]).
+- Outbound suspension makes every `SendXcm::validate` fail with `Transport("XCM sending is suspended")` — user XCM transfers out and any pallet that sends XCM fail.
+- A wrong Uniswap v3 address fails silently: `getPool` finds no pool and the venue just goes quiet. Verify against deployment artefacts after enactment; off-chain consumers should read these storage values, not hardcode.
+- `TwoSecBlocksSince` defaults to `u32::MAX` (= "not yet switched"); period math in staking/gigahdx depends on it being set correctly.
 
 ## Sources
 
 - [[wiki/source-hydration-node-codebase\|source-hydration-node-codebase]]
 - [[wiki/hydration-runtime\|hydration-runtime]]
+- [[wiki/note-emergency-levers\|note-emergency-levers]]

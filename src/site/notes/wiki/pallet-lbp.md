@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-lbp/","title":"pallet-lbp","tags":["amm","lbp","liquidity-bootstrapping","launchpad","runtime","rust"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-lbp","repo":"hydration-node","paths":["pallets/lbp/src/lib.rs","pallets/lbp/src/types.rs","pallets/lbp/src/trade_execution.rs","pallets/lbp/src/provider.rs","pallets/lbp/src/weights.rs","pallets/lbp/src/invariants.rs"],"symbols":["Pallet","Config","Pool","LBPWeight","WeightCurveType","create_pool","update_pool_data","add_liquidity","remove_liquidity","sell","buy","start_sale","stop_sale","LBPWeightCalculation"],"traits_impl":["LBPWeightCalculation","TradeExecution"],"depends_on":["pallet-broadcast"],"runtime_index":73,"tags":["amm","lbp","liquidity-bootstrapping","launchpad","runtime","rust"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-lbp/","title":"pallet-lbp","tags":["amm","lbp","liquidity-bootstrapping","launchpad","runtime","rust"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-lbp","repo":"hydration-node","paths":["pallets/lbp/src/lib.rs","pallets/lbp/src/types.rs","pallets/lbp/src/trade_execution.rs","pallets/lbp/src/provider.rs","pallets/lbp/src/weights.rs","pallets/lbp/src/invariants.rs"],"symbols":["Pallet","Config","Pool","LBPWeight","WeightCurveType","create_pool","update_pool_data","add_liquidity","remove_liquidity","sell","buy","start_sale","stop_sale","LBPWeightCalculation"],"traits_impl":["LBPWeightCalculation","TradeExecution"],"depends_on":["pallet-broadcast"],"runtime_index":73,"tags":["amm","lbp","liquidity-bootstrapping","launchpad","runtime","rust"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -95,7 +95,7 @@ pub fn create_pool(
 
 ## Gotchas
 
-- `MAX_SALE_DURATION ≈ 14 days` (201,600 blocks at 6s/block).
+- `MAX_SALE_DURATION = (86_400 / 6) * 14` blocks — 14 days of **relay-chain** blocks: the runtime wires `BlockNumberProvider = RelayChainBlockNumberProvider`, so LBP timing is unaffected by Hydration's 2 s blocks.
 - Weights in range 0..=100_000_000 (100%); linear interpolation between start & end blocks.
 - Fee structure has a *repayment target*: until `fee_collector` receives the target amount of asset_a, fee is elevated (≈ 20%); drops to configured fee afterwards.
 - Pool owner cannot modify weights once the sale has started; only `fee_collector` / `repay_target` via `update_pool_data`.

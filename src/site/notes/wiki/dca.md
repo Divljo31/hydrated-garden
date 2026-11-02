@@ -1,17 +1,25 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/dca/","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/dca/","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"DCA (Dollar-Cost Averaging)","tags":["trading","automation"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
 # DCA (Dollar-Cost Averaging)
 
-**TL;DR:** DCA is a [[wiki/hydration\|hydration]] trading tool that enables automated recurring trades over time using the [[omnipool\|omnipool]]. A related feature, **Split Trade / Easy DCA**, splits large trades into smaller chunks targeting <0.1% slippage per chunk.
+**TL;DR:** DCA is a [[wiki/hydration\|hydration]] trading tool that enables automated recurring trades over time through the router; new DCA flow is ICE DCA intents ([[wiki/ice\|ice]]). A related feature, **Split Trade / Easy DCA**, splits large trades into smaller chunks targeting <0.1% slippage per chunk.
 
-## Sell-only since Aug 2026
+## Two implementations
 
-`schedule` now rejects any `Order::Buy` with `Error::NoLongerSupported` (`pallets/dca/src/lib.rs`) — **only sell schedules can be created**. Buy schedules stored before the restriction keep executing to completion, so the buy execution path in `on_initialize` is still live and must not be treated as dead code. See [[wiki/pallet-dca\|pallet-dca]].
+| | Legacy schedules | ICE DCA intents |
+|---|---|---|
+| Pallet | [[wiki/pallet-dca\|pallet-dca]] (index 66) | [[wiki/pallet-intent\|pallet-intent]] + [[wiki/pallet-ice\|pallet-ice]] |
+| Execution | `on_initialize` per schedule via the router | Solver batch; may be matched against opposite intents before AMMs |
+| Price protection | stability threshold + slippage vs oracle | `max(hard floor, route-oracle price − slippage)`, `MaxDcaSlippage` 50% |
+| Orders | sell only (`Order::Buy` → `NoLongerSupported`; stored buys still execute) | sell only |
+| Status | migration source: with `DCA.set_migration_enabled(true)` each due schedule converts into an ICE DCA intent or is cancelled + refunded | target |
 
-[[wiki/sdk-next\|sdk-next]] `TradeScheduler` now also returns `assetOutEd` on every order DTO (`src/sor/TradeScheduler.ts`) — per-trade `amount_out` must clear the destination asset's existential deposit.
+Periods are in blocks (2 s); legacy `MinimalPeriod` = 15 blocks.
+
+[[wiki/sdk-next\|sdk-next]] `TradeScheduler` returns `assetOutEd` on every order DTO (`src/sor/TradeScheduler.ts`) — per-trade `amount_out` must clear the destination asset's existential deposit.
 
 ## Sources
 

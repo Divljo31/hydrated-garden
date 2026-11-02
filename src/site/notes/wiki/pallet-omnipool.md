@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-omnipool/","title":"pallet-omnipool","tags":["amm","omnipool","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-omnipool","repo":"hydration-node","paths":["pallets/omnipool/src/lib.rs","pallets/omnipool/src/types.rs","pallets/omnipool/src/traits.rs","pallets/omnipool/src/router_execution.rs","pallets/omnipool/src/weights.rs"],"symbols":["Pallet","Config","AssetState","Position","Tradability","SlipFeeConfig","sell","buy","add_liquidity","add_liquidity_with_limit","add_all_liquidity","remove_liquidity","remove_liquidity_with_limit","remove_all_liquidity","add_token","set_asset_tradable_state","sacrifice_position","withdraw_protocol_liquidity","refund_refused_asset","HubAssetId","HdxAssetId","BurnProtocolFee","NFTCollectionId","Assets","Positions","SlipFee","SlipFeeHubReserveAtBlockStart","SlipFeeDelta","HubAssetTradability"],"traits_impl":["AMM","AssetPairSpotPrice","TradeExecution","RouteProvider"],"depends_on":["pallet-broadcast","pallet-nft","pallet-ema-oracle","pallet-circuit-breaker","pallet-asset-registry","pallet-dynamic-fees"],"runtime_index":59,"tags":["amm","omnipool","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-omnipool/","title":"pallet-omnipool","tags":["amm","omnipool","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-omnipool","repo":"hydration-node","paths":["pallets/omnipool/src/lib.rs","pallets/omnipool/src/types.rs","pallets/omnipool/src/traits.rs","pallets/omnipool/src/router_execution.rs","pallets/omnipool/src/weights.rs"],"symbols":["Pallet","Config","AssetState","Position","Tradability","SlipFeeConfig","sell","buy","add_liquidity","add_liquidity_with_limit","add_all_liquidity","remove_liquidity","remove_liquidity_with_limit","remove_all_liquidity","add_token","set_asset_tradable_state","sacrifice_position","withdraw_protocol_liquidity","refund_refused_asset","HubAssetId","HdxAssetId","BurnProtocolFee","NFTCollectionId","Assets","Positions","SlipFee","SlipFeeHubReserveAtBlockStart","SlipFeeDelta","HubAssetTradability"],"traits_impl":["AMM","AssetPairSpotPrice","TradeExecution","RouteProvider"],"depends_on":["pallet-broadcast","pallet-nft","pallet-ema-oracle","pallet-circuit-breaker","pallet-asset-registry","pallet-dynamic-fees"],"runtime_index":59,"tags":["amm","omnipool","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -45,7 +45,7 @@ pub trait Config: frame_system::Config + pallet_broadcast::Config {
 
 | Name | Kind | Key → Value |
 |------|------|-------------|
-| `Assets` | StorageMap | `AssetId → AssetState` |
+| `Assets` | StorageMap | `AssetId → AssetState` — `pub` (read directly by the ICE simulator provider) |
 | `Positions` | StorageMap | `PositionItemId → Position` |
 | `NextPositionId` | StorageValue | `PositionItemId` |
 | `HubAssetTradability` | StorageValue | `Tradability` |
@@ -118,6 +118,8 @@ pub fn sell(
 ```
 
 ## Gotchas
+
+- The fee-accounting `debug_assert` tolerates a 1-unit difference between taken and reported fee (`abs_diff <= 1`) — rounding through aToken/ERC-20 legs.
 
 - Hub asset ([[wiki/lrna\|lrna]]) is special: can only be *sold*, never *bought*; all trades compute hub-reserve deltas internally.
 - NFT position captures the exact price at provision; [[wiki/impermanent-loss\|impermanent-loss]] is calculated against that snapshot.

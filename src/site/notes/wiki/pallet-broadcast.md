@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-broadcast/","title":"pallet-broadcast","tags":["broadcast","events","indexer","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-broadcast","repo":"hydration-node","paths":["pallets/broadcast/src/lib.rs","pallets/broadcast/src/types.rs"],"symbols":["Pallet","Config","ExecutionContext","IncrementalIdProvider","Swapped3","Asset","Fee","Filler","TradeOperation"],"traits_impl":["IncrementalIdProvider","ExecutionTypeStack"],"depends_on":[],"runtime_index":204,"tags":["broadcast","events","indexer","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-broadcast/","title":"pallet-broadcast","tags":["broadcast","events","indexer","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-broadcast","repo":"hydration-node","paths":["pallets/broadcast/src/lib.rs","pallets/broadcast/src/types.rs"],"symbols":["Pallet","Config","ExecutionContext","IncrementalIdProvider","Swapped3","Asset","Fee","Filler","TradeOperation"],"traits_impl":["IncrementalIdProvider","ExecutionTypeStack"],"depends_on":[],"runtime_index":204,"tags":["broadcast","events","indexer","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -55,15 +55,19 @@ None.
 ```rust
 // pallets/broadcast/src/types.rs
 pub enum ExecutionType {
-    Omnipool(u32), Stableswap(u32), XYK(u32), LBP(u32), OTC(u32),
-    Router(u32), DCA(u32), HSM(u32), Batch(u32), Solver(u32), ICE(u32),
+    Router(IncrementalIdType),
+    DCA(ScheduleId, IncrementalIdType),
+    Batch(IncrementalIdType),
+    Omnipool(IncrementalIdType),
+    XcmExchange(IncrementalIdType),
+    Xcm([u8; 32], IncrementalIdType),
 }
 
-pub enum TradeOperation { ExactIn, ExactOut }
+pub enum TradeOperation { ExactIn, ExactOut, Limit, LiquidityAdd, LiquidityRemove }
 
 pub enum Filler {
-    Omnipool, Stableswap(poolId), XYK(shareAssetId), LBP,
-    OTC(orderId), HSM(collateralId),
+    Omnipool, Stableswap(AssetId /* pool id */), XYK(AssetId /* share token */), LBP,
+    OTC(OtcOrderId), AAVE, HSM, UniswapV3,
 }
 
 pub struct Asset<AssetId, Balance> { pub asset_id: AssetId, pub amount: Balance }

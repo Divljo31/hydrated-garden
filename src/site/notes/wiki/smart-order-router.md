@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/smart-order-router/","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/smart-order-router/","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Smart Order Router (SOR)","tags":["trading","routing","algorithm","sdk"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
@@ -12,13 +12,13 @@
 The SOR uses **Breadth-First Search (BFS)** with graph-based pathfinding:
 - **Nodes** = assets
 - **Edges** = pool pairs connecting assets
-- **Maximum path length:** 10 hops (prevents infinite loops)
+- **Maximum path length:** `MAX_SIZE_OF_PATH = 10` (`sor/route/bfs.ts`)
 - Prevents cycles by tracking both asset revisits and pool reuse
 
 ## Routing Strategy
 
 The router classifies pools into two categories:
-- **Trusted pools** (deep liquidity): [[omnipool\|omnipool]], [[wiki/stableswap\|stableswap]], [[wiki/lbp\|lbp]], Aave, HSM
+- **Trusted pools**: every pool type except XYK — [[omnipool\|omnipool]], [[wiki/stableswap\|stableswap]], [[wiki/lbp\|lbp]], Aave, HSM, **Uniswap v3** (`sor/route/suggester.ts`: `trustedPools = pools.filter(p => p.type !== PoolType.XYK)`)
 - **Isolated pools** (used as bridges): [[wiki/xyk-pools\|XYK]] only
 
 Three routing modes based on where the assets live:
@@ -49,7 +49,11 @@ The [[wiki/route-suggester\|route-suggester]] Rust crate provides a high-perform
 
 ## Pool Filtering
 
-The router supports `.withFilter()` to exclude or whitelist specific pool types — useful for limiting routes to specific pool kinds.
+`Router.withFilter({ useOnly?, exclude? }: PoolFilter)` (`sor/Router.ts`) restricts pool types: `useOnly` whitelists, otherwise anything not in `exclude` passes. `TradeScheduler` routes with `exclude: [PoolType.HSM]`.
+
+## Pool state
+
+The router reads pools from `IPoolCtxProvider.getPools()`; with the live `PoolContextProvider` that is a block-coherent snapshot from the event-driven sync engine (`docs/SOR_ENGINE.md`). Specs: `packages/sdk-next/docs/SOR_SPEC.md` (architecture), `SOR_AUDIT.md`.
 
 ## Sources
 

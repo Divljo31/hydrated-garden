@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-currencies/","title":"pallet-currencies","tags":["currency","erc20","native","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-currencies","repo":"hydration-node","paths":["pallets/currencies/src/lib.rs","pallets/currencies/src/fungibles.rs"],"symbols":["Pallet","Config","transfer","transfer_native_currency","update_balance","BalanceOf","CurrencyIdOf"],"traits_impl":["MultiCurrency","MultiCurrencyExtended","MultiLockableCurrency","MultiReservableCurrency","NamedMultiReservableCurrency"],"depends_on":["pallet-asset-registry","pallet-circuit-breaker"],"runtime_index":79,"tags":["currency","erc20","native","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-currencies/","title":"pallet-currencies","tags":["currency","erc20","native","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-currencies","repo":"hydration-node","paths":["pallets/currencies/src/lib.rs","pallets/currencies/src/fungibles.rs"],"symbols":["Pallet","Config","transfer","transfer_native_currency","update_balance","BalanceOf","CurrencyIdOf"],"traits_impl":["MultiCurrency","MultiCurrencyExtended","MultiLockableCurrency","MultiReservableCurrency","NamedMultiReservableCurrency"],"depends_on":["pallet-asset-registry","pallet-circuit-breaker"],"runtime_index":79,"tags":["currency","erc20","native","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -39,7 +39,7 @@ None — pure adapter; balances live in the underlying backends (`pallet_balance
 
 ## Errors
 
-`AmountIntoBalanceFailed`, `BalanceTooLow`, `DepositFailed`, `NotSupported`.
+`AmountIntoBalanceFailed`, `BalanceTooLow`, `DepositFailed`, `NotSupported`, `InvalidBeneficiary` (repatriate to the reserve account itself).
 
 ## Extrinsics
 
@@ -72,6 +72,8 @@ pub(crate) type AmountOf<T> =
 ```
 
 ## Gotchas
+
+- **Bound ERC-20 reserves are receipts.** For an asset bound to an ERC-20 contract, `reserve_named` moves the real tokens to `ReserveAccount` and mints an orml receipt. `repatriate_reserved_named` therefore: `BalanceStatus::Reserved` → moves the receipt only (custody untouched); `BalanceStatus::Free` → burns the receipt and transfers the same amount of the ERC-20 out of `ReserveAccount` to the beneficiary (one transaction). Invariant: sum of receipts per asset == `ReserveAccount`'s ERC-20 balance. Beneficiary == `ReserveAccount` → `InvalidBeneficiary`. Used by [[wiki/pallet-intent\|pallet-intent]] / [[wiki/pallet-ice\|pallet-ice]] settlement of reserved intent funds.
 
 - `AssetId == GetNativeCurrencyId::get()` (typically 0 = HDX) → routes through `NativeCurrency` (= `pallet_balances`).
 - `BoundErc20::contract_address(id)` returning `Some` → routes through the EVM ERC-20 precompile via `Erc20Currency`.

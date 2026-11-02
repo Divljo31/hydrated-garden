@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-circuit-breaker/","title":"pallet-circuit-breaker","tags":["risk","limits","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-circuit-breaker","repo":"hydration-node","paths":["pallets/circuit-breaker/src/lib.rs","pallets/circuit-breaker/src/types.rs","pallets/circuit-breaker/src/weights.rs"],"symbols":["Pallet","Config","TradeVolumeLimit","LiquidityLimit","AllowedTradeVolumeLimitPerAsset","AllowedAddLiquidityAmountPerAsset","AllowedRemoveLiquidityAmountPerAsset","set_trade_volume_limit","set_add_liquidity_limit","set_remove_liquidity_limit","do_lock_deposit","DepositLockWhitelist","InTradeContext","DepositLimitExceededForWhitelistedAccount"],"traits_impl":["OnTradeHandler","OnLiquidityChangedHandler"],"depends_on":["pallet-broadcast"],"runtime_index":65,"tags":["risk","limits","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-circuit-breaker/","title":"pallet-circuit-breaker","tags":["risk","limits","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-circuit-breaker","repo":"hydration-node","paths":["pallets/circuit-breaker/src/lib.rs","pallets/circuit-breaker/src/types.rs","pallets/circuit-breaker/src/weights.rs"],"symbols":["Pallet","Config","TradeVolumeLimit","LiquidityLimit","AllowedTradeVolumeLimitPerAsset","AllowedAddLiquidityAmountPerAsset","AllowedRemoveLiquidityAmountPerAsset","set_trade_volume_limit","set_add_liquidity_limit","set_remove_liquidity_limit","do_lock_deposit","DepositLockWhitelist","InTradeContext","DepositLimitExceededForWhitelistedAccount"],"traits_impl":["OnTradeHandler","OnLiquidityChangedHandler"],"depends_on":["pallet-broadcast"],"runtime_index":65,"tags":["risk","limits","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -63,6 +63,18 @@ pub trait Config: frame_system::Config {
 | `set_trade_volume_limit` | Set per-asset trade volume ratio (TechnicalOrigin) |
 | `set_add_liquidity_limit` | Set per-asset add-liquidity ratio |
 | `set_remove_liquidity_limit` | Set per-asset remove-liquidity ratio |
+| `lockdown_asset(asset, until)` | call_index 3 — lock an asset for minting/deposits until block `until` (AuthorityOrigin) |
+| `force_lift_lockdown(asset)` | call_index 4 — remove lockdown regardless of state |
+| `release_deposit` | release a deposit reserved while the asset was locked |
+| `set_global_withdraw_limit_params(limit, window)` | call_index 6 — global egress limit in reference-currency units over a time window |
+| `reset_withdraw_lockdown` | reset the global withdraw accumulator / lockdown |
+| `add_egress_accounts` / `remove_egress_accounts` | call_index 8 / 9 — which accounts count as egress |
+| `set_global_withdraw_lockdown(until)` | call_index 10 — halt participating withdrawals until timestamp `until` |
+| `set_asset_category(asset, Option<GlobalAssetCategory>)` | call_index 11 — override `External` / `Local` classification (`GlobalAssetOverrides`) |
+
+Runtime: `AuthorityOrigin = EitherOf<EnsureRoot, EitherOf<TechCommitteeMajority, OmnipoolAdmin>>`; `DepositLimiter = DepositCircuitBreaker` (the XCM deposit fuse — issuance increase beyond the asset's `xcm_rate_limit` → `AssetLockdownState::Locked(until)` + `AssetLockdown` event, alerted by snakewatch, triaged by upstream `ai_skills/circuit-breaker-incident`, see [[wiki/note-ai-skills\|note-ai-skills]]). Storage: `AssetLockdownState`, `WithdrawLockdownUntil`, `GlobalAssetOverrides`.
+
+**XCM netting (runtime `xcm.rs`):** each processed XCM message nets withdrawn vs deposited value — net outflow → `note_egress`, net inflow → `note_deposit`, so inbound reserve transfers offset earlier egress in the global withdraw accumulator. NTT mints via the multicurrency precompile take the same deposit-fuse path as XCM. Block-denominated parameters (`lockdown_asset … until`) are in 2 s blocks. How these fit an incident response: [[wiki/note-emergency-levers\|note-emergency-levers]].
 
 ## Hooks
 

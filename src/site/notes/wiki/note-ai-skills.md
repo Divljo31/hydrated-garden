@@ -73,7 +73,7 @@ Useful even outside a full audit run: `references/known-false-positives.md` docu
 
 Runbook for snakewatch `AssetLockdown` alerts, covering the XCM deposit fuse (issuance increase), trade-volume limits and liquidity limits — see [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]].
 
-Expected event sequence at the trigger block: `messageQueue.Processed` → `tokens.Deposited` → `circuitBreaker.AssetLockdown`, where `tokens.Reserved` equals the over-limit excess and `messageQueue.Processed` carries the XCM origin (`{"sibling":2004}` = Moonbeam, `{"sibling":1000}` = Asset Hub Polkadot).
+Expected event sequence at the trigger block: `messageQueue.Processed` → `tokens.Deposited` → `circuitBreaker.AssetLockdown`, where `tokens.Reserved` equals the over-limit excess and `messageQueue.Processed` carries the XCM origin (e.g. `{"sibling":1000}` = Asset Hub Polkadot; other sibling ids = that parachain).
 
 Scripts must be run **from `hydration-node/scripts/mint-limit/`** — that is where `@polkadot/api` and `@galacticcouncil/sdk` are installed. `.cjs` = CommonJS, `.js` = ESM (`scripts/mint-limit/` has `"type": "module"`). `generate-tc-unlock.js` emits the TC proposal hex that lifts a lockdown and raises the limit.
 

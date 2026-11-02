@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/gigahdx/","title":"GigaHDX","tags":["gigahdx","hdx","staking","liquid-staking","tokenomics","governance","aave","evm"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"protocol","title":"GigaHDX","repo":"hydration-node","paths":["pallets/gigahdx/src/lib.rs","pallets/gigahdx-rewards/src/lib.rs","traits/src/gigahdx.rs","runtime/hydradx/src/gigahdx.rs","runtime/hydradx/src/assets.rs","precompiles/lock-manager/src/lib.rs","integration-tests/src/gigahdx.rs","integration-tests/src/gigahdx_rewards.rs"],"symbols":["giga_stake","giga_unstake","unlock","cancel_unstake","migrate","realize_yield","claim_rewards","exchange_rate","gigapot_account_id","MoneyMarketOperations","Seize","ClearConflictingVotes","VotingCommitmentInspect"],"tags":["gigahdx","hdx","staking","liquid-staking","tokenomics","governance","aave","evm"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/gigahdx/","title":"GigaHDX","tags":["gigahdx","hdx","staking","liquid-staking","tokenomics","governance","aave","evm"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"protocol","title":"GigaHDX","repo":"hydration-node","paths":["pallets/gigahdx/src/lib.rs","pallets/gigahdx-rewards/src/lib.rs","traits/src/gigahdx.rs","runtime/hydradx/src/gigahdx.rs","runtime/hydradx/src/assets.rs","precompiles/lock-manager/src/lib.rs","integration-tests/src/gigahdx.rs","integration-tests/src/gigahdx_rewards.rs"],"symbols":["giga_stake","giga_unstake","unlock","cancel_unstake","migrate","realize_yield","claim_rewards","exchange_rate","gigapot_account_id","MoneyMarketOperations","Seize","ClearConflictingVotes","VotingCommitmentInspect"],"tags":["gigahdx","hdx","staking","liquid-staking","tokenomics","governance","aave","evm"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -27,7 +27,7 @@ giga_stake(amount)
   └─ refresh_lock: ghdxlock = hdx + unstaking   (HDX stays in the staker's account)
 ```
 
-Unstaking is the reverse, plus a **28-day cooldown**: `giga_unstake` burns aTokens, opens a pending position keyed by the current block, and `unlock` releases it once `CooldownPeriod` elapses. `cancel_unstake` folds a pending position back into active stake at today's rate at any point before `unlock`.
+Unstaking is the reverse, plus a **28-day cooldown**: `giga_unstake` burns aTokens, opens a pending position keyed by the current block, and `unlock` releases it once the cooldown elapses (`cooldown_expires_at`, 2 s-block aware — see [[wiki/pallet-gigahdx\|pallet-gigahdx]]). `cancel_unstake` folds a pending position back into active stake at today's rate at any point before `unlock`.
 
 ## Economic mechanism
 

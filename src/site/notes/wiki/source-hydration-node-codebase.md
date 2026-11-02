@@ -1,25 +1,26 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/source-hydration-node-codebase/","title":"hydration-node codebase","tags":["hydration","runtime","substrate","polkadot","rust"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"source","title":"hydration-node codebase","source_kind":"repo_clone","raw_path":"raw/hydration-node/","upstream":"https://github.com/galacticcouncil/hydration-node","cloned_at":"2026-04-13","last_refreshed":"2026-08-15","last_commit":"cc1bc97 (2026-08-15) — spec_version 439; gigahdx stack (pallet-gigahdx=86, pallet-gigahdx-rewards=87); pallet-fee-processor=207 rewires trade-fee distribution; PEPL v2 liquidation worker replaces the node-embedded v1; node-side synthetic EVM logs; lock-manager precompile; NTT mint/burn; ai_skills/ shared agent skills","produces_pages":["pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-route-executor","pallet-circuit-breaker","pallet-dynamic-fees","pallet-dynamic-evm-fee","pallet-ema-oracle","pallet-asset-registry","pallet-xcm-rate-limiter","pallet-transaction-multi-payment","pallet-transaction-pause","pallet-dca","pallet-staking","pallet-hsm","pallet-otc","pallet-otc-settlements","pallet-referrals","pallet-fee-processor","pallet-gigahdx","pallet-gigahdx-rewards","pallet-bonds","pallet-liquidation","pallet-liquidity-mining","pallet-omnipool-liquidity-mining","pallet-xyk-liquidity-mining","pallet-currencies","pallet-evm-accounts","pallet-duster","pallet-collator-rewards","pallet-collator-rotation","pallet-democracy","pallet-claims","pallet-dispenser","pallet-nft","pallet-broadcast","pallet-dispatcher","pallet-genesis-history","pallet-parameters","pallet-relaychain-info","pallet-signet","hydration-runtime","hydration-precompiles","gigahdx","pepl-worker","note-ai-skills"],"tags":["hydration","runtime","substrate","polkadot","rust"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/source-hydration-node-codebase/","title":"hydration-node codebase","tags":["hydration","runtime","substrate","polkadot","rust"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"source","title":"hydration-node codebase","source_kind":"repo_clone","raw_path":"raw/hydration-node/","upstream":"https://github.com/galacticcouncil/hydration-node","cloned_at":"2026-04-13","last_refreshed":"2026-11-02","last_commit":"a35840f (2026-10-28) — spec_version 458; 2 s blocks; ICE intent stack live (pallet-lazy-executor=97, pallet-intent=98, pallet-ice=99, node ice_solver_worker, ice/ solver crates); Uniswap v3 router venue; XCM suspension in pallet-parameters; gov v1 (pallet-democracy) removed; fee-payment swap fallback removed; DCA→ICE migration path; direction-independent EMA smoothing; PEPL off-chain liquidation routing","produces_pages":["pallet-omnipool","pallet-stableswap","pallet-xyk","pallet-lbp","pallet-route-executor","pallet-circuit-breaker","pallet-dynamic-fees","pallet-dynamic-evm-fee","pallet-ema-oracle","pallet-asset-registry","pallet-xcm-rate-limiter","pallet-transaction-multi-payment","pallet-transaction-pause","pallet-dca","pallet-staking","pallet-hsm","pallet-otc","pallet-otc-settlements","pallet-referrals","pallet-fee-processor","pallet-gigahdx","pallet-gigahdx-rewards","pallet-bonds","pallet-liquidation","pallet-liquidity-mining","pallet-omnipool-liquidity-mining","pallet-xyk-liquidity-mining","pallet-currencies","pallet-evm-accounts","pallet-duster","pallet-collator-rewards","pallet-collator-rotation","pallet-claims","pallet-dispenser","pallet-nft","pallet-broadcast","pallet-dispatcher","pallet-genesis-history","pallet-parameters","pallet-relaychain-info","pallet-signet","pallet-ice","pallet-intent","pallet-lazy-executor","ice","hydration-runtime","hydration-precompiles","gigahdx","pepl-worker","note-ai-skills"],"tags":["hydration","runtime","substrate","polkadot","rust"],"last_updated":"2026-11-02"}}
 ---
 
 
 # hydration-node codebase
 
-**TL;DR:** Substrate parachain powering [[wiki/hydration\|hydration]]. 42 pallets under `pallets/`, runtime at `runtime/hydradx/` (spec_version 439), Polkadot SDK fork `polkadot-stable2506-11-patch`, toolchain Rust 1.88.0 → wasm32. Spec 439 (Aug 2026) added the [[wiki/gigahdx\|gigahdx]] stack, centralised trade-fee distribution in [[wiki/pallet-fee-processor\|pallet-fee-processor]], replaced the node's embedded liquidation worker with the standalone [[wiki/pepl-worker\|pepl-worker]] (v2), and added off-chain synthetic EVM logs to the node.
+**TL;DR:** Substrate parachain powering [[wiki/hydration\|hydration]]. 44 pallet crates under `pallets/`, runtime at `runtime/hydradx/` (spec_version 458, **2 s blocks**), Polkadot SDK fork `polkadot-stable2506-11-patch`, toolchain Rust 1.88.0 → wasm32. Major subsystems: Omnipool/Stableswap/XYK/LBP AMMs + router (now incl. a Uniswap v3 EVM venue), the [[wiki/ice\|ice]] intent stack ([[wiki/pallet-intent\|pallet-intent]], [[wiki/pallet-ice\|pallet-ice]], [[wiki/pallet-lazy-executor\|pallet-lazy-executor]], node-side solver), [[wiki/gigahdx\|gigahdx]] staking, [[wiki/pallet-fee-processor\|pallet-fee-processor]], [[wiki/pepl-worker\|pepl-worker]] liquidations, off-chain synthetic EVM logs. Gov v1 is removed.
 
 ## Upstream
 - Repo: https://github.com/galacticcouncil/hydration-node
 - Branch cloned: default (master)
 - Local path: `raw/hydration-node/`
-- Full file count: 1262 tracked files (854 `.rs`)
-- HEAD: `cc1bc97` (2026-08-15), "Merge pull request #1501 … feat/pepl-v2"
-- Previous vault sync: `7722ff4` (2026-05-13), spec 419
+- Vault copy: 1426 files (958 `.rs`); integration-test chain snapshots excluded (see `raw/hydration-node/.vault-clone-info`)
+- HEAD: `a35840f` (2026-10-28), "Merge pull request #1561 … chore/remove-migrations"
+- Previous vault sync: `cc1bc97` (2026-08-15), spec 439
 
 ## Top-level layout
 
 ```
 raw/hydration-node/
-├── pallets/                  # 42 custom pallets
+├── pallets/                  # 44 custom pallets
+├── ice/                      # off-chain ICE crates: ice-solver, route-findr, solver-bench
 ├── runtime/
 │   ├── hydradx/              # Main runtime (construct_runtime!)
 │   └── adapters/             # Runtime adapter crates
@@ -65,7 +66,7 @@ make docker-amd64      # NEW — package a pre-built linux/amd64 binary via Dock
 Single pallet test: `cargo test -p pallet-omnipool --locked`
 All cargo commands use `--config net.git-fetch-with-cli=true`.
 
-## Pallet inventory (42)
+## Pallet inventory (44)
 
 ### AMM core (5)
 - [[wiki/pallet-omnipool\|pallet-omnipool]] — single-pool AMM with hub asset LRNA
@@ -84,9 +85,14 @@ All cargo commands use `--config net.git-fetch-with-cli=true`.
 - [[wiki/pallet-transaction-multi-payment\|pallet-transaction-multi-payment]] — pay fees in any accepted asset
 - [[wiki/pallet-transaction-pause\|pallet-transaction-pause]] — pause arbitrary extrinsics
 
+### ICE (3)
+- [[wiki/pallet-intent\|pallet-intent]] — intent storage/lifecycle: swaps, partial, match-first, DCA intents (index 98)
+- [[wiki/pallet-ice\|pallet-ice]] — solver-batch settlement, matched-volume fee, solver mode kill switch, venue routing (index 99)
+- [[wiki/pallet-lazy-executor\|pallet-lazy-executor]] — FIFO queue of post-resolution EVM forwards, OCW-dispatched (index 97)
+
 ### Finance & orchestration (14)
-- [[wiki/pallet-dca\|pallet-dca]] — dollar-cost averaging schedules (buy-DCA removed in spec 439)
-- [[wiki/pallet-staking\|pallet-staking]] — HDX staking + democracy points (legacy path; superseded by gigahdx)
+- [[wiki/pallet-dca\|pallet-dca]] — legacy DCA schedules (sell-only); migration path into ICE DCA intents
+- [[wiki/pallet-staking\|pallet-staking]] — legacy HDX staking + conviction-voting points (superseded by gigahdx)
 - [[wiki/pallet-gigahdx\|pallet-gigahdx]] — stHDX / GIGAHDX staking against the AAVE-fork money market (index 86)
 - [[wiki/pallet-gigahdx-rewards\|pallet-gigahdx-rewards]] — per-OpenGov-track voting rewards funded from trade fees (index 87)
 - [[wiki/pallet-fee-processor\|pallet-fee-processor]] — central trade-fee splitter + HDX conversion (index 207)
@@ -100,13 +106,12 @@ All cargo commands use `--config net.git-fetch-with-cli=true`.
 - [[wiki/pallet-omnipool-liquidity-mining\|pallet-omnipool-liquidity-mining]] — LM wrapper for Omnipool NFTs
 - [[wiki/pallet-xyk-liquidity-mining\|pallet-xyk-liquidity-mining]] — LM wrapper for XYK LP shares
 
-### Currency & accounts (9)
+### Currency & accounts (8)
 - [[wiki/pallet-currencies\|pallet-currencies]] — multi-currency adapter
 - [[wiki/pallet-evm-accounts\|pallet-evm-accounts]] — EVM↔Substrate account mapping
 - [[wiki/pallet-duster\|pallet-duster]] — dust removal + whitelist
 - [[wiki/pallet-collator-rewards\|pallet-collator-rewards]] — collator payout
 - [[wiki/pallet-collator-rotation\|pallet-collator-rotation]] — SessionManager wrapper that benches one collator each odd session
-- [[wiki/pallet-democracy\|pallet-democracy]] — legacy democracy (pre-OpenGov bridge)
 - [[wiki/pallet-claims\|pallet-claims]] — HDX claims (ETH signatures)
 - [[wiki/pallet-dispenser\|pallet-dispenser]] — one-time faucet (ETH accounts)
 - [[wiki/pallet-nft\|pallet-nft]] — NFT pallet (LP positions, staking)
@@ -115,29 +120,30 @@ All cargo commands use `--config net.git-fetch-with-cli=true`.
 - [[wiki/pallet-broadcast\|pallet-broadcast]] — shared Swapped event bus
 - [[wiki/pallet-dispatcher\|pallet-dispatcher]] — proxy-style dispatch with custom origins
 - [[wiki/pallet-genesis-history\|pallet-genesis-history]] — chain-migration lineage marker
-- [[wiki/pallet-parameters\|pallet-parameters]] — on-chain runtime parameters
+- [[wiki/pallet-parameters\|pallet-parameters]] — runtime parameters + XCM kill switch (`suspend_xcm`), Uniswap v3 addresses, `TwoSecBlocksSince`
 - [[wiki/pallet-relaychain-info\|pallet-relaychain-info]] — relay metadata exposure
 - [[wiki/pallet-signet\|pallet-signet]] — authenticated off-chain data signing
 
 ## Runtime
 
-See [[wiki/hydration-runtime\|hydration-runtime]]. Main entry: `runtime/hydradx/src/lib.rs` (construct_runtime!, recursion_limit = 512, spec_version 439, crate version `439.0.0`). Hyperbridge / ISMP / token-gateway pallets are no longer wired and their cleanup migration file was deleted in spec 439 — `runtime/hydradx/src/migrations/cleanup_hyperbridge.rs` does not exist.
+See [[wiki/hydration-runtime\|hydration-runtime]]. Main entry: `runtime/hydradx/src/lib.rs` (construct_runtime!, recursion_limit = 512, spec_version 458). No Hyperbridge / ISMP / token-gateway and no gov v1 pallets are wired.
 
-## Node (`node/`, crate `hydradx` v15.2.0)
+## Node (`node/`, crate `hydradx` v15.7.2)
 
 | Module | Role |
 |---|---|
-| `node/src/service.rs` | `new_partial` / `start_node_impl`; spawns the liquidation worker and wires the synthetic storage override |
+| `node/src/service.rs` | `new_partial` / `start_node_impl`; spawns the liquidation and ICE solver workers, wires the synthetic storage override; Aura `authoring_duration` 2000 ms |
+| `node/src/ice_solver_worker.rs` | ICE solver worker: per best block reads `IceSolverApi::solver_input`, solves natively, submits unsigned `ICE.submit_solution`. Flags `--ice-solver-worker`, `--ice-solver-split`, `--ice-solver-tolerance`; default on for validators — see [[wiki/pallet-ice\|pallet-ice]] |
 | `node/src/cli.rs` | `Cli.liquidation_worker_config` is now `pepl_worker::LiquidationWorkerCli` (was the local v1 config struct) |
 | `node/src/rpc.rs` | `FullDeps.pepl_status: Option<Arc<pepl_worker::WorkerStatus>>`; hosts the `liquidation_*` RPC module and swaps in a synth-aware `eth_getLogs` |
 | `node/src/liquidation_worker.rs` | **v1** worker, retained behind `--liquidation-worker-v1`; `#![allow(dead_code)]`, plus a `From<&pepl_worker::LiquidationWorkerCli>` so old flags still boot it |
-| `node/src/synthetic_logs/` | NEW — off-chain indexing of substrate activity as EVM logs |
+| `node/src/synthetic_logs/` | Off-chain indexing of substrate activity as EVM logs (synth tx hashes stable across reorgs) |
 
 ### `liquidation_*` RPCs (node/src/rpc.rs → `mod liquidation`)
 
-`liquidation_getBorrowers` (→ `Vec<CoveredBorrower{pool, borrower}>`), `liquidation_isRunning`, `liquidation_maxTransactionsPerBlock`, `liquidation_lastScannedBlock` (new). All read [[wiki/pepl-worker\|pepl-worker]]'s `WorkerStatus`; they return empty/false when no v2 worker runs.
+`liquidation_getBorrowers` (→ `Vec<CoveredBorrower{pool, borrower}>`), `liquidation_isRunning`, `liquidation_maxTransactionsPerBlock`, `liquidation_lastScannedBlock`. All read [[wiki/pepl-worker\|pepl-worker]]'s `WorkerStatus`; they return empty/false when no v2 worker runs.
 
-### `node/src/synthetic_logs/` (new, ~2.6k LOC + SCALE test fixtures)
+### `node/src/synthetic_logs/` (~2.6k LOC + SCALE test fixtures)
 
 | File | Role |
 |---|---|
@@ -154,23 +160,24 @@ Other node changes: `new_partial` treats the upstream default `runtime_cache_siz
 
 ## Precompiles
 
-See [[wiki/hydration-precompiles\|hydration-precompiles]]. Located under `precompiles/`: `call-permit` (gasless EVM permit), `flash-loan` (HSM flash mint), **`lock-manager`** (new — `pallet-evm-precompile-lock-manager`, address `0x…0806`, backs `LockableAToken.sol` for [[wiki/gigahdx\|gigahdx]]), and `utils`.
+See [[wiki/hydration-precompiles\|hydration-precompiles]]. Located under `precompiles/`: `call-permit` (gasless EVM permit), `flash-loan` (HSM flash mint), **`lock-manager`** (`pallet-evm-precompile-lock-manager`, address `0x…0806`, backs `LockableAToken.sol` for [[wiki/gigahdx\|gigahdx]]), and `utils`.
 
 ## Math / traits / primitives
 
 - `math/` → hydra-dx-math (Omnipool, Stableswap, XYK, LBP, DCA math primitives)
-- `traits/` → hydradx-traits (shared trait abstractions like `OmnipoolHooks`, `RouteProvider`, `PriceOracle`, `AMM`). New modules in spec 439: `traits/src/fee_processor.rs` (`FeeReceiver`, `FeeDestination`, `Convert`) and `traits/src/gigahdx.rs` (`MoneyMarketOperations`, `Seize`, `ClearConflictingVotes`)
+- `traits/` → hydradx-traits (shared trait abstractions like `OmnipoolHooks`, `RouteProvider`, `PriceOracle`, `AMM`). Notable modules: `traits/src/fee_processor.rs` (`FeeReceiver`, `FeeDestination`, `Convert`), `traits/src/gigahdx.rs` (`MoneyMarketOperations`, `Seize`, `ClearConflictingVotes`), `traits/src/amm.rs` (`SimulatorConfig`, `RouteDiscovery`, simulator traits for ICE), `traits/src/lazy_executor.rs` (`ForwardAction`, `Source`, `Mutate`); `traits/src/router.rs` `PoolType` includes `UniswapV3(fee)`
 - `primitives/` → hydradx-primitives (BlockNumber=u32, AssetId=u32, Balance=u128, Amount=i128, Price=FixedU128, CollectionId=u128, ItemId=u128, EvmAddress=H160, Hash=H256). New constant `GIGAHDX_SOURCE = *b"gigahdxs"` in `primitives/src/constants.rs`
 
 ## Off-chain workers
 
-- [[wiki/pepl-worker\|pepl-worker]] (`pepl-worker/`, `pepl-worker/support/`) — PEPL v2 liquidation worker, default since spec 439
+- [[wiki/pepl-worker\|pepl-worker]] (`pepl-worker/`, `pepl-worker/support/`) — PEPL v2 liquidation worker (default); off-chain collateral→debt routing via `LiquidityStateApi`
+- ICE solver: `node/src/ice_solver_worker.rs` + `ice/ice-solver` (v4 + passthrough), `ice/route-findr`, `ice/solver-bench` (bench/fuzz/replay) — see [[wiki/pallet-ice\|pallet-ice]]
 - `liquidation-worker-support/` (v1.2.0) — helper crate for the legacy v1 worker in `node/src/liquidation_worker.rs`, reachable via `--liquidation-worker-v1`
 - `scraper/` — pool-state scraping for integration-test snapshots
 
 ## Integration tests
 
-`integration-tests/src/` gained `fee_processor.rs`, `gigahdx.rs`, `gigahdx_rewards.rs`, `pepl.rs` (v1-vs-v2 decision parity + `decide_liquidation` scenarios) and an `integration-tests/README.md` describing the scraper-snapshot → replay-test debugging loop. Binary chain-state snapshots under `integration-tests/` (`dca-snapshot/`, `snapshots/`, `omnipool-snapshot/`, `evm-snapshot/`) are **excluded from `raw/`** — never cite those paths; `integration-tests/src/` is present.
+`integration-tests/src/` includes `fee_processor.rs`, `gigahdx.rs`, `gigahdx_rewards.rs`, `pepl.rs` (v1-vs-v2 decision parity + `decide_liquidation` scenarios), `ice/` (intent/solver end-to-end), `uniswap_v3_router.rs`, and an `integration-tests/README.md` describing the scraper-snapshot → replay-test debugging loop. Binary chain-state snapshots under `integration-tests/` (`dca-snapshot/`, `snapshots/`, `omnipool-snapshot/`, `evm-snapshot/`) are **excluded from `raw/`** — never cite those paths; `integration-tests/src/` is present.
 
 ## Agent skills in-repo
 

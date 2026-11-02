@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-asset-registry/","title":"pallet-asset-registry","tags":["registry","assets","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-asset-registry","repo":"hydration-node","paths":["pallets/asset-registry/src/lib.rs","pallets/asset-registry/src/types.rs"],"symbols":["Pallet","Config","AssetDetails","AssetType","AssetMetadata","AssetLocation","register","update","set_metadata","set_location","Assets","AssetIds","AssetMetadataMap","AssetLocations","BannedAssets"],"traits_impl":["Inspect","Create","Mutate","RegistryInspect"],"depends_on":[],"runtime_index":51,"tags":["registry","assets","runtime","rust","substrate"],"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-asset-registry/","title":"pallet-asset-registry","tags":["registry","assets","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-asset-registry","repo":"hydration-node","paths":["pallets/asset-registry/src/lib.rs","pallets/asset-registry/src/types.rs"],"symbols":["Pallet","Config","AssetDetails","AssetType","register","update","ban_asset","unban_asset","Assets","NextAssetId","AssetIds","AssetLocations","LocationAssets","BannedAssets","RegisterAssetHook"],"traits_impl":["Inspect","Create","Mutate","RegistryInspect"],"depends_on":[],"runtime_index":51,"tags":["registry","assets","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -16,15 +16,15 @@ Single source of truth for every registered asset on Hydration. Consumed by esse
 ```rust
 // pallets/asset-registry/src/lib.rs
 pub trait Config: frame_system::Config {
-    type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-    type RegistryOrigin: EnsureOrigin<Self::RuntimeOrigin>;
-    type UpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
-    type Currency: MultiCurrency<Self::AccountId, CurrencyId = Self::AssetId, Balance = Self::Balance>;
-    type AssetId: Parameter + Member + Copy + MaxEncodedLen + Default + AtLeast32BitUnsigned + From<u32> + Into<u32>;
-    type Balance: Parameter + Member + AtLeast32BitUnsigned + Default + Copy + MaxEncodedLen;
+    type RegistryOrigin: EnsureOrigin<Self::RuntimeOrigin>;   // runtime: Root | GeneralAdmin
+    type UpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;     // runtime: Root | TechCommitteeMajority | GeneralAdmin
+    type AssetId: Parameter /* + … */;
     type AssetNativeLocation: Parameter + Member + Default + MaxEncodedLen;
-    #[pallet::constant] type SequentialIdStartAt: Get<Self::AssetId>;
-    #[pallet::constant] type StringLimit: Get<u32>;
+    type Currency: FungiblesInspect<Self::AccountId, AssetId = Self::AssetId, Balance = Balance>;
+    type SequentialIdStartAt: Get<Self::AssetId>;
+    type StringLimit: Get<u32> + Debug + PartialEq;
+    type MinStringLimit: Get<u32> + Debug + PartialEq;
+    type RegisterAssetHook: RegisterAssetHook<Self::AssetId>;
     type WeightInfo: WeightInfo;
 }
 ```
@@ -33,32 +33,31 @@ pub trait Config: frame_system::Config {
 
 | Name | Kind | Key → Value |
 |------|------|-------------|
-| `Assets` | StorageMap | `AssetId → AssetDetails` |
-| `AssetIds` | StorageMap | `BoundedVec<u8, StringLimit> → AssetId` (name lookup) |
-| `AssetMetadataMap` | StorageMap | `AssetId → AssetMetadata` |
-| `AssetLocations` | StorageMap | `AssetId → AssetNativeLocation` (XCM MultiLocation) |
-| `LocationAssets` | StorageMap | `AssetNativeLocation → AssetId` |
-| `BannedAssets` | StorageMap | `AssetId → ()` |
+| `Assets` | StorageMap | `AssetId → AssetDetails { name, asset_type, existential_deposit, symbol, decimals, xcm_rate_limit, is_sufficient }` |
 | `NextAssetId` | StorageValue | `AssetId` |
+| `AssetIds` | StorageMap | `BoundedVec<u8, StringLimit> → AssetId` (name lookup) |
+| `AssetLocations` | StorageMap | `AssetId → AssetNativeLocation` (XCM location) |
+| `LocationAssets` | StorageMap | `AssetNativeLocation → AssetId` |
+| `BannedAssets` | StorageMap | `AssetId → ()` — transfers banned |
 
 ## Events
 
-`Registered`, `Updated`, `MetadataSet`, `LocationSet`, `AssetBanned`, `AssetUnbanned`.
+`Registered`, `Updated`, `LocationSet`, `AssetBanned`, `AssetUnbanned`.
 
 ## Errors
 
-`AssetNotFound`, `AssetAlreadyRegistered`, `TooLong`, `AssetNotRegistered`, `LocationAlreadyRegistered`, `NoIdAvailable`, `InvalidSharedAssetItsComponents`, `Forbidden`.
+`NoIdAvailable`, `AssetNotFound`, `TooShort`, `InvalidSymbol`, `AssetNotRegistered`, `AssetAlreadyRegistered`, `InvalidSharedAssetLen`, `CannotUpdateLocation`, `NotInReservedRange`, `LocationAlreadyRegistered`, `Forbidden`, `InsufficientBalance`, `ForbiddenSufficiencyChange`, `AssetAlreadyBanned`, `AssetNotBanned`.
 
 ## Extrinsics
 
-| Name | Description |
-|------|-------------|
-| `register` | Register new asset with metadata + type + location (RegistryOrigin) |
-| `update` | Update existing asset details (UpdateOrigin) |
-| `set_metadata` | Change symbol/decimals (UpdateOrigin) |
-| `set_location` | Set/update XCM location (UpdateOrigin) |
-| `ban_asset` | Add to banned set (RegistryOrigin) |
-| `unban_asset` | Remove from banned set (RegistryOrigin) |
+| # | Name | Origin | Description |
+|---|------|--------|-------------|
+| 0 | `register` | RegistryOrigin | Register asset: name, type, ED, symbol, decimals, location, `xcm_rate_limit`, `is_sufficient` |
+| 1 | `update` | Registry, or UpdateOrigin for the non-restricted fields | Update details (incl. `xcm_rate_limit`, which drives the [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]] deposit fuse) |
+| 5 | `ban_asset` | UpdateOrigin | Ban transfers of an asset |
+| 6 | `unban_asset` | UpdateOrigin | Lift the ban |
+
+There is **no permissionless registration**: external assets are registered only through `register` by governance (call index 4 is retired). Metadata and location are set through `register` / `update` — there are no separate `set_metadata` / `set_location` calls.
 
 ## Hooks
 
@@ -74,14 +73,13 @@ None (stateless registry; no lifecycle hooks).
 
 ```rust
 // pallets/asset-registry/src/types.rs
-pub enum AssetType<AssetId> {
-    Token,                                 // native-ish (e.g. DOT)
-    XYK,                                   // xyk share token
-    StableSwap,                            // stableswap share token
-    Bond,                                  // pallet-bonds share
-    External,                              // external (XCM) origin
-    Erc20,                                  // EVM-registered ERC20
-    PoolShare(AssetId, AssetId),           // (unused legacy)
+pub enum AssetType {
+    Token,       // native-ish (e.g. DOT)
+    XYK,         // xyk share token
+    StableSwap,  // stableswap share token
+    Bond,        // pallet-bonds share
+    External,    // external (XCM) origin
+    Erc20,       // EVM-registered ERC20
 }
 ```
 

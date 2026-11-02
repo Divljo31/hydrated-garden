@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/routing/","title":"Task Routing","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"routing","title":"Task Routing","last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/routing/","title":"Task Routing","dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"routing","title":"Task Routing","last_updated":"2026-11-02"}}
 ---
 
 
@@ -16,9 +16,10 @@ Task → pages cheat sheet for Claude Code working on [[wiki/hydration\|hydratio
 - "Work on XYK constant-product pools" → [[wiki/pallet-xyk\|pallet-xyk]], [[wiki/xyk-pools\|xyk-pools]]
 - "Launch a token via LBP" → [[wiki/pallet-lbp\|pallet-lbp]], [[wiki/lbp\|lbp]]
 - "Route a multi-hop trade on-chain" → [[wiki/pallet-route-executor\|pallet-route-executor]], [[wiki/smart-order-router\|smart-order-router]]
-- "Schedule DCA / TWAP" (note: **buy schedules can no longer be created** — `Error::NoLongerSupported`; existing ones keep executing) → [[wiki/pallet-dca\|pallet-dca]], [[wiki/dca\|dca]]
+- "Schedule DCA" (legacy schedules are migrating into ICE DCA intents; buy schedules and TWAP buy are gone) → [[wiki/dca\|dca]], [[wiki/pallet-dca\|pallet-dca]], [[wiki/pallet-intent\|pallet-intent]]
 - "OTC / peer-to-peer trades" → [[wiki/pallet-otc\|pallet-otc]], [[wiki/otc-trading\|otc-trading]]
-- "ICE intent engine" → [[wiki/ice\|ice]]
+- "ICE intents / solver batches / post-settlement EVM forwards" → [[wiki/ice\|ice]], [[wiki/pallet-intent\|pallet-intent]], [[wiki/pallet-ice\|pallet-ice]], [[wiki/pallet-lazy-executor\|pallet-lazy-executor]]
+- "Uniswap v3 pools on Hydration EVM" → [[wiki/uniswap-v3\|uniswap-v3]], [[wiki/pallet-route-executor\|pallet-route-executor]], [[wiki/sdk-next\|sdk-next]]
 - "Where do trade fees actually go / change the fee split" → [[wiki/pallet-fee-processor\|pallet-fee-processor]], [[wiki/hydration-runtime\|hydration-runtime]], [[wiki/pallet-referrals\|pallet-referrals]], [[wiki/dynamic-fees\|dynamic-fees]]
 
 ## Trading SDK (TypeScript)
@@ -63,6 +64,10 @@ Task → pages cheat sheet for Claude Code working on [[wiki/hydration\|hydratio
 - "My NTT transfer is stuck and the executor never delivered it" → [[wiki/xc-cfg\|xc-cfg]], [[wiki/xc-sdk\|xc-sdk]]
 - "Check an NTT rate limit before I fire the transfer" → [[wiki/xc-cfg\|xc-cfg]], [[wiki/pallet-evm-accounts\|pallet-evm-accounts]]
 - "Swap a Hydration asset into something in the NEAR ecosystem" → [[wiki/xc-swap\|xc-swap]], [[wiki/sdk-next\|sdk-next]]
+- "Add a new chain to the XC stack (chain def, wormhole block, routes)" → [[wiki/runbook-hyperevm-ntt\|runbook-hyperevm-ntt]], [[wiki/xc-cfg\|xc-cfg]], [[wiki/xc-core\|xc-core]]
+- "Bring HYPE or a HyperEVM asset onto Hydration" → [[wiki/runbook-hyperevm-ntt\|runbook-hyperevm-ntt]], [[wiki/wormhole\|wormhole]], [[wiki/xc-cfg\|xc-cfg]], [[wiki/pallet-evm-accounts\|pallet-evm-accounts]]
+- "Why can't I just point usdc_wh at another chain's bridge?" → [[wiki/runbook-hyperevm-ntt\|runbook-hyperevm-ntt]] (one hub per token group), [[wiki/xc-cfg\|xc-cfg]]
+- "Who do I ask to add Hydration as a peer on someone else's NTT deployment?" → [[wiki/runbook-hyperevm-ntt\|runbook-hyperevm-ntt]] (`setPeer` is `onlyOwner`), [[wiki/wormhole\|wormhole]]
 
 ## Lending & stablecoin
 
@@ -92,7 +97,20 @@ Task → pages cheat sheet for Claude Code working on [[wiki/hydration\|hydratio
 - "Adjust risk parameters (caps, thresholds)" → [[wiki/circuit-breaker\|circuit-breaker]], [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]], [[wiki/price-barrier\|price-barrier]], [[wiki/dynamic-fees\|dynamic-fees]], [[wiki/pallet-dynamic-fees\|pallet-dynamic-fees]]
 - "EMA oracle lookup / config" → [[wiki/ema-oracle\|ema-oracle]], [[wiki/pallet-ema-oracle\|pallet-ema-oracle]]
 - "Protocol-owned liquidity (POL)" → [[wiki/protocol-owned-liquidity\|protocol-owned-liquidity]]
-- "Tradability flags / pause an asset" → [[wiki/tradability-flags\|tradability-flags]], [[wiki/pallet-omnipool\|pallet-omnipool]]
+- "Tradability flags / pause an asset" → [[wiki/tradability-flags\|tradability-flags]], [[wiki/pallet-omnipool\|pallet-omnipool]], [[wiki/note-emergency-levers\|note-emergency-levers]]
+- "A bridge / oracle / issuer we depend on just got hit — what do we pause?" → [[wiki/runbook-collateral-damage-playbooks\|runbook-collateral-damage-playbooks]], [[wiki/note-dependency-registry\|note-dependency-registry]], [[wiki/note-emergency-levers\|note-emergency-levers]]
+- "Which assets depend on Snowbridge / Wormhole / Bifrost / Asset Hub?" → [[wiki/note-dependency-registry\|note-dependency-registry]]
+- "Who can pause X and how fast (TC vs referendum)?" → [[wiki/note-emergency-levers\|note-emergency-levers]], [[wiki/pallet-dispatcher\|pallet-dispatcher]]
+- "Suspend all XCM in an emergency" → [[wiki/pallet-parameters\|pallet-parameters]] (`suspend_xcm`, master only), [[wiki/note-emergency-levers\|note-emergency-levers]], [[wiki/note-live-chain-check\|note-live-chain-check]] (what is live today)
+- "What is actually live on chain right now (oracle sources, roles, fuses, caps)?" → [[wiki/note-live-chain-check\|note-live-chain-check]]
+- "What should our monitors look for / what alerts do we need?" → [[wiki/note-monitoring-plan\|note-monitoring-plan]], [[wiki/note-risk-register\|note-risk-register]]
+- "WHM contracts: oracle relay, Basejump, intents, NEAR/ZEC corridors, cross-chain governance" → [[wiki/source-whm-codebase\|source-whm-codebase]], [[wiki/whm-contracts\|whm-contracts]], [[wiki/whm-oracle-relay\|whm-oracle-relay]], [[wiki/whm-basejump\|whm-basejump]], [[wiki/whm-intents\|whm-intents]], [[wiki/whm-near-corridors\|whm-near-corridors]], [[wiki/whm-cross-chain-governance\|whm-cross-chain-governance]], [[wiki/whm-agents\|whm-agents]]
+- "Which oracle prices X / what can go wrong with our oracles" → [[wiki/note-oracle-inventory\|note-oracle-inventory]], [[wiki/note-collateral-map\|note-collateral-map]], [[wiki/pallet-ema-oracle\|pallet-ema-oracle]], [[wiki/whm-oracle-relay\|whm-oracle-relay]], [[wiki/hydration-precompiles\|hydration-precompiles]]
+- "What collateral does the money market accept / what does asset X depend on (bridge, issuer, oracle)?" → [[wiki/note-collateral-map\|note-collateral-map]], [[wiki/note-dependency-registry\|note-dependency-registry]]
+- "All risks to the protocol / what should we monitor?" → [[wiki/note-risk-register\|note-risk-register]], [[wiki/note-security-hardening-plan\|note-security-hardening-plan]], [[wiki/note-oracle-inventory\|note-oracle-inventory]]
+- "Harden security: what to build next, NTT pausing, custody watchdog, emergency brake" → [[wiki/note-security-hardening-plan\|note-security-hardening-plan]], [[wiki/note-emergency-levers\|note-emergency-levers]], [[wiki/wormhole\|wormhole]]
+- "Design / build onchain monitoring & alerting / should we buy Blockaid?" → [[wiki/note-dependency-aware-monitoring\|note-dependency-aware-monitoring]], [[wiki/source-onchain-monitoring-landscape\|source-onchain-monitoring-landscape]] (incl. Blockaid deep dive), [[wiki/note-ai-skills\|note-ai-skills]]
+- "An asset got locked down by the circuit breaker" → upstream `ai_skills/circuit-breaker-incident` via [[wiki/note-ai-skills\|note-ai-skills]], [[wiki/pallet-circuit-breaker\|pallet-circuit-breaker]]
 - "Transaction fee payment in alt assets" → [[wiki/pallet-transaction-multi-payment\|pallet-transaction-multi-payment]]
 
 ## Frontend (`hydration-ui`)
@@ -104,9 +122,9 @@ Task → pages cheat sheet for Claude Code working on [[wiki/hydration\|hydratio
 - "Work on the liquidity UI" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (liquidity section), [[wiki/nft-lp-positions\|nft-lp-positions]], [[wiki/pallet-omnipool\|pallet-omnipool]]
 - "Work on the borrow UI" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (borrow section), [[wiki/hydration-ui-money-market\|hydration-ui-money-market]], [[wiki/hydration-borrow\|hydration-borrow]]
 - "Work on the XCM transfer UI" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (xcm section), [[wiki/xc-sdk\|xc-sdk]], [[wiki/xc-package\|xc-package]], [[wiki/xc-cfg\|xc-cfg]]
-- "Add a new bridge route in the UI / multi-bridge selector" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (xcm/transfer `BridgeSelector`), [[wiki/hydration-ui-utils\|hydration-ui-utils]] (basejumpscan), [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] (icons), [[wiki/xc-cfg\|xc-cfg]]
-- "Investigate Basejump bridge scan history / SSE journey timeline" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (xcm/history), [[wiki/hydration-ui-utils\|hydration-ui-utils]] (basejumpscan), [[wiki/hydration-ui-indexer\|hydration-ui-indexer]]
-- "Work on the wallet / assets UI" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (wallet section), [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]]
+- "Add a new bridge route in the UI / multi-bridge selector" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (xcm/transfer `BridgeSelector`), [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] (icons), [[wiki/xc-cfg\|xc-cfg]]
+- "Investigate cross-chain transfer / intent history in the UI" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (xcm/history, scan-based), [[wiki/hydration-ui-utils\|hydration-ui-utils]] (transferscan, intentscan, xcscan), [[wiki/hydration-ui-indexer\|hydration-ui-indexer]], [[wiki/whm-basejump\|whm-basejump]]
+- "Work on the portfolio / balances UI (replaced `wallet`)" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (portfolio section), [[wiki/hydration-ui-api\|hydration-ui-api]], [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]]
 - "Transaction signing / submission flow" → [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]], [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]], [[wiki/papi-signers\|papi-signers]]
 - "Sign an EVM permit and submit it as a papi extrinsic" → [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]] (`useSignAndSubmit`), [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]] (`EthereumSigner.getPermit`)
 - "Review a pending multisig transaction in the UI / track multisig approvals" → [[wiki/hydration-ui-submit-tx\|hydration-ui-submit-tx]], [[wiki/hydration-ui-api\|hydration-ui-api]], [[wiki/hydration-ui-modules\|hydration-ui-modules]]
@@ -114,12 +132,12 @@ Task → pages cheat sheet for Claude Code working on [[wiki/hydration\|hydratio
 - "Style / component additions" → [[wiki/hydration-ui-design-system\|hydration-ui-design-system]]
 - "Add a top-of-page banner / app announcement" → [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] (`BannerTop`), [[wiki/hydration-ui-main-app\|hydration-ui-main-app]] (`banners.ts`), [[wiki/hydration-ui-modules\|hydration-ui-modules]] (`NewFarmsBanner`)
 - "Subscribe to a chain storage value with rxjs/sharing" → [[wiki/hydration-ui-main-app\|hydration-ui-main-app]] (`usePapiValue`)
-- "Generate / update GraphQL types (three clients now: indexer, squid, multix — the Snowbridge client was deleted)" → [[wiki/hydration-ui-indexer\|hydration-ui-indexer]]
+- "History / explorer data in the UI (Neckwork REST, scan, GraphQL indexer for farms, multix)" → [[wiki/hydration-ui-indexer\|hydration-ui-indexer]], [[wiki/hydration-ui-api\|hydration-ui-api]]
 - "Historical data / analytics queries" → [[wiki/hydration-ui-indexer\|hydration-ui-indexer]], [[wiki/hydration-ui-modules\|hydration-ui-modules]] (stats section)
 - "Build a yield strategy page — BIL vault or Hollar bonds" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (strategies section), [[wiki/hollar\|hollar]], [[wiki/pallet-otc\|pallet-otc]]
 - "Wire up a CEX or fiat deposit / withdraw flow" → [[wiki/hydration-ui-modules\|hydration-ui-modules]] (onramp section), [[wiki/xc-cfg\|xc-cfg]]
 - "Add a lending market to the money-market UI" → [[wiki/hydration-ui-money-market\|hydration-ui-money-market]], [[wiki/hydration-borrow\|hydration-borrow]]
-- "Add a chart (squid → Grafana SQL)" → [[wiki/hydration-ui-indexer\|hydration-ui-indexer]], [[wiki/hydration-ui-design-system\|hydration-ui-design-system]]
+- "Add a chart" → [[wiki/hydration-ui-design-system\|hydration-ui-design-system]] (`@tanstack/charts`), [[wiki/hydration-ui-indexer\|hydration-ui-indexer]]
 - "Work on the address book / contacts" → [[wiki/hydration-ui-web3-connect\|hydration-ui-web3-connect]]
 - "Render long-form MDX content" → [[wiki/hydration-ui-design-system\|hydration-ui-design-system]], [[wiki/hydration-ui-tech-stack\|hydration-ui-tech-stack]]
 

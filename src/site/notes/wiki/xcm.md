@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xcm/","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/xcm/","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"XCM (Cross-Consensus Messaging)","tags":["cross-chain","polkadot","interoperability"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
@@ -19,12 +19,13 @@
 
 For connectivity outside the Polkadot ecosystem, [[wiki/hydration\|hydration]] uses:
 - **[[wiki/snowbridge\|snowbridge]]** — trustless native bridge between Polkadot and Ethereum; V1 and V2 routes ship side by side
-- **[[wiki/wormhole\|wormhole]] NTT** — direct Hydration ↔ Ethereum / Base / Solana / Sui. **No XCM hop:** the old MRL model that routed through Moonbeam via XCM `Transact` is gone, and so is `AssetRoute.transact`
-- **[[wiki/xc-swap\|xc-swap]]** — NEAR Intent Routing; a sibling of the XCM/bridge transfer stack, not a layer on it (one Hydration EVM tx, no transfer stack at all)
+- **[[wiki/wormhole\|wormhole]] NTT** — direct Hydration ↔ Ethereum / Base / HyperEVM / Robinhood / Solana / Sui / NEAR (Hydration EVM, no XCM hop)
+- **Omni (NEAR One)** — Zcash corridor via NEAR
+- **[[wiki/xc-swap\|xc-swap]]** — Hydration → NEAR Intents swaps over the NTT rail (one Hydration EVM tx)
 
-## Chain set (Aug 2026)
+## Chain set
 
-[[wiki/xc-cfg\|xc-cfg]] `chainsMap` **removed 5 chains** — `moonbeam`, `interlay`, `crust`, `ajuna`, `laos` — and **added `assethub_cex`**, an AssetHub variant used by the UI `onramp/` module for CEX forwarding (reads every asset incl. DOT from the `assets` pallet, reuses AssetHub's DEX via `dexAlias`).
+Substrate chains in [[wiki/xc-cfg\|xc-cfg]] `chainsMap` (d16ff85): `hydration`, `polkadot`, `assethub`, `assethub_cex` (CEX forwarding for the UI `onramp/` module; reuses AssetHub's DEX via `dexAlias`), `astar`, `bifrost`, `energywebx`, `mythos`, `neuroweb`, `pendulum`, `unique`; Kusama `assethub_kusama`, `basilisk`. Full list incl. EVM / Solana / Sui / NEAR / Zcash: [[wiki/xc-cfg\|xc-cfg]].
 
 ## Sources
 

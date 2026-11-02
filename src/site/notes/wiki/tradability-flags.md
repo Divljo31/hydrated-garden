@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/tradability-flags/","title":"Tradability Flags","tags":["security","omnipool","governance"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Tradability Flags","tags":["security","omnipool","governance"],"source_count":1,"last_updated":"2026-04-13"}}
+{"dg-publish":true,"permalink":"/wiki/tradability-flags/","title":"Tradability Flags","tags":["security","omnipool","governance"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"Tradability Flags","tags":["security","omnipool","governance"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
@@ -24,7 +24,9 @@ A `safe_withdrawal` state is inferred when both `SELL` and `BUY` are disabled. T
 
 ## Emergency Use
 
-The Technical Committee can invoke `set_asset_tradable_state` to selectively disable any combination of flags for any asset in an emergency. This extrinsic is a candidate for `Operational` dispatch class (highest priority, bypasses block weight limits), ensuring pausing can succeed even during high-throughput attacks. This is the primary tool for responding to an active exploit.
+The Technical Committee can invoke `set_asset_tradable_state` to selectively disable any combination of flags for any asset in an emergency. This is the primary tool for responding to an active exploit.
+
+**Verified 2026-11-02 against `raw/hydration-node` (2026-08-15 sync):** Omnipool `UpdateTradabilityOrigin = Root | TechCommitteeMajority | OmnipoolAdmin` (`set_asset_tradable_state`, call_index 7); Stableswap has its own `set_asset_tradable_state` (call_index 9) with `UpdateTradabilityOrigin = Root | TechCommitteeMajority`. Neither is `DispatchClass::Operational` — both are `Normal` class, so an emergency flag flip competes for block space; making it Operational is an open proposal. See [[wiki/note-emergency-levers\|note-emergency-levers]] and [[wiki/runbook-collateral-damage-playbooks\|runbook-collateral-damage-playbooks]] (infinite-mint pattern: disable `SELL` + `ADD_LIQUIDITY`, keep exits open).
 
 ## Governance
 

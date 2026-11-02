@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xc-package/","title":"xc (Cross-Chain Package)","tags":["sdk","cross-chain","transfers","xc","ntt"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc (Cross-Chain Package)","repo":"sdk","paths":["packages/xc/src/factory.ts","packages/xc/src/dex.ts","packages/xc/src/types.ts","packages/xc/docs/overview.md","packages/xc/docs/ntt.md","packages/xc/docs/chain-native-balances.md","packages/xc/docs/unidirectional-routes.md"],"key_exports":["createXcContext","XcCtx","XcOpts","registerDexes"],"tags":["sdk","cross-chain","transfers","xc","ntt"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/xc-package/","title":"xc (Cross-Chain Package)","tags":["sdk","cross-chain","transfers","xc","ntt"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc (Cross-Chain Package)","repo":"sdk","paths":["packages/xc/src/factory.ts","packages/xc/src/dex.ts","packages/xc/src/types.ts","packages/xc/docs/overview.md","packages/xc/docs/ntt.md","packages/xc/docs/chain-native-balances.md","packages/xc/docs/unidirectional-routes.md","packages/xc/docs/ntt-reorg-recovery.md"],"key_exports":["createXcContext","XcCtx","XcOpts","registerDexes"],"tags":["sdk","cross-chain","transfers","xc","ntt"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
 # xc (Cross-Chain Package)
 
-**TL;DR:** `@galacticcouncil/xc` (v2.1.0, papi v2) is the batteries-included entry point for cross-chain transfers — a context factory wiring [[wiki/xc-core\|xc-core]], [[wiki/xc-cfg\|xc-cfg]] and [[wiki/xc-sdk\|xc-sdk]] into one API. Four source files, ~50 lines of logic; its real weight this cycle is **`docs/`, which is now the XC stack's reference documentation**.
+**TL;DR:** `@galacticcouncil/xc` (v2.1.0, papi v2) is the batteries-included entry point for cross-chain transfers — a context factory wiring [[wiki/xc-core\|xc-core]], [[wiki/xc-cfg\|xc-cfg]] and [[wiki/xc-sdk\|xc-sdk]] into one API. Four source files, ~50 lines of logic; its real weight is **`docs/`, the XC stack's reference documentation**.
 
 ## Quick Start
 
@@ -57,18 +57,19 @@ const dexAlias: Record<string, string> = {
 
 ## Multi-Bridge Route Selection
 
-Routes are tagged and selected with the optional `tag` argument of `ConfigBuilder.build()`. Current tags: `Basejump`, `Wormhole`, `Ntt`, `NttExecutor`, `Relayer`, `Snowbridge`, `SnowbridgeV1`.
+Routes are tagged and selected with the optional `tag` argument of `ConfigBuilder.build()`. Current tags: `Basejump`, `Ntt`, `NttExecutor`, `Omni`, `Wormhole`, `Relayer`, `Snowbridge`, `SnowbridgeV1`.
 
 ## Supported Protocols & Bridges
 
 - **[[wiki/xcm\|xcm]]** — Polkadot cross-consensus messaging
-- **[[wiki/wormhole\|wormhole]] NTT** — Native Token Transfers, direct Hydration ↔ Ethereum / Base / Solana / Sui (**replaced MRL**, which routed through Moonbeam)
+- **[[wiki/wormhole\|wormhole]] NTT** — Native Token Transfers, Hydration ↔ Ethereum / Base / HyperEVM / Robinhood / Solana / Sui / NEAR
+- **Omni (NEAR One)** — Zcash UTXO corridor via NEAR
 - **[[wiki/snowbridge\|snowbridge]]** — trustless Polkadot↔Ethereum, V1 and V2 side by side
-- **Basejump** — EVM bridge on Base
+- **Basejump** — one remaining Ethereum → Hydration USDC route
 
 ## Supported Platforms
 
-Substrate (Polkadot + Kusama parachains), EVM (Ethereum, Base, Hydration EVM), Solana, Sui.
+Substrate (Polkadot + Kusama parachains), EVM (Ethereum, Base, HyperEVM, Robinhood, Hydration EVM), Solana, Sui, NEAR, Zcash (transparent).
 
 ## Reference docs (`packages/xc/docs/`)
 
@@ -78,8 +79,9 @@ Substrate (Polkadot + Kusama parachains), EVM (Ethereum, Base, Hydration EVM), S
 | `ntt.md` | the definitive NTT reference — model, registry, transfer flow, signer paths & binding, rate limits, tracking/claim, executor vs self-redeem, per-chain support matrix, open items |
 | `chain-native-balances.md` | declarative balance/min model, per-platform typing, how to add a chain |
 | `unidirectional-routes.md` | phased spec for one-way routes, chain-level balance registry, the `reversible` flag |
+| `ntt-reorg-recovery.md` | NTT messages lost to a Hydration reorg (synthetic EVM tx hash embeds the substrate block hash) — finding the surviving tx, getting the VAA signed |
 
-Treat `ntt.md` and `unidirectional-routes.md` as **specs that partly lead the code** — e.g. `ntt.md` describes `ContractConfig.prior`/`.follow` slots and commented-out Sui routes, neither of which matches HEAD.
+Treat `ntt.md` and `unidirectional-routes.md` as **specs that partly lead the code** — e.g. `ntt.md` describes `ContractConfig.prior`/`.follow` slots that do not exist in `xc-core`.
 
 ## Dependencies
 

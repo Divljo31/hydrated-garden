@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs","pallets/dispatcher/src/weights.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_as_emergency_admin","dispatch_with_extra_gas","dispatch_evm_call","dispatch_with_fee_payer","note_aave_manager","AaveManagerAccount","ExtraGas","LastEvmCallExitReason","EvmCallChecker","MaybeEvmCall","EvmFeePayerSupport","ExtraGasSupport"],"traits_impl":["ExtraGasSupport"],"depends_on":["pallet-evm"],"runtime_index":40,"tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"last_updated":"2026-05-14"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-dispatcher/","title":"pallet-dispatcher","tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-dispatcher","repo":"hydration-node","paths":["pallets/dispatcher/src/lib.rs","pallets/dispatcher/src/weights.rs"],"symbols":["Pallet","Config","dispatch_as_treasury","dispatch_as_aave_manager","dispatch_as_emergency_admin","dispatch_with_extra_gas","dispatch_evm_call","dispatch_with_fee_payer","note_aave_manager","AaveManagerAccount","ExtraGas","LastEvmCallExitReason","EvmCallChecker","MaybeEvmCall","EvmFeePayerSupport","ExtraGasSupport"],"traits_impl":["ExtraGasSupport"],"depends_on":["pallet-evm"],"runtime_index":40,"tags":["dispatcher","batching","governance","evm","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
 # pallet-dispatcher
 
-**TL;DR:** Authorised-origin call dispatcher. Lets specific governance origins (Treasurer, AaveManager, EmergencyAdmin = TC majority) execute calls as a pallet-controlled signed account, plus EVM-specific dispatch paths: gas-augmented dispatch, single EVM call dispatch (with exit-reason validation), and fee-payer override. Runtime index = 40. (ISMP cleanup hook removed in spec 419 along with Hyperbridge.)
+**TL;DR:** Authorised-origin call dispatcher. Lets specific governance origins (Treasurer, AaveManager, EmergencyAdmin = TC majority) execute calls as a pallet-controlled signed account, plus EVM-specific dispatch paths: gas-augmented dispatch, single EVM call dispatch (with exit-reason validation), and fee-payer override. Runtime index = 40.
 
 ## Role
 
@@ -63,7 +63,7 @@ type EmergencyAdminOrigin  = EitherOf<EnsureRoot<AccountId>, TechCommitteeMajori
 
 ## Errors
 
-`EvmCallFailed`, `NotEvmCall`, `EvmOutOfGas`, `EvmArithmeticOverflowOrUnderflow`, `AaveSupplyCapExceeded`, `AaveBorrowCapExceeded`, `AaveHealthFactorNotBelowThreshold`, `AaveHealthFactorLowerThanLiquidationThreshold`, `CollateralCannotCoverNewBorrow`, `AaveReservePaused`.
+`EvmCallFailed`, `NotEvmCall`, `EvmOutOfGas`, `EvmArithmeticOverflowOrUnderflow`, `AaveSupplyCapExceeded`, `AaveBorrowCapExceeded`, `AaveHealthFactorNotBelowThreshold`, `AaveHealthFactorLowerThanLiquidationThreshold`, `CollateralCannotCoverNewBorrow`, `AaveReservePaused`, `UniswapV3InsufficientLiquidity`, `UniswapV3SwapFailed` (decoded EVM errors from the Uniswap v3 router venue; `UniswapV3InsufficientLiquidity` is DCA-retriable).
 
 ## Extrinsics
 
@@ -81,7 +81,7 @@ type EmergencyAdminOrigin  = EitherOf<EnsureRoot<AccountId>, TechCommitteeMajori
 
 ## Hooks
 
-`on_finalize` — `LastEvmCallExitReason::kill()` resets the per-block storage. No `on_idle` cleanup any more; the previous ISMP cleanup hook was removed alongside the Hyperbridge pallets in spec 419.
+`on_finalize` — `LastEvmCallExitReason::kill()` resets the per-block storage. No `on_idle` hook.
 
 ## Integration
 
@@ -110,7 +110,6 @@ pub fn dispatch_as_emergency_admin(
 
 ## Gotchas
 
-- **No more ISMP / Hyperbridge support.** The `on_idle` hook that called `pallet_ismp::cleanup_requests` was removed in spec 419 along with the deletion of Hyperbridge / ISMP / token-gateway pallets. Old wiki notes referencing `CLEANUP_LIMIT` and ISMP housekeeping are obsolete.
 - **`dispatch_with_extra_gas`** is a gas inflation tool — be careful with weight accounting; post-dispatch weight equals declared-extra (via `GasWeightMapping`) + actual inner.
 - **`dispatch_evm_call`** rejects any call that is not `pallet_evm::Call::call` (checked by `EvmCallIdentifier`). It also reads `LastEvmCallExitReason` set by the EVM runner wrapper and fails the extrinsic if the EVM execution returned anything other than `Succeed(Returned)` or `Succeed(Stopped)`. This is the only path where EVM call failures bubble up as proper substrate errors.
 - **`dispatch_with_fee_payer`** sets `T::EvmFeePayer::set_fee_payer(signer)` for the duration of the inner call and restores the previous payer (or clears) afterwards. Used to let one account sponsor another's EVM gas.

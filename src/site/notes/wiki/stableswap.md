@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/stableswap/","title":"StableSwap Pools","tags":["amm","stablecoin","trading"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"StableSwap Pools","tags":["amm","stablecoin","trading"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/stableswap/","title":"StableSwap Pools","tags":["amm","stablecoin","trading"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"concept","title":"StableSwap Pools","tags":["amm","stablecoin","trading"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
@@ -9,7 +9,7 @@
 
 ## Virtual share issuance (storage v1 → v2, Aug 2026)
 
-Share supply is now tracked by the pallet itself in `ShareIssuance: StorageMap<AssetId, Balance>`, mutated through `mint_shares` / `burn_shares` (`pallets/stableswap/src/lib.rs`). Migration: `pallets/stableswap/src/migrations/v2.rs` (`MigrateV1ToV2`).
+Share supply is now tracked by the pallet itself in `ShareIssuance: StorageMap<AssetId, Balance>`, mutated through `mint_shares` / `burn_shares` (`pallets/stableswap/src/lib.rs`). Migration: `pallets/stableswap/src/migrations/v2.rs` (`MigrateV1ToV2`). **SDK caveat:** [[wiki/sdk-next\|sdk-next]]'s `StableSwapClient` still derives share supply from `Tokens.TotalIssuance`, not `Stableswap.ShareIssuance` (unfixed at sdk d16ff85).
 
 **Anything deriving a pool's share supply from `Tokens.TotalIssuance(shareAssetId)` is now wrong.** All `StableMath.*` inputs must come from `ShareIssuance`. New errors: `InsufficientShareIssuance`, `UnaccountedShareIssuance`.
 

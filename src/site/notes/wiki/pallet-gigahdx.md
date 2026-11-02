@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/pallet-gigahdx/","title":"pallet-gigahdx","tags":["gigahdx","staking","liquid-staking","aave","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-gigahdx","repo":"hydration-node","paths":["pallets/gigahdx/src/lib.rs","pallets/gigahdx/src/traits.rs","pallets/gigahdx/src/weights.rs","pallets/gigahdx/src/benchmarking.rs","traits/src/gigahdx.rs","runtime/hydradx/src/gigahdx.rs","precompiles/lock-manager/src/lib.rs"],"symbols":["Pallet","Config","StakeRecord","PendingUnstake","Stakes","TotalLocked","GigaHdxPoolContract","PendingUnstakes","giga_stake","giga_unstake","unlock","cancel_unstake","migrate","realize_yield","set_pool_contract","do_stake","do_unstake","do_realize_yield","refresh_lock","exchange_rate","total_staked_hdx","total_gigahdx_supply","locked_gigahdx","gigapot_account_id","calculate_gigahdx_given_hdx_amount","calculate_hdx_amount_given_gigahdx"],"traits_impl":["Seize","ExternalClaims","LegacyStakeMigrator","VotingCommitmentInspect","MoneyMarketOperations"],"depends_on":["pallet-staking","pallet-gigahdx-rewards","pallet-liquidation","pallet-evm-accounts","pallet-conviction-voting","pallet-asset-registry"],"runtime_index":86,"tags":["gigahdx","staking","liquid-staking","aave","evm","runtime","rust","substrate"],"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/pallet-gigahdx/","title":"pallet-gigahdx","tags":["gigahdx","staking","liquid-staking","aave","evm","runtime","rust","substrate"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"pallet","title":"pallet-gigahdx","repo":"hydration-node","paths":["pallets/gigahdx/src/lib.rs","pallets/gigahdx/src/traits.rs","pallets/gigahdx/src/weights.rs","pallets/gigahdx/src/benchmarking.rs","traits/src/gigahdx.rs","runtime/hydradx/src/gigahdx.rs","precompiles/lock-manager/src/lib.rs"],"symbols":["Pallet","Config","StakeRecord","PendingUnstake","Stakes","TotalLocked","GigaHdxPoolContract","PendingUnstakes","giga_stake","giga_unstake","unlock","cancel_unstake","migrate","realize_yield","set_pool_contract","do_stake","do_unstake","do_realize_yield","refresh_lock","exchange_rate","total_staked_hdx","total_gigahdx_supply","locked_gigahdx","gigapot_account_id","calculate_gigahdx_given_hdx_amount","calculate_hdx_amount_given_gigahdx"],"traits_impl":["Seize","ExternalClaims","LegacyStakeMigrator","VotingCommitmentInspect","MoneyMarketOperations"],"depends_on":["pallet-staking","pallet-gigahdx-rewards","pallet-liquidation","pallet-evm-accounts","pallet-conviction-voting","pallet-asset-registry"],"runtime_index":86,"tags":["gigahdx","staking","liquid-staking","aave","evm","runtime","rust","substrate"],"last_updated":"2026-11-02"}}
 ---
 
 
@@ -44,6 +44,8 @@ pub trait Config: frame_system::Config<RuntimeEvent: From<Event<Self>>> {
     #[pallet::constant] type LockId: Get<LockIdentifier>;      // ghdxlock
     #[pallet::constant] type MinStake: Get<Balance>;
     #[pallet::constant] type CooldownPeriod: Get<BlockNumberFor<Self>>;
+    /// Block at which the runtime switched from 6-second to 2-second blocks.
+    type TwoSecBlocksSince: Get<BlockNumberFor<Self>>;   // runtime: pallet_parameters::TwoSecBlocksSince
     #[pallet::constant] type MaxPendingUnstakes: Get<u32>;
     type ExternalClaims: crate::traits::ExternalClaims<Self::AccountId>;
     type LegacyStaking: crate::traits::LegacyStakeMigrator<Self::AccountId>;
@@ -189,6 +191,7 @@ Runtime wiring: `impl pallet_gigahdx::Config for Runtime` in `runtime/hydradx/sr
 - `do_stake` is `pub` and skips *all* admission checks; untrusted callers must replicate `giga_stake`'s gate.
 - `realize_yield` can return `GigapotInsufficient` from cross-user floor-rounding; the tripwire `MAX_GIGAPOT_ROUNDING_SHORTFALL = 1_000_000` (1 µHDX) `debug_assert`s under test but returns the error in release.
 - `position_id` is the **originating block number**, not a sequence — unstakes in the same block compound into one position.
+- **Cooldown expiry goes through `cooldown_expires_at(unstaked_at)`**, never `position_id + CooldownPeriod`. `CooldownPeriod` is in 2 s blocks; positions created before `TwoSecBlocksSince` keep their remaining wall-clock cooldown (old cooldown = `CooldownPeriod / 3` in 6 s blocks, remainder after the switch ×3). When `TwoSecBlocksSince == u32::MAX` (not switched) it is plain addition.
 - Behavioural coverage: `integration-tests/src/gigahdx.rs` (mainnet-snapshot tests against the deployed AAVE fork — staking, rate inflation, multi-position cooldowns, migration, liquidation e2e).
 
 ## Sources

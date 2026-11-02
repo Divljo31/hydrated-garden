@@ -22,7 +22,7 @@ The design philosophy is vertical integration: the pillars interact natively at 
 
 Hydration is a Polkadot parachain, inheriting shared security from the relay chain. The runtime is composed of Substrate pallets (Rust modules), not EVM smart contracts. This gives deeper integration and stronger security guarantees than contract-based protocols. EVM compatibility is available via [[wiki/pallet-frontier\|pallet-frontier]] for Solidity tooling and MetaMask support.
 
-Cross-chain interoperability uses [[wiki/xcm\|xcm]], with bridges to Ethereum via [[wiki/snowbridge\|snowbridge]] (trustless, V1 + V2) and [[wiki/wormhole\|wormhole]] **NTT** — direct to Ethereum / Base / Solana / Sui since Aug 2026 (the Moonbeam MRL hop is gone). [[wiki/xc-swap\|xc-swap]] adds NEAR Intent Routing outside the transfer stack.
+Cross-chain interoperability uses [[wiki/xcm\|xcm]], with bridges to Ethereum via [[wiki/snowbridge\|snowbridge]] (trustless, V1 + V2) and [[wiki/wormhole\|wormhole]] **NTT** — direct to Ethereum / Base / Solana / Sui. [[wiki/xc-swap\|xc-swap]] adds NEAR Intent Routing outside the transfer stack.
 
 ## Governance
 

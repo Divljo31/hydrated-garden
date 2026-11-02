@@ -1,20 +1,20 @@
 ---
-{"dg-publish":true,"permalink":"/wiki/xc-core/","title":"xc-core","tags":["sdk","cross-chain","types","definitions","ntt","balances"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-core","repo":"sdk","paths":["packages/xc-core/src/chain/Chain.ts","packages/xc-core/src/chain/balance","packages/xc-core/src/bridge/ntt.ts","packages/xc-core/src/bridge/wormhole.ts","packages/xc-core/src/config/definition/AssetRoute.ts","packages/xc-core/src/config/definition/ChainRoutes.ts","packages/xc-core/src/config/ConfigBuilder.ts","packages/xc-core/src/evm/EvmCall.ts","packages/xc-core/src/evm/abi"],"key_exports":["Chain","Parachain","EvmChain","EvmParachain","SolanaChain","SuiChain","Asset","AssetAmount","AssetRoute","ChainRoutes","ConfigService","ConfigBuilder","Ntt","NttTokenDef","Wormhole","Snowbridge","Basejump","SubstrateBalanceType","EvmBalanceType","SolanaBalanceType","SuiBalanceType","SubstrateMinType","CallType","EvmCallData","EvmPrerequisite","getEvmPrerequisites","ContractConfig","ContractConfigBuilder","TransferValidation","TransferValidationError"],"tags":["sdk","cross-chain","types","definitions","ntt","balances"],"source_count":1,"last_updated":"2026-08-15"}}
+{"dg-publish":true,"permalink":"/wiki/xc-core/","title":"xc-core","tags":["sdk","cross-chain","types","definitions","ntt","balances"],"dgShowBacklinks":true,"dgShowLocalGraph":true,"dgShowInlineTitle":true,"dgShowFileTree":true,"dgShowToc":true,"dg-note-properties":{"type":"entity","entity_kind":"product","title":"xc-core","repo":"sdk","paths":["packages/xc-core/src/chain/Chain.ts","packages/xc-core/src/chain/balance","packages/xc-core/src/bridge/ntt.ts","packages/xc-core/src/bridge/wormhole.ts","packages/xc-core/src/config/definition/AssetRoute.ts","packages/xc-core/src/config/definition/ChainRoutes.ts","packages/xc-core/src/config/ConfigBuilder.ts","packages/xc-core/src/evm/EvmCall.ts","packages/xc-core/src/evm/abi","packages/xc-core/src/chain/NearChain.ts","packages/xc-core/src/chain/ZecChain.ts","packages/xc-core/src/near","packages/xc-core/src/config/definition/deposit","packages/xc-core/src/config/definition/functionCall"],"key_exports":["Chain","Parachain","EvmChain","EvmParachain","SolanaChain","SuiChain","NearChain","ZecChain","NearClient","NearBalanceType","ZecBalanceType","DepositConfig","DepositConfigBuilder","FunctionCallConfig","FunctionCallConfigBuilder","Asset","AssetAmount","AssetRoute","ChainRoutes","ConfigService","ConfigBuilder","Ntt","NttTokenDef","Wormhole","Snowbridge","Basejump","SubstrateBalanceType","EvmBalanceType","SolanaBalanceType","SuiBalanceType","SubstrateMinType","CallType","EvmCallData","EvmPrerequisite","getEvmPrerequisites","ContractConfig","ContractConfigBuilder","TransferValidation","TransferValidationError"],"tags":["sdk","cross-chain","types","definitions","ntt","balances"],"source_count":1,"last_updated":"2026-11-02"}}
 ---
 
 
 # xc-core
 
-**TL;DR:** `@galacticcouncil/xc-core` (v2.3.0, papi v2) provides the foundational types for cross-chain transfers — chain models, asset definitions, route configuration and bridge primitives — depended on by every other XC package. **Aug 2026: two structural changes** — balance/min reads moved from route-level builders onto the chain itself, and the MRL/TokenBridge primitives were replaced by NTT.
+**TL;DR:** `@galacticcouncil/xc-core` (**v2.8.0**; `@wormhole-foundation/sdk-*` pinned `6.1.4`, `sdk-definitions-ntt 8.0.1`) provides the foundational types for cross-chain transfers — chain models (incl. **NEAR** and **Zcash**), asset definitions, route configuration and bridge primitives (Wormhole, NTT, Snowbridge, Basejump) — depended on by every other XC package. Balance / minimum reads are declared on the chain itself.
 
 ## Chain Model
 
-**Ecosystems:** Ethereum, Polkadot, Kusama, Solana, Sui
-**Chain types:** `Parachain`, `EvmParachain`, `EvmChain`, `SolanaChain`, `SuiChain`
+**Ecosystems:** Ethereum, Polkadot, Kusama, Solana, Sui, Near, Zcash
+**Chain types:** `Parachain`, `EvmParachain`, `EvmChain`, `SolanaChain`, `SuiChain`, **`NearChain`**, **`ZecChain`**
 
 Each chain maps assets with chain-specific ids and decimals, can have a DEX attached (`registerDex()`), tracks minimum deposit amounts, and provides type-checking methods (`isEvm()`, `isSubstrate()`, …). EVM chains can optionally declare bridge integrations: `basejump`, `snowbridge`, `wormhole`.
 
-### Chain-native balance reads (new)
+### Chain-native balance reads
 
 Balance and minimum reads are now **declared on the chain**, not built per route. `Chain` is generic over its platform's balance type and exposes the read API directly:
 
@@ -44,9 +44,11 @@ Storage-type enums (`src/chain/balance/types.ts`):
 | `EvmBalanceType` | `EvmNative`, `EvmErc20` |
 | `SolanaBalanceType` | `SolanaNative`, `SolanaToken` |
 | `SuiBalanceType` | `SuiNative` |
+| `NearBalanceType` | `NearNative`, `NearFt` (NEP-141, keyed by contract account) |
+| `ZecBalanceType` | `ZecTransparent` (shielded balances are not publicly readable) |
 | `SubstrateMinType` | `Assets` — optional dynamic-minimum storage; chains with static minimums use `assetsData[*].min` |
 
-Per-platform read implementations live in `src/chain/balance/{substrate,evm,solana,sui}.ts`. Subscriptions retry 3× with 1 s delay (`BALANCE_RETRY`) and coalesce the post-change update burst over a 500 ms window (`BALANCE_DEBOUNCE`), using `rx.debounceAfterFirst` from [[wiki/sdk-common\|sdk-common]]. `subscribeBalances()` isolates a dead stream so one bad asset doesn't error the whole combined observable.
+Per-platform read implementations live in `src/chain/balance/{substrate,evm,solana,sui,near,zec}.ts`. Subscriptions retry 3× with 1 s delay (`BALANCE_RETRY`) and coalesce the post-change update burst over a 500 ms window (`BALANCE_DEBOUNCE`), using `rx.debounceAfterFirst` from [[wiki/sdk-common\|sdk-common]]. `subscribeBalances()` isolates a dead stream so one bad asset doesn't error the whole combined observable.
 
 Design + migration spec: `packages/xc/docs/chain-native-balances.md`, `packages/xc/docs/unidirectional-routes.md`.
 
@@ -56,7 +58,7 @@ Assets have a unique `key` (e.g. `'eth'`, `'dai'`) and an `originSymbol` (e.g. `
 
 ## Route Configuration
 
-Routes are hierarchical: `ChainRoutes` → `AssetRoute[]`, keyed `${sourceAsset.key}-${destChain.key}-${destAsset.key}`. `AssetRoute` shrank considerably:
+Routes are hierarchical: `ChainRoutes` → `AssetRoute[]`, keyed `${sourceAsset.key}-${destChain.key}-${destAsset.key}`.
 
 ```ts
 // packages/xc-core/src/config/definition/AssetRoute.ts
@@ -74,19 +76,19 @@ export interface AssetRouteParams {
   extrinsic?: ExtrinsicConfigBuilder;  // Substrate
   move?: MoveConfigBuilder;            // Sui
   program?: ProgramConfigBuilder;      // Solana
+  deposit?: DepositConfigBuilder;      // plain transfer to a bridge deposit address (Omni / Zcash)
+  functionCall?: FunctionCallConfigBuilder; // NEAR function calls
   tags?: string[];
 }
 ```
 
-**Removed from `AssetRoute`:** `source.balance`, `source.min`, the `source.destinationFee` *builder*, and `transact` (the intermediate-chain hop that MRL needed). `BalanceConfigBuilder` / `MinConfigBuilder` / `SubstrateQueryConfig` / `SolanaQueryConfig` / `SuiQueryConfig` are deleted.
-
-`ChainRoutes.getAssetDestinationRoutesOrEmpty(asset, destination)` is new — probes for a **reverse** route without using exceptions for control flow, which is what backs `Transfer.reversible` in [[wiki/xc-sdk\|xc-sdk]].
+`ChainRoutes.getAssetDestinationRoutesOrEmpty(asset, destination)` probes for a **reverse** route without using exceptions for control flow, which is what backs `Transfer.reversible` in [[wiki/xc-sdk\|xc-sdk]].
 
 `ConfigBuilder.build(assetOnDest, tag?)` still disambiguates when several routes share a key.
 
 ## Bridge Primitives
 
-`src/bridge/` — `Wormhole`, `Snowbridge`, `Basejump`, and the new `Ntt`.
+`src/bridge/` — `Wormhole`, `Snowbridge`, `Basejump`, `Ntt`.
 
 ```ts
 // packages/xc-core/src/bridge/ntt.ts
@@ -111,8 +113,16 @@ class Ntt {
 
 Address comparison is case-insensitive for `0x…` and exact for base58 (Solana). The per-chain registry lives inline on each chain def under `wormhole.ntt` in [[wiki/xc-cfg\|xc-cfg]].
 
-**Deleted with MRL:** `utils/mrl.ts` (+ spec), `evm/abi/Gmp.ts`, `evm/abi/TokenBridge.ts`, `evm/abi/TokenRelayer.ts`.
-**Added:** `evm/abi/{NttManager,NttManagerWithExecutor,WormholeTransceiver,Executor}.ts`, `evm/EvmCall.ts`, `utils/{codec,solana,sui}.ts`.
+ABIs (`src/evm/abi/`): `NttManager`, `NttManagerWithExecutor`, `WormholeTransceiver`, `Executor`, `Basejump`, **`UtxoEmitter`** (Omni withdraw emitter on Hydration EVM), plus `evm/EvmCall.ts`, `utils/{codec,solana,sui}.ts`.
+
+## Deposit & function-call configs
+
+- `DepositConfig { to, amount, min? }` (`config/definition/deposit/`) — a plain transfer to a bridge-derived deposit address; the bridge acts once it lands. Used by the Zcash → Hydration Omni route.
+- `FunctionCallConfig { receiverId, args, gas, deposit, wrapNative? }` (`config/definition/functionCall/`) — a NEAR function call; consecutive calls on the same receiver go out as one transaction.
+
+## NEAR client (`src/near/`)
+
+`NearClient(rpc)` — JSON-RPC wrapper: `view`, `viewAccount`, `viewAccessKey`, `viewState`, `getBlockHash`, `getGasPrice`, `sendTransaction`, `getTransaction`; `NearRpcError`. Used by the NEAR chain balance reads, `NttNearClient` ([[wiki/xc-cfg\|xc-cfg]]) and the NEAR platform in [[wiki/xc-sdk\|xc-sdk]].
 
 ## Contract config: ordered calls + prerequisites
 
@@ -129,7 +139,7 @@ export async function getEvmPrerequisites(
 
 Ordered and self-shortening: a native source is wrapped into the erc20 the contract pulls, which is then approved for the **exact** amount; each step drops off once executed, so re-deriving after signing yields a shorter sequence. Precompile targets and native-ETH bridges (Snowbridge V1 zero-address `sendToken`, V2 `v2_sendMessage` with an empty assets array) need nothing. Gas ceilings are split into `Gas` (fat `EVM.call` declarations: `approve` 200k, `deposit` 200k, `transfer` 1.2M, `redeem` 2M, `queued` 600k) and `FeeGas` (realistic bounds used only for fee estimation: `deposit` 60k, `approve` 70k, `transfer` 500k).
 
-> `packages/xc/docs/ntt.md` describes `ContractConfig.prior` / `.follow` slots — those fields do **not** exist at HEAD; ordering is the array plus `getEvmPrerequisites()`.
+> `packages/xc/docs/ntt.md` still refers to `ContractConfig.prior` / `.follow`; those fields do not exist in `xc-core` — ordering is the array plus `getEvmPrerequisites()`.
 
 ## Sources
 
