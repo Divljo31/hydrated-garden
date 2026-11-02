@@ -5,9 +5,7 @@
 
 # descriptors (SDK)
 
-**TL;DR:** `@galacticcouncil/descriptors` (v2.9.0, `polkadot-api
-{ #2}
-.1.7`) — type-safe papi metadata descriptors for [[hydration]] (`hydration`, `hydrationNext`, `hydrationIce`) and Asset Hub (`hub`), generated from a single whitelist. Built on [[papi-codegen]] / [[papi-typed-api]]. **Edit `.papi/whitelist.ts`** — it is now the only whitelist (the old `src/whitelist.ts` source-of-truth was deleted; `src/index.ts` is an empty stub).
+**TL;DR:** `@galacticcouncil/descriptors` (v2.9.0, `polkadot-api ^2.1.7`) — type-safe papi metadata descriptors for [[wiki/hydration\|hydration]] (`hydration`, `hydrationNext`, `hydrationIce`) and Asset Hub (`hub`), generated from a single whitelist. Built on [[wiki/papi-codegen\|papi-codegen]] / [[wiki/papi-typed-api\|papi-typed-api]]. **Edit `.papi/whitelist.ts`** — it is now the only whitelist (the old `src/whitelist.ts` source-of-truth was deleted; `src/index.ts` is an empty stub).
 
 ## Generation
 

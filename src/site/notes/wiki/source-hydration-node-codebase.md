@@ -34,7 +34,7 @@ raw/hydration-node/
 ├── primitives/               # Core types
 ├── runtime-mock/             # Shared test mocking utilities
 ├── scraper/                  # Offchain workers for pool scraping
-├── ai_skills/                # NEW — repo-local agent skills (see [[wiki/note-ai-skills\|note-ai-skills]])
+├── ai_skills/                # NEW — repo-local agent skills (see [[note-ai-skills]])
 ├── launch-configs/           # Zombienet, Chopsticks, fork configs
 ├── scripts/                  # Benchmarking, ops and TC-proposal scripts
 ├── infrastructure/           # Terraform + node bootstrap shell scripts

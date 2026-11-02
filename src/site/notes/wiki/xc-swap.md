@@ -16,11 +16,7 @@
 | [[wiki/sdk-common\|sdk-common]] | `erc20.ERC20.fromAssetId()` |
 | [[wiki/xc-cfg\|xc-cfg]] | none |
 
-Peers: `common >=1.1.0`, `sdk-next >=2.0.0`, `xc-core >=2.0.0`, `xc-sdk >=2.0.0`, `viem
-{ #2}
-.38.3`; dep `@defuse-protocol/one-click-sdk-typescript
-{ #0}
-.1.17`.
+Peers: `common >=1.1.0`, `sdk-next >=2.0.0`, `xc-core >=2.0.0`, `xc-sdk >=2.0.0`, `viem ^2.38.3`; dep `@defuse-protocol/one-click-sdk-typescript ^0.1.17`.
 
 ## Flow (`docs/spec.md`)
 

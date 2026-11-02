@@ -5,11 +5,7 @@
 
 # common (SDK)
 
-**TL;DR:** `@galacticcouncil/common` (v1.2.0) provides shared utilities across the SDK monorepo — big-number ops, XCM transformations, ERC20/EVM helpers, Substrate RPC abstractions and, new this cycle, **rxjs operators for subscription hygiene**. Aligned with [[wiki/papi\|papi]] v2 (`createWsClient`); peers `polkadot-api
-{ #2}
-.1.7`, `rxjs
-{ #7}
-.8.0`.
+**TL;DR:** `@galacticcouncil/common` (v1.2.0) provides shared utilities across the SDK monorepo — big-number ops, XCM transformations, ERC20/EVM helpers, Substrate RPC abstractions and, new this cycle, **rxjs operators for subscription hygiene**. Aligned with [[wiki/papi\|papi]] v2 (`createWsClient`); peers `polkadot-api ^2.1.7`, `rxjs ^7.8.0`.
 
 ## Modules
 

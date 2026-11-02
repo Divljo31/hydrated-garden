@@ -15,7 +15,6 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 
 ## Sources
 
-- [[wiki/source-onchain-monitoring-landscape\|source-onchain-monitoring-landscape]] — Nov 2026 vendor research (Blockaid, Hypernative, Hexagate, Phalcon, Forta, Venn, Tenderly, OZ Monitor…): pipeline, intervention modes, Hydration relevance
 - [[wiki/source-hydration-general-context\|source-hydration-general-context]] — Foundational protocol overview: products, architecture, governance, tokenomics, cross-chain design
 - [[wiki/source-omnipool-deep-context\|source-omnipool-deep-context]] — Deep technical reference: AMM model, swap math, LP mechanics, fees, risk controls, on-chain data model
 - [[wiki/source-sdk-codebase\|source-sdk-codebase]] — Galactic SDK monorepo: trading SDK, cross-chain transfers, WASM math, tooling
@@ -165,15 +164,7 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/price-barrier\|price-barrier]] — Spot/oracle price deviation check (1% threshold)
 - [[wiki/ema-oracle\|ema-oracle]] — Exponential moving average oracle for time-weighted pricing
 - [[wiki/protocol-owned-liquidity\|protocol-owned-liquidity]] — POL as liquidity floor and IL mitigation
-- [[wiki/note-emergency-levers\|note-emergency-levers]] — Every pause/limit lever (tradability, CB lockdown + global withdraw lockdown, tx-pause, emergency-admin dispatch, NTT minter revoke, MM/HSM) with scope, reversibility and fastest origin; MM + HSM have no TC fast path
-- [[wiki/note-dependency-registry\|note-dependency-registry]] — Assets grouped by upstream dependency (Snowbridge ~19, Wormhole ~11, Asset Hub, Bifrost, Interlay, parachains) + oracles (DIA feeds, EMA via Chainlink-adapter precompile) + registry schema and chain-snapshot generator
-- [[wiki/note-oracle-inventory\|note-oracle-inventory]] — Every oracle Hydration consumes (EMA internal sources, Chainlink-adapter precompile, DIA, WHM relay, Bifrost/external pushers, AaveOracle, stableswap peg sources) + 32 failure modes (staleness, manipulation, representation gap, key compromise, liquidation coupling) + chain reads to resolve
-- [[wiki/note-collateral-map\|note-collateral-map]] — Every money-market collateral (main 24 reserves, GIGAHDX, BIL) with route, configured price source, LTV/LT, HOLLAR facilitators + pool pricing, tBTC dependency chain worked hop by hop, "weird movement" signals
-- [[wiki/note-risk-register\|note-risk-register]] — Protocol-wide risk register (bridges, issuers, oracles, money market, HOLLAR/HSM, AMMs, ICE, governance/keys, EVM, infra, social) — each risk with today's control, gap and the signal to monitor
-- [[wiki/note-live-chain-check\|note-live-chain-check]] — Live read 2026-11-02 (block 16.54M, spec 455): 32 main-market reserves, live oracle sources + owners + staleness, ACL roles (TC has none on main/BIL), deposit fuses, HOLLAR facilitators, pegs; `suspend_xcm` not live
-- [[wiki/note-monitoring-plan\|note-monitoring-plan]] — What to watch so we don't get caught in someone else's incident: 6 layers (upstream, arrival, pricing, exposure, control plane, response readiness), ~40 signals with severity, alert format, routing, what fires today, rollout order
-- [[wiki/note-security-hardening-plan\|note-security-hardening-plan]] — Draft 4-phase plan (verify → fast paths + paging → watchtower → runtime/bridge upgrades); gaps: NTT hubs pauser = 4/7 owner, single verifier (threshold 1), fuse auto-expiry + funds-unlocker, no custody/admin/governance watch; patterns from Wormhole Governor/Accountant, CCIP, Snowbridge RFC-0166/0167, GateSeal, Aave Guardian
-- [[wiki/note-dependency-aware-monitoring\|note-dependency-aware-monitoring]] — Design draft: registry + internal/external watchers + correlator + pre-encoded playbooks; build order and open decisions
+- [[wiki/index-security\|index-security]] — Security & monitoring notes (private — kept in the vault, not published)
 
 ### Governance & Tokenomics
 - [[wiki/opengov\|opengov]] — On-chain governance framework (referenda, token listings, parameter changes); referendum completion drives [[wiki/pallet-gigahdx-rewards\|pallet-gigahdx-rewards]] payouts
@@ -213,7 +204,6 @@ Master catalog of all pages in the wiki. Updated on every ingest.
 - [[wiki/runbook-run-collator\|runbook-run-collator]] — Run a Hydration collator: machine specs, runtime gate (`MaxCandidates = 0`, Invulnerables via `GeneralAdmin`), session keys, rewards (455 HDX/session), onboarding sequence
 - [[wiki/runbook-request-judgement\|runbook-request-judgement]] — Request an identity judgement: `pallet_identity` `setIdentity` → `requestJudgement(reg_index, max_fee)` flow, 2 mainnet registrars (HydraSik=0, stakenode=1), NOT a Technical Committee action, registrars managed by Root/GeneralAdmin
 
-- [[wiki/runbook-collateral-damage-playbooks\|runbook-collateral-damage-playbooks]] — Pre-decided pauses per failure class: §A bridge compromise / unbacked mint, §B oracle failure, §C stable depeg, §D LST depeg, §E origin-chain halt; severity ladder S0–S3, per-asset card template, drills
 
 ## Analyses
 

@@ -5,11 +5,7 @@
 
 # sdk-next
 
-**TL;DR:** `@galacticcouncil/sdk-next` (**v2.5.0**, papi v2) is the trading SDK for [[wiki/hydration\|hydration]]: trade routing ([[wiki/smart-order-router\|smart-order-router]]), pool state, DCA/TWAP scheduling, tx building (incl. ICE intents), staking, liquidity mining, money-market helpers and a block indexer. Peers: [[wiki/sdk-common\|sdk-common]] `>=1.2.0`, [[wiki/sdk-descriptors\|sdk-descriptors]] `>=2.7.0`, `polkadot-api
-{ #2}
-.1.7`, `viem
-{ #2}
-.38.3`. **Since Aug 2026:** pools moved to `src/pool/amm/*` and are driven by one event-driven sync engine (`PoolSync`, torn-snapshot bug fixed); new **Uniswap v3** venue; multiple Aave markets; 2-second block time; TWAP **buy** removed.
+**TL;DR:** `@galacticcouncil/sdk-next` (**v2.5.0**, papi v2) is the trading SDK for [[wiki/hydration\|hydration]]: trade routing ([[wiki/smart-order-router\|smart-order-router]]), pool state, DCA/TWAP scheduling, tx building (incl. ICE intents), staking, liquidity mining, money-market helpers and a block indexer. Peers: [[wiki/sdk-common\|sdk-common]] `>=1.2.0`, [[wiki/sdk-descriptors\|sdk-descriptors]] `>=2.7.0`, `polkadot-api ^2.1.7`, `viem ^2.38.3`. **Since Aug 2026:** pools moved to `src/pool/amm/*` and are driven by one event-driven sync engine (`PoolSync`, torn-snapshot bug fixed); new **Uniswap v3** venue; multiple Aave markets; 2-second block time; TWAP **buy** removed.
 
 ## Quick Start
 

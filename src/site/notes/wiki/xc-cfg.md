@@ -5,9 +5,7 @@
 
 # xc-cfg
 
-**TL;DR:** `@galacticcouncil/xc-cfg` (**v2.9.1**; deps `xc-core
-{ #2}
-.8.0`, peer `sdk-next >=2.0.0`) is the **data + builder layer** of the XC stack: chain / asset / route definitions, per-bridge contract / extrinsic / program / move / deposit builders, bridge clients, DEX fee conversion and transfer validations. Bridges at d16ff85: **XCM**, **Snowbridge** (V2 default + V1), **Wormhole NTT** (self-redeem + Executor), **Omni** (NEAR One; Zcash UTXO corridor), and one **Basejump** route on Ethereum. Long-form references live in `packages/xc/docs/` (`ntt.md`, `ntt-reorg-recovery.md`, `overview.md`, `chain-native-balances.md`, `unidirectional-routes.md`).
+**TL;DR:** `@galacticcouncil/xc-cfg` (**v2.9.1**; deps `xc-core ^2.8.0`, peer `sdk-next >=2.0.0`) is the **data + builder layer** of the XC stack: chain / asset / route definitions, per-bridge contract / extrinsic / program / move / deposit builders, bridge clients, DEX fee conversion and transfer validations. Bridges at d16ff85: **XCM**, **Snowbridge** (V2 default + V1), **Wormhole NTT** (self-redeem + Executor), **Omni** (NEAR One; Zcash UTXO corridor), and one **Basejump** route on Ethereum. Long-form references live in `packages/xc/docs/` (`ntt.md`, `ntt-reorg-recovery.md`, `overview.md`, `chain-native-balances.md`, `unidirectional-routes.md`).
 
 ## Chain inventory (`chainsMap`, `src/chains/`)
 

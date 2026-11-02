@@ -21,9 +21,7 @@
 | Routing | `@tanstack/react-router` / `router-plugin` | `^1.170.10` / `^1.168.13` | 1.170.10 / 1.168.13 |
 | Data | `@tanstack/react-query` (+ `query-persist-client-core`) | `5.101.4` (pinned) | 5.101.4 |
 | Charts | `@tanstack/charts` / lightweight-charts | `0.14.0` / `^5.0.8` | 0.14.0 / 5.1.0 |
-| Substrate | `polkadot-api` (root `resolutions:
-{ #2}
-.1.7`) | `^2.1.0` | **2.2.2** |
+| Substrate | `polkadot-api` (root `resolutions: ^2.1.7`) | `^2.1.0` | **2.2.2** |
 | Substrate | `@polkadot-api/tx-utils` | `^0.2.2` | 0.2.5 |
 | SDK | `@galacticcouncil/sdk-next` / `descriptors` / `common` | `^2.5.0` / `^2.9.0` / `^1.2.0` | 2.5.0 / 2.9.0 / 1.2.0 |
 | Cross-chain | `xc` / `xc-cfg` / `xc-core` / `xc-sdk` / `xc-scan` / **`xc-swap`** | `^2.1.0` / `^2.9.1` / `^2.8.0` / `^2.7.0` / `^0.5.0` / `^0.9.0` | 2.1.0 / 2.9.1 / 2.8.0 / 2.7.0 / 0.5.0 / 0.9.0 |
